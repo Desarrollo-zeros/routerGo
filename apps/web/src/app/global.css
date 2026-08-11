@@ -1,6 +1,33 @@
-*,:before,:after{box-sizing:border-box}
-html,body{margin:0;padding:0}
-body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#0a0a0f;color:#f2f2f7;-webkit-font-smoothing:antialiased}
-a:focus-visible,button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-visible{outline:2px solid #a99bff;outline-offset:2px}
+*,*:before,*:after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
+body{font-family:'Inter',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--rg-primitive-color-ink,#08080d);color:var(--rg-primitive-color-textPrimary,#f8fafc);min-height:100dvh;overflow-x:hidden}
+
+/* Focus visible */
+a:focus-visible,button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-visible{outline:2px solid var(--rg-primitive-color-brandLight,#a78bfa);outline-offset:2px}
+
+/* Screen reader only */
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms !important;transition-duration:.01ms !important}}
+
+/* Reduced motion */
+@media(prefers-reduced-motion:reduce){
+  *,*:before,*:after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;scroll-behavior:auto !important}
+}
+
+/* Selection */
+::selection{background:var(--rg-primitive-color-brand,#8b5cf6);color:#fff}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--rg-primitive-color-surface,#0f0f17)}
+::-webkit-scrollbar-thumb{background:var(--rg-primitive-color-surfaceElevated,#1c1c28);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--rg-primitive-color-brandDark,#6d28d9)}
+
+/* Links */
+a{color:var(--rg-primitive-color-brandLight,#a78bfa);text-decoration:none;transition:color 0.2s ease}
+a:hover{color:var(--rg-primitive-color-brand,#8b5cf6)}
+
+/* Images */
+img,video{max-width:100%;height:auto;display:block}
+
+/* Buttons reset */
+button{font:inherit;cursor:pointer;border:none;background:none}

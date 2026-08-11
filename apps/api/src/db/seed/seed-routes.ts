@@ -8,6 +8,7 @@ const ROUTES: Route[] = [
   { route_key: 'runtime-manifest', method: 'GET', path: '/runtime-manifest', use_case: 'getManifest', auth: 'public', req: null, res: 'manifestResponse' },
   { route_key: 'catalog-list', method: 'GET', path: '/catalog', use_case: 'getCatalog', auth: 'session', req: null, res: 'catalogResponse' },
   { route_key: 'wallet-get', method: 'GET', path: '/wallet', use_case: 'getWallet', auth: 'session', req: null, res: 'walletResponse' },
+  { route_key: 'wallet-ledger', method: 'GET', path: '/wallet/ledger', use_case: 'getWalletLedger', auth: 'session', req: null, res: 'ledgerResponse' },
   { route_key: 'activity-verify', method: 'POST', path: '/activities/:id/verify', use_case: 'verifyActivity', auth: 'session', req: 'verifyActivityRequest', res: 'verifyActivityResponse' },
   { route_key: 'quote-create', method: 'POST', path: '/quotes', use_case: 'createQuote', auth: 'session', req: 'createQuoteRequest', res: 'quoteResponse' },
   { route_key: 'run-create', method: 'POST', path: '/runs', use_case: 'createRun', auth: 'session', req: 'createRunRequest', res: 'runResponse' },

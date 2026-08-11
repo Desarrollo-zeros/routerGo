@@ -5,7 +5,10 @@ export class CatalogRegistry {
   private byTier = new Map<string, CatalogEntry[]>();
 
   constructor(manifest: RuntimeManifest) {
-    for (const e of manifest.catalog) {
+    const list = (manifest as unknown as { catalog?: CatalogEntry[]; models?: CatalogEntry[] }).catalog
+      ?? (manifest as unknown as { models?: CatalogEntry[] }).models
+      ?? [];
+    for (const e of list) {
       if (!e.enabled) continue;
       this.byId.set(e.logical_id, e);
       const arr = this.byTier.get(e.tier) ?? [];

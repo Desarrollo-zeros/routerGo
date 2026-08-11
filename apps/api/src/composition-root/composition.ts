@@ -16,12 +16,28 @@ const { Pool } = pg;
 export async function createComposition() {
   const pool = new Pool({ connectionString: process.env.DATABASE_URL ?? 'postgres://routergo:routergo@localhost:5432/routergo' });
   const redis = new Redis(process.env.REDIS_URL ?? 'redis://localhost:6379', { lazyConnect: true });
-  const manifest = await loadRuntimeManifest(pool).catch(() => ({ version: 1, gateways: [], endpoints: [], models: [], routes: [], navigation: [], tokens: [], flags: [], poolPolicies: [] } as never));
+  let manifest: Awaited<ReturnType<typeof loadRuntimeManifest>>;
+  try {
+    manifest = await loadRuntimeManifest(pool);
+    console.log(`[manifest] loaded v${manifest.version} models=${manifest.models.length} routes=${manifest.routes.length}`);
+  } catch (e) {
+    console.error('[manifest] load failed, using fallback empty', e);
+    manifest = { version: 1, gateways: [], endpoints: [], models: [], routes: [], navigation: [], tokens: [], flags: [], poolPolicies: [] } as never;
+  }
   const schemas = new SchemaRegistry();
   schemas.registerZod('verifyActivityRequest', z.object({ reps: z.number(), sessionId: z.string() }));
   schemas.registerZod('createQuoteRequest', z.object({ logicalModelId: z.string(), maxOutputTokens: z.number().optional() }));
   schemas.registerZod('createRunRequest', z.object({ quoteId: z.string() }));
   schemas.register('economyResponse', { type: 'object', properties: { go: { type: 'object' }, windows: { type: 'object' }, contribution: { type: 'object' }, dau: { type: 'number' } } });
+  schemas.register('healthResponse', { type: 'object', properties: { status: { type: 'string' } } });
+  schemas.register('manifestResponse', { type: 'object' });
+  schemas.register('catalogResponse', { type: 'array', items: { type: 'object', additionalProperties: true } });
+  schemas.register('walletResponse', { type: 'object', properties: { balance: { type: 'number' } } });
+  schemas.register('ledgerResponse', { type: 'object', properties: { entries: { type: 'array', items: { type: 'object' } } } });
+  schemas.register('verifyActivityResponse', { type: 'object', properties: { verified: { type: 'boolean' } } });
+  schemas.register('quoteResponse', { type: 'object', properties: { quoteId: { type: 'string' } } });
+  schemas.register('runResponse', { type: 'object', properties: { runId: { type: 'string' } } });
+  schemas.register('streamResponse', { type: 'object' });
   const economy = new GetEconomyUseCase({
     getGoCount: async () => {
       try { const r = await pool.query("SELECT count(*)::int as c FROM credential_deployments WHERE pool_kind='GO' AND status='ACTIVE'"); return r.rows[0]?.c ?? 3; } catch { return 3; }
@@ -35,7 +51,8 @@ export async function createComposition() {
     readinessCheck: async () => ({ ready: true }),
     getManifest: async () => manifest,
     getCatalog: async () => manifest.models,
-    getWallet: async () => ({ balance: 0 }),
+    getWallet: async () => ({ balance: 0, lifetime_earned: 0, currency: 'CREDITS' }),
+    getWalletLedger: async () => ({ entries: [] }),
     verifyActivity: async (req) => ({ verified: true, input: req }),
     createQuote: async (req) => ({ quoteId: 'q-' + Date.now(), input: req }),
     createRun: async (req) => ({ runId: 'r-' + Date.now(), input: req }),

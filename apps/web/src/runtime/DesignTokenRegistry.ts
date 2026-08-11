@@ -9,8 +9,10 @@ export class DesignTokenRegistry {
   version: number;
 
   constructor(manifest: RuntimeManifest) {
-    this.tokens = manifest.tokens.filter((t) => t.enabled);
-    this.version = manifest.manifest_version;
+    this.tokens = (manifest.tokens ?? []).filter((t) => t.enabled);
+    this.version = (manifest as unknown as { manifest_version?: number; version?: number }).manifest_version
+      ?? (manifest as unknown as { version?: number }).version
+      ?? 1;
   }
 
   toCssVariables(): Record<string, string> {
