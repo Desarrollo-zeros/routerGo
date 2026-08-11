@@ -1,0 +1,32 @@
+{
+  "name": "routergo",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Esfuerzo → Tokens — PWA mobile-first, gateway dual Zen+Go, verificadores tiempo real",
+  "packageManager": "pnpm@9.12.3",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "pnpm -r --parallel dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "pnpm -r test",
+    "test:e2e": "playwright test",
+    "check:lines": "node scripts/check-file-lines.mjs",
+    "check:arch": "dependency-cruiser --config .dependency-cruiser.cjs apps/api/src apps/web/src",
+    "dev:web": "pnpm --filter @routergo/web dev",
+    "dev:api": "pnpm --filter @routergo/api dev",
+    "db:migrate": "pnpm --filter @routergo/api db:migrate",
+    "db:seed": "pnpm --filter @routergo/api db:seed"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "@typescript-eslint/eslint-plugin": "^8.66.0",
+    "@typescript-eslint/parser": "^8.66.0",
+    "eslint": "^10.8.1",
+    "typescript": "^5.6.0"
+  }
+}

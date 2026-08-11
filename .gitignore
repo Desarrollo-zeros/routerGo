@@ -1,0 +1,14 @@
+node_modules
+dist
+.pnpm-store
+.env
+.env.local
+*.log
+.DS_Store
+coverage
+.turbo
+.vite
+apps/api/litellm.yaml
+litellm.yaml
+test-results
+playwright-report

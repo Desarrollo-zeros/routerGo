@@ -1,0 +1,44 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: routergo-pg
+    environment:
+      POSTGRES_DB: routergo
+      POSTGRES_USER: routergo
+      POSTGRES_PASSWORD: routergo
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U routergo"]
+      interval: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: routergo-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+
+  litellm:
+    image: ghcr.io/berriai/litellm:v1.65.1
+    container_name: routergo-litellm
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./apps/api/litellm.yaml.example:/app/config.yaml:ro
+    command: ["--config", "/app/config.yaml", "--port", "4000", "--num_workers", "2"]
+    environment:
+      LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY:-sk-routergo-dev}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+volumes:
+  pgdata:
+  redisdata:
