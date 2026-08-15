@@ -1,27 +1,30 @@
 import type pg from 'pg';
+import { PERMISSION_KEYS, type PermissionKey } from '../../domain/authorization/PermissionKey';
 
-type Permission = { key: string; description: string };
-type Role = { id: string; key: string; name: string; permissions: string[] };
+type Permission = { key: PermissionKey; description: string };
+type Role = { id: string; key: string; name: string; permissions: readonly PermissionKey[] };
 
-const PERMISSIONS: Permission[] = [
-  { key: 'users.read', description: 'Read user identity records' },
-  { key: 'users.manage', description: 'Manage user identity state' },
-  { key: 'wallet.read', description: 'Read wallet balances and ledger views' },
-  { key: 'wallet.adjust', description: 'Adjust wallet balances through authorized workflows' },
-  { key: 'economy.read', description: 'Read economy policies and budgets' },
-  { key: 'economy.manage', description: 'Manage economy policies and budgets' },
-  { key: 'runtime.read', description: 'Read runtime configuration' },
-  { key: 'runtime.publish', description: 'Publish runtime configuration' },
-  { key: 'models.read', description: 'Read model catalog entries' },
-  { key: 'models.manage', description: 'Manage model catalog entries' },
-  { key: 'providers.read', description: 'Read provider configuration metadata' },
-  { key: 'providers.manage', description: 'Manage provider configuration metadata' },
-  { key: 'cms.read', description: 'Read managed content' },
-  { key: 'cms.publish', description: 'Publish managed content' },
-  { key: 'campaigns.read', description: 'Read campaign records' },
-  { key: 'campaigns.manage', description: 'Manage campaign records' },
-  { key: 'audit.read', description: 'Read audit records' },
-];
+const PERMISSION_DESCRIPTIONS: Record<PermissionKey, string> = {
+  'users.read': 'Read user identity records',
+  'users.manage': 'Manage user identity state',
+  'wallet.read': 'Read wallet balances and ledger views',
+  'wallet.adjust': 'Adjust wallet balances through authorized workflows',
+  'economy.read': 'Read economy policies and budgets',
+  'economy.manage': 'Manage economy policies and budgets',
+  'runtime.read': 'Read runtime configuration',
+  'runtime.publish': 'Publish runtime configuration',
+  'models.read': 'Read model catalog entries',
+  'models.manage': 'Manage model catalog entries',
+  'providers.read': 'Read provider configuration metadata',
+  'providers.manage': 'Manage provider configuration metadata',
+  'cms.read': 'Read managed content',
+  'cms.publish': 'Publish managed content',
+  'campaigns.read': 'Read campaign records',
+  'campaigns.manage': 'Manage campaign records',
+  'audit.read': 'Read audit records',
+};
+
+const PERMISSIONS: Permission[] = PERMISSION_KEYS.map((key) => ({ key, description: PERMISSION_DESCRIPTIONS[key] }));
 
 const ROLES: Role[] = [
   { id: 'role-user', key: 'USER', name: 'User', permissions: ['wallet.read', 'models.read'] },
