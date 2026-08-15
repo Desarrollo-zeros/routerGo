@@ -19,12 +19,17 @@ services:
     image: redis:7-alpine
     container_name: routergo-redis
     ports:
-      - "6379:6379"
+      - "6380:6379"
     volumes:
       - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   litellm:
-    image: ghcr.io/berriai/litellm:v1.65.1
+    image: ghcr.io/berriai/litellm@sha256:ebf2fc9bfcb186d34ddfd16bf4eb544e95bb8d3431aa616d39d9b16c73f54626
     container_name: routergo-litellm
     ports:
       - "4000:4000"
@@ -37,7 +42,13 @@ services:
       postgres:
         condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python3 -c \"import urllib.request; urllib.request.urlopen('http://localhost:4000/health/liveliness')\""]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
 
 volumes:
   pgdata:
