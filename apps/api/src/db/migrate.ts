@@ -1,5 +1,5 @@
 import pg from 'pg';
-import { readFile } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
@@ -25,15 +25,23 @@ async function runMigration(pool: pg.Pool, sql: string): Promise<void> {
   }
 }
 
+async function migrationFiles(dir: string): Promise<string[]> {
+  const files = await readdir(dir);
+  return files.filter((file) => file.endsWith('.sql')).sort();
+}
+
 async function main(): Promise<void> {
   const pool = new Pool({ connectionString: getDatabaseUrl() });
-  const dir = path.dirname(fileURLToPath(import.meta.url));
-  const file = path.join(dir, 'migrations', '001_initial.sql');
-  const sql = await readFile(file, 'utf-8');
-  console.log('[migrate] applying 001_initial.sql');
-  await runMigration(pool, sql);
-  console.log('[migrate] done');
-  await pool.end();
+  try {
+    const dir = path.join(path.dirname(fileURLToPath(import.meta.url)), 'migrations');
+    for (const file of await migrationFiles(dir)) {
+      console.log(`[migrate] applying ${file}`);
+      await runMigration(pool, await readFile(path.join(dir, file), 'utf-8'));
+    }
+    console.log('[migrate] done');
+  } finally {
+    await pool.end();
+  }
 }
 
 main().catch((e) => {

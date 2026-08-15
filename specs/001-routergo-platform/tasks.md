@@ -13,7 +13,7 @@ Format: `[ID] [P?] [Story] task`. `[P]` means safe parallel ownership in differe
 - [x] T008 [P] Make local integration environment reproducible: explicit host-port translation, health/readiness checks, and a reviewed valid LiteLLM image reference.
 
 ## Phase 1 — Identity, RBAC, audit, runtime config
-- [ ] T010 [US3] Add identity/RBAC/audit migrations and idempotent seeds.
+- [x] T010 [US3] Add identity/RBAC/audit migrations and idempotent seeds.
 - [ ] T011 [P] [US3] Implement identity domain/application ports.
 - [ ] T012 [P] [US3] Implement RBAC specifications/policies and tests.
 - [ ] T013 [US3] Implement audit outbox/application service for privileged changes.

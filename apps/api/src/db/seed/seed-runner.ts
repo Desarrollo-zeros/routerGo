@@ -9,8 +9,9 @@ import { seedPolicies } from './seed-policies.js';
 import { seedDesignTokens } from './seed-design-tokens.js';
 import { seedNavigation } from './seed-navigation.js';
 import { seedFeatureFlags } from './seed-feature-flags.js';
+import { seedIdentity } from './seed-identity.js';
 
-export const SEED_VERSION = '2026-08-10-r1';
+export const SEED_VERSION = '2026-08-15-r2';
 export const MANIFEST_VERSION = 1;
 
 function checksumFor(version: string): string {
@@ -50,6 +51,7 @@ export async function runSeed(pool: pg.Pool): Promise<{ status: string; seedVers
     await seedDesignTokens(client);
     await seedNavigation(client);
     await seedFeatureFlags(client);
+    await seedIdentity(client);
     await completeSeedRun(client, runId);
     await client.query('COMMIT');
     return { status: 'COMPLETED', seedVersion: SEED_VERSION, checksum };

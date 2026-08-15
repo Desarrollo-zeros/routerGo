@@ -5,10 +5,12 @@
 
 ## Additive model
 ### Identity
-- `organizations(id,type,status,...)`
-- `organization_members(organization_id,user_id,status,...)`
-- `roles`, `permissions`, `role_permissions`, `member_roles`
-- `audit_logs(actor,action,resource,before,after,correlation_id,created_at)`
+- `organizations(id,name,slug,kind,status,created_at,updated_at)` with unique slug and `PERSONAL`, `ADVERTISER`, `DEVELOPER`, or `INTERNAL` kind.
+- `organization_members(id,organization_id,user_id,status,created_at,updated_at)` with unique `(organization_id,user_id)`.
+- `roles(id,role_key,display_name,scope,organization_id,is_system,...)`; global roles have no organization and organization roles have an owning organization.
+- `permissions(id,permission_key,description,is_system,created_at)` with unique capability key.
+- `role_permissions(role_id,permission_id)` and `member_roles(member_id,role_id,assigned_at)`.
+- `audit_logs(id,actor_user_id,actor_organization_id,action,resource_type,resource_id,before_state,after_state,metadata,correlation_id,created_at)`; no `updated_at`, and database trigger makes it append-only.
 
 ### Economy/API
 - `credit_reservations(id,wallet_id,run_id,amount,status,expires_at,idempotency_key)`
@@ -49,3 +51,5 @@
 - Campaign finalized spend cannot exceed funded/authorized budget.
 - Battle scoring is server authoritative.
 - QR tokens are replay-resistant and expire/version explicitly.
+- An organization-scoped role cannot be assigned to a membership from another organization; assigned roles cannot be retargeted across organizations.
+- Audit metadata is a sanitized JSON object and audit rows cannot be updated or deleted.
