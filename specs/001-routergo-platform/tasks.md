@@ -14,8 +14,8 @@ Format: `[ID] [P?] [Story] task`. `[P]` means safe parallel ownership in differe
 
 ## Phase 1 — Identity, RBAC, audit, runtime config
 - [x] T010 [US3] Add identity/RBAC/audit migrations and idempotent seeds.
-- [ ] T011 [P] [US3] Implement identity domain/application ports.
-- [ ] T012 [P] [US3] Implement RBAC specifications/policies and tests.
+- [x] T011 [P] [US3] Implement identity domain/application ports.
+- [x] T012 [P] [US3] Implement RBAC specifications/policies and tests.
 - [ ] T013 [US3] Implement audit outbox/application service for privileged changes.
 - [ ] T014 [US3] Remove frontend/business hardcoded navigation/colors/routes where runtime manifest owns them.
 - [ ] T015 [US3] Add manifest publish/version/cache invalidation/rollback contract tests.

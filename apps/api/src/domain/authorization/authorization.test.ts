@@ -24,8 +24,7 @@ function subject(roles: readonly RoleAssignment[] = []): AuthorizationSubject {
     userId: 'user-1',
     membershipId: 'member-a',
     organizationId: 'org-a',
-    isActive: true,
-    membershipIsActive: true,
+    membershipStatus: 'ACTIVE',
     roles,
   };
 }
@@ -67,10 +66,8 @@ describe('AuthorizationPolicy', () => {
       .toEqual({ allowed: false, reason: 'WRONG_ORGANIZATION' });
   });
 
-  it('denies inactive subjects and memberships', () => {
-    expect(policy.can({ ...subject(), isActive: false }, 'runtime.publish'))
-      .toEqual({ allowed: false, reason: 'INACTIVE_SUBJECT' });
-    expect(policy.can({ ...subject(), membershipIsActive: false }, 'runtime.publish'))
+  it('denies inactive memberships', () => {
+    expect(policy.can({ ...subject(), membershipStatus: 'SUSPENDED' }, 'runtime.publish'))
       .toEqual({ allowed: false, reason: 'NO_ACTIVE_MEMBERSHIP' });
   });
 

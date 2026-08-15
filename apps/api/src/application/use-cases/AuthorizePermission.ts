@@ -4,13 +4,23 @@ import type {
   AuthorizationSubject,
   AuthorizationSubjectIdentity,
 } from '../../domain/authorization/AuthorizationSubject';
+import type { IdentityContext } from '../contracts/IdentityContext';
 import { AuthorizationPolicy } from '../../domain/authorization/AuthorizationPolicy';
 import type { AuthorizationGrantReader } from '../ports/outbound/AuthorizationGrantReader';
 
 export interface AuthorizePermissionInput {
-  subject: AuthorizationSubjectIdentity;
+  identity: IdentityContext;
   permission: string;
   context?: AuthorizationContext;
+}
+
+export function toAuthorizationSubjectIdentity(identity: IdentityContext): AuthorizationSubjectIdentity {
+  return {
+    userId: identity.userId,
+    membershipId: identity.membershipId,
+    organizationId: identity.organizationId,
+    membershipStatus: identity.membershipStatus,
+  };
 }
 
 export class AuthorizePermissionUseCase {
@@ -20,8 +30,9 @@ export class AuthorizePermissionUseCase {
   ) {}
 
   async execute(input: AuthorizePermissionInput): Promise<AccessDecision> {
-    const roles = await this.grants.findRoleAssignments(input.subject.membershipId);
-    const subject: AuthorizationSubject = { ...input.subject, roles };
+    const subjectIdentity = toAuthorizationSubjectIdentity(input.identity);
+    const roles = await this.grants.findRoleAssignments(subjectIdentity.membershipId);
+    const subject: AuthorizationSubject = { ...subjectIdentity, roles };
     return this.policy.can(subject, input.permission, input.context);
   }
 }

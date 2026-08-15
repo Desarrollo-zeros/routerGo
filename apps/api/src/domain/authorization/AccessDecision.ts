@@ -4,7 +4,6 @@ export const ACCESS_DECISION_REASONS = [
   'NO_ACTIVE_MEMBERSHIP',
   'WRONG_ORGANIZATION',
   'INACTIVE_ROLE',
-  'INACTIVE_SUBJECT',
 ] as const;
 
 export type AccessDecisionReason = typeof ACCESS_DECISION_REASONS[number];

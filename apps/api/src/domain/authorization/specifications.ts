@@ -23,13 +23,7 @@ export class HasPermission implements Specification<RoleEvaluation> {
 
 export class IsActiveMembership implements Specification<AuthorizationSubject> {
   isSatisfiedBy(candidate: AuthorizationSubject): boolean {
-    return candidate.membershipIsActive;
-  }
-}
-
-export class IsActiveSubject implements Specification<AuthorizationSubject> {
-  isSatisfiedBy(candidate: AuthorizationSubject): boolean {
-    return candidate.isActive;
+    return candidate.membershipStatus === 'ACTIVE';
   }
 }
 

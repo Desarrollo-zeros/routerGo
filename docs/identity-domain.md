@@ -15,4 +15,4 @@ T011 models identity facts without implementing authentication or authorization.
 
 `UserRepository`, `OrganizationRepository`, and `MembershipRepository` are segregated outbound ports returning domain objects, never SQL rows. The query use cases map missing records to typed `IdentityError` codes and leave repository failures unchanged.
 
-`ResolveIdentityContextUseCase` verifies user, organization, and membership ownership/status, then returns only `userId`, `organizationId`, `membershipId`, and `membershipStatus`. T012 can consume this trusted identity context to evaluate authorization without making Identity depend on RBAC.
+`ResolveIdentityContextUseCase` verifies user, organization, and membership ownership/status, then returns only `userId`, `organizationId`, `membershipId`, and `membershipStatus`. The authorization application use case consumes this context directly and performs one explicit projection into its domain-local subject shape; this keeps the domain independent from application contracts without creating a second active-state model.

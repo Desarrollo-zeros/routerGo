@@ -7,7 +7,6 @@ import {
   HasPermission,
   IsActiveMembership,
   IsActiveRole,
-  IsActiveSubject,
   IsGlobalRole,
   MatchesOrganizationScope,
   or,
@@ -17,7 +16,6 @@ import {
 export class AuthorizationPolicy {
   can(subject: AuthorizationSubject, permission: string, context: AuthorizationContext = {}): AccessDecision {
     if (!isPermissionKey(permission)) return deny('MISSING_PERMISSION');
-    if (!new IsActiveSubject().isSatisfiedBy(subject)) return deny('INACTIVE_SUBJECT');
     if (!new IsActiveMembership().isSatisfiedBy(subject)) return deny('NO_ACTIVE_MEMBERSHIP');
 
     const evaluations = subject.roles.map((role): RoleEvaluation => ({ subject, role, context }));
