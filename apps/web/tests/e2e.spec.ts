@@ -1,6 +1,21 @@
 import { test, expect } from "@playwright/test";
 const manifest = {
-  manifest_version: 1, routes: [], tokens: [], navigation: [], feature_flags: {},
+  manifest_version: 1,
+  routes: [
+    { route_key: "activity-verify", method: "POST", path_template: "/activities/:id/verify", version: "v1", use_case_key: "verifyActivity", auth_policy_key: "session", request_schema_key: null, response_schema_key: null, enabled: true },
+    { route_key: "quote-create", method: "POST", path_template: "/quotes", version: "v1", use_case_key: "createQuote", auth_policy_key: "session", request_schema_key: null, response_schema_key: null, enabled: true },
+    { route_key: "run-create", method: "POST", path_template: "/runs", version: "v1", use_case_key: "createRun", auth_policy_key: "session", request_schema_key: null, response_schema_key: null, enabled: true },
+    { route_key: "run-events", method: "GET", path_template: "/runs/:id/events", version: "v1", use_case_key: "streamRun", auth_policy_key: "session", request_schema_key: null, response_schema_key: null, enabled: true },
+    { route_key: "wallet-get", method: "GET", path_template: "/wallet", version: "v1", use_case_key: "getWallet", auth_policy_key: "session", request_schema_key: null, response_schema_key: null, enabled: true },
+    { route_key: "wallet-ledger", method: "GET", path_template: "/wallet/ledger", version: "v1", use_case_key: "getWalletLedger", auth_policy_key: "session", request_schema_key: null, response_schema_key: null, enabled: true },
+  ],
+  navigation: [
+    { route_key: "activity-verify", screen_key: "activity", label_key: "nav.activity", icon_key: "activity", order_index: 1, required_capability: null, feature_flag: null, enabled: true },
+    { route_key: "quote-create", screen_key: "chat", label_key: "nav.chat", icon_key: "message", order_index: 2, required_capability: null, feature_flag: null, enabled: true },
+    { route_key: "wallet-get", screen_key: "wallet", label_key: "nav.wallet", icon_key: "wallet", order_index: 3, required_capability: null, feature_flag: null, enabled: true },
+  ],
+  feature_flags: {},
+  tokens: [],
   catalog: [
     { logical_id: "zen-free", provider_model_id: "z", gateway_id: "zen", tier: "FREE", credit_price: 1, enabled: true, capabilities: {}, limits: {} },
     { logical_id: "go-pro", provider_model_id: "g", gateway_id: "go", tier: "PREMIUM", credit_price: 5, enabled: true, capabilities: {}, limits: {} },
@@ -11,7 +26,7 @@ const titles: Record<string,string> = { idle:"Flexiones verificadas", permission
 async function mockApi(page: any, balance=12){
   await page.route("**/runtime-manifest", (r:any)=>r.fulfill({status:200,contentType:"application/json",body:JSON.stringify(manifest)}));
   await page.route("**/api/wallet", (r:any)=>r.fulfill({status:200,contentType:"application/json",body:JSON.stringify({balance,lifetime_earned:30,currency:"CREDITS"})}));
-  await page.route("**/api/activity/verify", (r:any)=>r.fulfill({status:200,contentType:"application/json",body:JSON.stringify({verified_reps:10,credits:5})}));
+  await page.route("**/api/activities/current/verify", (r:any)=>r.fulfill({status:200,contentType:"application/json",body:JSON.stringify({verified_reps:10,credits:5})}));
   await page.route("**/api/quotes", (r:any)=>r.fulfill({status:200,contentType:"application/json",body:JSON.stringify({id:"q1",credit_cost:5})}));
   await page.route("**/api/runs", (r:any)=>r.fulfill({status:200,contentType:"application/json",body:JSON.stringify({id:"run1"})}));
   await page.route("**/api/runs/**/refund", (r:any)=>r.fulfill({status:200,contentType:"application/json",body:JSON.stringify({refunded:true,refundId:"ref1"})}));
@@ -37,8 +52,9 @@ test.describe("RouterGo E2E",()=>{
     await mockApi(page,12);await mockSse(page);await mockCameraOk(page);
     await page.goto("/");
     await expect(page.getByText("Flexiones verificadas")).toBeVisible();
+    await expect(page.locator('[data-route-key="activity-verify"]')).toBeVisible();
     // flexión -> verify (mock direct API call covers earn)
-    const earn=await page.evaluate(async()=>{const r=await fetch("/api/activity/verify",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({claimed_reps:10})});return r.json()});
+    const earn=await page.evaluate(async()=>{const r=await fetch("/api/activities/current/verify",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({claimed_reps:10})});return r.json()});
     expect(earn.credits).toBe(5);
     // quote
     const quote=await page.evaluate(async()=>{const r=await fetch("/api/quotes",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({logical_model_id:"zen-free",prompt:"hola"})});return r.json()});
@@ -71,7 +87,7 @@ test.describe("RouterGo E2E",()=>{
   test("offline muestra fallback sin conexión",async({page})=>{
     await page.route("**/runtime-manifest",(r)=>r.abort());
     await page.goto("/");
-    await expect(page.getByText(/sin conexión/i)).toBeVisible({timeout:5000});
+    await expect(page.getByText(/Configuración no disponible/i)).toBeVisible({timeout:5000});
   });
   test("saldo cero badge y CTA bloqueado",async({page})=>{
     await mockApi(page,0);

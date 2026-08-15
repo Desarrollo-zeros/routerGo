@@ -1,4 +1,5 @@
 import type { RouteResolver } from "./RouteResolver";
+import { parseRuntimeManifest, type RuntimeManifest } from "./types";
 
 export type ApiCall = {
   routeKey: string;
@@ -10,13 +11,14 @@ export type ApiCall = {
 
 export interface ApiPort {
   request<T>(call: ApiCall): Promise<T>;
-  getManifest(): Promise<import("./types").RuntimeManifest>;
+  getManifest(): Promise<RuntimeManifest>;
 }
 
 export class HttpApiPort implements ApiPort {
   constructor(
     private resolver: RouteResolver | null,
-    private baseUrl = "",
+    private baseUrl = "/api",
+    private manifestBaseUrl = "",
   ) {}
 
   updateResolver(r: RouteResolver): void {
@@ -26,7 +28,7 @@ export class HttpApiPort implements ApiPort {
   async request<T>(call: ApiCall): Promise<T> {
     if (!this.resolver) throw new Error("Resolver not ready");
     const route = this.resolver.resolve(call.routeKey);
-    let url = this.baseUrl + this.resolver.pathFor(call.routeKey, call.params);
+    let url = this.pathFor(call.routeKey, call.params);
     if (call.query) {
       const qs = new URLSearchParams(call.query).toString();
       if (qs) url += `?${qs}`;
@@ -45,9 +47,14 @@ export class HttpApiPort implements ApiPort {
     return (await res.json()) as T;
   }
 
-  async getManifest(): Promise<import("./types").RuntimeManifest> {
-    const res = await fetch(`${this.baseUrl}/runtime-manifest`, { credentials: "include" });
+  async getManifest(): Promise<RuntimeManifest> {
+    const res = await fetch(`${this.manifestBaseUrl}/runtime-manifest`, { credentials: "include" });
     if (!res.ok) throw new Error(`manifest ${res.status}`);
-    return (await res.json()) as import("./types").RuntimeManifest;
+    return parseRuntimeManifest(await res.json());
+  }
+
+  pathFor(routeKey: string, params?: Record<string, string>): string {
+    if (!this.resolver) throw new Error("Resolver not ready");
+    return this.baseUrl + this.resolver.pathFor(routeKey, params);
   }
 }

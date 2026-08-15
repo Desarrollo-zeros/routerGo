@@ -28,8 +28,8 @@ export function PrimaryCTA({ disabled, loading, children, onClick, type = "butto
 }
 
 const ctaCss = `
-.rg-cta{width:100%;min-height:44px;padding:12px 20px;border-radius:999px;border:0;background:var(--rg-primitive-color-brand,#7c5cff);color:#fff;font-weight:700;font-size:16px;cursor:pointer}
-.rg-cta:focus-visible{outline:2px solid var(--rg-primitive-color-brandSoft,#a99bff);outline-offset:2px}
+.rg-cta{width:100%;min-height:44px;padding:12px 20px;border-radius:999px;border:0;background:var(--rg-color-brand,ButtonFace);color:var(--rg-color-text-primary,CanvasText);font-weight:700;font-size:16px;cursor:pointer}
+.rg-cta:focus-visible{outline:2px solid var(--rg-color-brand-soft,Highlight);outline-offset:2px}
 .rg-cta:disabled{opacity:.5;cursor:not-allowed}
 .rg-cta:hover:not(:disabled){filter:brightness(1.08)}
 .rg-cta:active:not(:disabled){transform:scale(.99)}

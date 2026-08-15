@@ -1,10 +1,10 @@
 import { useCallback, useRef, useState } from "react";
-import { httpRequest } from "../../adapters/http";
 import { connectSse } from "../../adapters/sse";
+import type { HttpApiPort } from "../../runtime/ApiPort";
 
 export type ChatMsg = { role: "user" | "assistant"; content: string };
 
-export function useChat(modelId: string) {
+export function useChat(modelId: string, api: HttpApiPort) {
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [streaming, setStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -15,12 +15,12 @@ export function useChat(modelId: string) {
     setError(null);
     setMessages((m) => [...m, { role: "user", content: prompt }]);
     try {
-      const quote = await httpRequest<{ id: string; credit_cost: number }>("/api/quotes", { method: "POST", body: { logical_model_id: modelId, prompt } });
-      const run = await httpRequest<{ id: string }>("/api/runs", { method: "POST", body: { quote_id: quote.id, idempotency_key: crypto.randomUUID() } });
+      const quote = await api.request<{ id: string; credit_cost: number }>({ routeKey: "quote-create", body: { logical_model_id: modelId, prompt } });
+      const run = await api.request<{ id: string }>({ routeKey: "run-create", body: { quote_id: quote.id, idempotency_key: crypto.randomUUID() } });
       setStreaming(true);
       let acc = "";
       setMessages((m) => [...m, { role: "assistant", content: "" }]);
-      const url = `/api/runs/${run.id}/events`;
+      const url = api.pathFor("run-events", { id: run.id });
       esRef.current?.close();
       esRef.current = connectSse(url, {
         onEvent(ev) {
@@ -32,7 +32,7 @@ export function useChat(modelId: string) {
         onError() { setError("Conexión SSE perdida"); setStreaming(false); },
       }, lastIdRef.current);
     } catch (e) { setError(e instanceof Error ? e.message : String(e)); setStreaming(false); }
-  }, [modelId]);
+  }, [api, modelId]);
 
   const stop = useCallback(() => { esRef.current?.close(); setStreaming(false); }, []);
   return { messages, streaming, error, send, stop };

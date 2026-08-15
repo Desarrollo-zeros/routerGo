@@ -82,16 +82,16 @@ export function ActivityCard({ state, count = 0, verifiedReps, credits, error, o
 }
 
 const css = `
-.rg-activity{border:1px solid #232336;background:var(--rg-primitive-color-surface,#12121a);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.rg-activity{border:1px solid var(--rg-color-surface-muted,ButtonFace);background:var(--rg-color-surface,Canvas);border-radius:var(--rg-radius-md,12px);padding:16px;display:flex;flex-direction:column;gap:10px}
 .rg-activity-title{font-size:18px;font-weight:700;margin:0}
-.rg-activity-desc{font-size:14px;color:var(--rg-primitive-color-textSecondary,#a1a1b5);margin:0}
-.rg-activity-counter{display:flex;align-items:baseline;gap:8px;padding:8px 12px;background:#0f0f18;border-radius:12px;min-height:44px}
+.rg-activity-desc{font-size:14px;color:var(--rg-color-text-secondary,CanvasText);margin:0}
+.rg-activity-counter{display:flex;align-items:baseline;gap:8px;padding:8px 12px;background:var(--rg-color-bg,Canvas);border-radius:var(--rg-radius-md,12px);min-height:44px}
 .rg-activity-count{font-size:32px;font-weight:800;font-variant-numeric:tabular-nums}
-.rg-activity-suffix{font-size:13px;color:#a1a1b5}
-.rg-activity-credits{color:var(--rg-primitive-color-success,#2ecc71);font-weight:600;margin:0}
-.rg-activity-error{color:var(--rg-primitive-color-danger,#ff4d6a);font-size:13px;margin:0}
+.rg-activity-suffix{font-size:13px;color:var(--rg-color-text-secondary,CanvasText)}
+.rg-activity-credits{color:var(--rg-color-success,CanvasText);font-weight:600;margin:0}
+.rg-activity-error{color:var(--rg-color-danger,CanvasText);font-size:13px;margin:0}
 .rg-activity-actions{display:flex;gap:8px;flex-wrap:wrap}
-.rg-activity-cta{min-height:44px;padding:10px 18px;border-radius:999px;border:0;background:#7c5cff;color:#fff;font-weight:700;cursor:pointer}
-.rg-activity-cta:focus-visible{outline:2px solid #a99bff;outline-offset:2px}
-.rg-activity-sec{min-height:44px;padding:10px 16px;border-radius:999px;border:1px solid #333;background:transparent;color:#f2f2f7;cursor:pointer}
+.rg-activity-cta{min-height:44px;padding:10px 18px;border-radius:999px;border:0;background:var(--rg-color-brand,ButtonFace);color:var(--rg-color-text-primary,CanvasText);font-weight:700;cursor:pointer}
+.rg-activity-cta:focus-visible{outline:2px solid var(--rg-color-brand-soft,Highlight);outline-offset:2px}
+.rg-activity-sec{min-height:44px;padding:10px 16px;border-radius:999px;border:1px solid var(--rg-color-surface-muted,ButtonFace);background:transparent;color:var(--rg-color-text-primary,CanvasText);cursor:pointer}
 `;

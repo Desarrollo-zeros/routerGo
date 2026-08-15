@@ -25,10 +25,10 @@ export function AppShell({ header, nav, children }: AppShellProps): React.ReactE
 }
 
 const css = `
-.rg-shell{min-height:100dvh;background:var(--rg-semantic-bg,#0a0a0f);color:var(--rg-semantic-text,#f2f2f7);display:flex;flex-direction:column}
+.rg-shell{min-height:100dvh;background:var(--rg-color-bg,Canvas);color:var(--rg-color-text-primary,CanvasText);display:flex;flex-direction:column}
 .rg-skip{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
-.rg-skip:focus{left:12px;top:12px;width:auto;height:auto;padding:8px 12px;background:#fff;color:#000;border-radius:8px;z-index:100}
-.rg-header{position:sticky;top:0;z-index:10;background:var(--rg-semantic-surface,#12121a);border-bottom:1px solid #222;padding:12px 16px;padding-top:max(12px,env(safe-area-inset-top))}
+.rg-skip:focus{left:12px;top:12px;width:auto;height:auto;padding:8px 12px;background:Canvas;color:CanvasText;border-radius:8px;z-index:100}
+.rg-header{position:sticky;top:0;z-index:10;background:var(--rg-color-surface,Canvas);border-bottom:1px solid var(--rg-color-surface-muted,ButtonFace);padding:12px 16px;padding-top:max(12px,env(safe-area-inset-top))}
 .rg-layout{display:flex;flex:1;gap:16px;max-width:960px;width:100%;margin:0 auto;padding:16px}
 .rg-nav{min-width:200px}
 .rg-main{flex:1;min-width:0}

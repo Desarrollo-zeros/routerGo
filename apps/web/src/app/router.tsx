@@ -1,48 +1,56 @@
 import React from "react";
-import { createBrowserRouter, RouterProvider, Link, Outlet } from "react-router-dom";
-import { ActivityView } from "../features/activity/ActivityView";
-import { ChatView } from "../features/chat/ChatView";
-import { WalletView } from "../features/wallet/WalletView";
-import { EconomySimulator } from "../features/economy/EconomySimulator";
+import { createBrowserRouter, Link, Outlet, RouterProvider, useLocation } from "react-router-dom";
 import { AppShell } from "../design-system/AppShell";
 import { CreditBalance } from "../design-system/CreditBalance";
 import type { RuntimeBundle } from "../runtime/bootstrap";
+import { useRuntime } from "../runtime/RuntimeProvider";
+import type { NavItem } from "../runtime/types";
 
 function Layout({ bundle }: { bundle: RuntimeBundle }): React.ReactElement {
   const [balance, setBalance] = React.useState(0);
+  const items = visibleItems(bundle);
   React.useEffect(() => {
-    fetch("/api/wallet", { credentials: "include" }).then((r) => r.json()).then((j) => setBalance(j.balance ?? 0)).catch(() => {});
-  }, []);
-  const nav = (
-    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-      <Link to="/" style={{ color: "#a99bff", fontWeight: 700, textDecoration: "none" }}>RouterGo</Link>
-      <Link to="/" style={linkStyle}>Actividad</Link>
-      <Link to="/chat" style={linkStyle}>Chat</Link>
-      <Link to="/wallet" style={linkStyle}>Billetera</Link>
-      <Link to="/economy" style={linkStyle}>Economía (admin)</Link>
+    void bundle.api.request<{ balance: number }>({ routeKey: "wallet-get" }).then((wallet) => setBalance(wallet.balance)).catch(() => undefined);
+  }, [bundle]);
+  const nav = <RuntimeNavigation items={items} bundle={bundle} />;
+  return <AppShell header={<CreditBalance balance={balance} />} nav={nav}><Outlet /></AppShell>;
+}
+
+function RuntimeNavigation({ items, bundle }: { items: NavItem[]; bundle: RuntimeBundle }): React.ReactElement {
+  const location = useLocation();
+  return (
+    <div className="rg-nav-list">
+      <Link className="rg-brand" to="/">RouterGo</Link>
+      {items.map((item) => {
+        const screen = bundle.screens.resolve(item.screen_key);
+        if (!screen.available) return null;
+        const current = location.pathname === screen.path;
+        return <Link key={item.route_key} className="rg-nav-link" to={screen.path} aria-current={current ? "page" : undefined} data-route-key={item.route_key}>{item.label_key}</Link>;
+      })}
     </div>
   );
-  const header = <CreditBalance balance={balance} />;
-  return <AppShell header={header} nav={nav}><Outlet /></AppShell>;
 }
 
-const linkStyle: React.CSSProperties = { minHeight: 44, display: "flex", alignItems: "center", padding: "8px 12px", borderRadius: 12, background: "#12121a", color: "#f2f2f7", textDecoration: "none", border: "1px solid #232336" };
+function visibleItems(bundle: RuntimeBundle): NavItem[] {
+  return bundle.navigation.list().filter((item) => bundle.screens.resolve(item.screen_key).available);
+}
 
 export function createAppRouter(bundle: RuntimeBundle): ReturnType<typeof createBrowserRouter> {
-  return createBrowserRouter([
-    {
-      element: <Layout bundle={bundle} />,
-      children: [
-        { path: "/", element: <ActivityView /> },
-        { path: "/chat", element: <ChatView catalog={bundle.catalog.list()} balance={0} /> },
-        { path: "/wallet", element: <WalletView /> },
-        { path: "/economy", element: <EconomySimulator /> },
-      ],
-    },
-  ]);
+  const items = visibleItems(bundle);
+  const routes = bundle.screens.uiRoutes(items, { catalog: bundle.catalog, api: bundle.api });
+  return createBrowserRouter([{
+    element: <Layout bundle={bundle} />,
+    children: [...routes, { path: "*", element: <NotAvailableRoute /> }],
+  }]);
 }
 
-export function App({ bundle }: { bundle: RuntimeBundle }): React.ReactElement {
+function NotAvailableRoute(): React.ReactElement {
+  return <section className="rg-runtime-unavailable" role="status"><h1>Vista no disponible</h1><p>Esta ruta no está activa en la configuración actual.</p></section>;
+}
+
+export function App({ bundle: provided }: { bundle?: RuntimeBundle } = {}): React.ReactElement {
+  const runtime = useRuntime();
+  const bundle = provided ?? runtime.bundle;
   const router = React.useMemo(() => createAppRouter(bundle), [bundle]);
   return <RouterProvider router={router} />;
 }

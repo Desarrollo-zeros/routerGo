@@ -3,7 +3,7 @@ import { ActivityCard } from "../../design-system/ActivityCard";
 import { PrimaryCTA } from "../../design-system/PrimaryCTA";
 import { SponsorPlacement } from "../../design-system/SponsorPlacement";
 import { useActivityMachine } from "./useActivityMachine";
-import { httpRequest } from "../../adapters/http";
+import type { HttpApiPort } from "../../runtime/ApiPort";
 
 type ActivityMachine = ReturnType<typeof useActivityMachine>;
 
@@ -40,7 +40,7 @@ function getVideoDisplay(state: string): string {
   return "block";
 }
 
-export function ActivityView(): React.ReactElement {
+export function ActivityView({ api }: { api: HttpApiPort }): React.ReactElement {
   const m = useActivityMachine();
   const [verified, setVerified] = React.useState<number | undefined>();
   const [credits, setCredits] = React.useState<number | undefined>();
@@ -49,17 +49,14 @@ export function ActivityView(): React.ReactElement {
     m.submit();
     m.verifying();
     try {
-      const res = await httpRequest<{ verified_reps: number; credits: number }>("/api/activity/verify", {
-        method: "POST",
-        body: buildVerifyBody(m.count),
-      });
+      const res = await api.request<{ verified_reps: number; credits: number }>({ routeKey: "activity-verify", params: { id: "current" }, body: buildVerifyBody(m.count) });
       setVerified(res.verified_reps);
       setCredits(res.credits);
       m.setVerified();
     } catch (e) {
       m.setRejected(e instanceof Error ? e.message : "Rechazado");
     }
-  }, [m]);
+  }, [api, m]);
 
   const label = getCtaLabel(m.state);
   const action = getPrimaryAction(m.state, m, doSubmit);
@@ -68,12 +65,12 @@ export function ActivityView(): React.ReactElement {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       <ActivityCard state={m.state} count={m.count} verifiedReps={verified} credits={credits} error={m.error} onAction={action} actionLabel={label} secondaryAction={secondary.action} secondaryLabel={secondary.label} />
-      <div style={{ position: "relative", background: "#0f0f18", borderRadius: 16, overflow: "hidden", minHeight: 220, display: getVideoDisplay(m.state) }}>
+      <div className="rg-camera" style={{ display: getVideoDisplay(m.state) }}>
         <video ref={m.videoRef} playsInline muted autoPlay style={{ width: "100%", height: 320, objectFit: "cover", objectPosition: "center" }} aria-label="Vista de cámara" />
       </div>
       {m.state !== "idle" ? <PrimaryCTA onClick={m.reset}>Reiniciar</PrimaryCTA> : null}
       <SponsorPlacement placement="activity-inline" />
-      <p style={{ fontSize: 12, color: "#6b6b80", margin: 0 }}>Privacidad: el video no se sube. Solo se envía evidencia cuantizada. Detén la cámara al salir.</p>
+      <p className="rg-privacy-note">Privacidad: el video no se sube. Solo se envía evidencia cuantizada. Detén la cámara al salir.</p>
     </div>
   );
 }

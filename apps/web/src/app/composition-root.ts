@@ -3,8 +3,8 @@ import type { RuntimeBundle } from "../runtime/bootstrap";
 
 let bundle: RuntimeBundle | null = null;
 
-export async function initApp(): Promise<RuntimeBundle> {
-  if (bundle) return bundle;
+export async function initApp(forceRefresh = false): Promise<RuntimeBundle> {
+  if (bundle && !forceRefresh) return bundle;
   bundle = await bootstrapRuntime();
   return bundle;
 }

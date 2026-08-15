@@ -30,17 +30,17 @@ export function EconomySimulator(): React.ReactElement {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
       <h2 style={{ margin: 0 }}>Simulador economía · Admin</h2>
-      <p style={{ color: "#a1a1b5", fontSize: 13, margin: 0 }}>Go: promo M×5 vs renovación M×10. Ventanas 12/5h, 30/sem, 60/mes por scope. Revenue estimado≠finalizado.</p>
+      <p style={{ color: "var(--rg-color-text-secondary,CanvasText)", fontSize: 13, margin: 0 }}>Go: promo M×5 vs renovación M×10. Ventanas 12/5h, 30/sem, 60/mes por scope. Revenue estimado≠finalizado.</p>
       <label style={{ display: "flex", gap: 8, alignItems: "center" }}>M Go subscriptions <input type="number" value={m} min={0} max={20} onChange={(e) => setM(Number(e.target.value))} style={{ width: 80, minHeight: 44, borderRadius: 8, padding: 8 }} /></label>
       <div style={{ overflowX: "auto" }}>
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
-          <thead><tr style={{ color: "#a1a1b5" }}><th>Escenario</th><th>DAU</th><th>Req/DAU</th><th>Promo</th><th>Renov.</th><th>Contribución/día</th></tr></thead>
+          <thead><tr style={{ color: "var(--rg-color-text-secondary,CanvasText)" }}><th>Escenario</th><th>DAU</th><th>Req/DAU</th><th>Promo</th><th>Renov.</th><th>Contribución/día</th></tr></thead>
           <tbody>
             {rows.map((r) => (
-              <tr key={r.k} style={{ borderTop: "1px solid #232336" }}>
+              <tr key={r.k} style={{ borderTop: "1px solid var(--rg-color-surface-muted,ButtonFace)" }}>
                 <td style={{ padding: 8 }}>{r.k}</td><td style={{ padding: 8 }}>{r.v.dau}</td><td style={{ padding: 8 }}>{r.v.reqPerDau}</td>
                 <td style={{ padding: 8 }}>${r.promo.toFixed(2)}</td><td style={{ padding: 8 }}>${r.renew.toFixed(2)}</td>
-                <td style={{ padding: 8, color: r.contrib >= 0 ? "#2ecc71" : "#ff4d6a", fontWeight: 700 }}>${r.contrib.toFixed(2)}</td>
+                <td style={{ padding: 8, color: r.contrib >= 0 ? "var(--rg-color-success,CanvasText)" : "var(--rg-color-danger,CanvasText)", fontWeight: 700 }}>${r.contrib.toFixed(2)}</td>
               </tr>
             ))}
           </tbody>
@@ -48,7 +48,7 @@ export function EconomySimulator(): React.ReactElement {
       </div>
       <div style={{ display: "grid", gap: 12, gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))" }}>
         {(Object.entries(scenarios) as [string, Scenario][]).map(([k, v]) => (
-          <fieldset key={k} style={{ border: "1px solid #232336", borderRadius: 12, padding: 12 }}>
+          <fieldset key={k} style={{ border: "1px solid var(--rg-color-surface-muted,ButtonFace)", borderRadius: 12, padding: 12 }}>
             <legend style={{ fontSize: 13, fontWeight: 700 }}>{k}</legend>
             {Object.entries(v).map(([fk, fv]) => (
               <label key={fk} style={{ display: "flex", justifyContent: "space-between", gap: 8, marginTop: 6, fontSize: 13 }}>

@@ -26,11 +26,11 @@ export function SponsorPlacement({ placement, onClose, children }: Props): React
 }
 
 const css = `
-.rg-sponsor{border:1px solid #2a2a3a;border-radius:12px;padding:10px 12px;background:#151520;min-height:72px}
+.rg-sponsor{border:1px solid var(--rg-color-surface-muted,ButtonFace);border-radius:var(--rg-radius-md,12px);padding:10px 12px;background:var(--rg-color-surface,Canvas);min-height:72px}
 .rg-sponsor-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.rg-sponsor-badge{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#a1a1b5;border:1px solid #2a2a3a;padding:2px 6px;border-radius:999px}
-.rg-sponsor-close{width:44px;height:44px;border-radius:999px;border:1px solid #333;background:transparent;color:#a1a1b5;cursor:pointer}
-.rg-sponsor-close:focus-visible{outline:2px solid #7c5cff;outline-offset:2px}
-.rg-sponsor-empty{font-size:13px;color:#6b6b80}
+.rg-sponsor-badge{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--rg-color-text-secondary,CanvasText);border:1px solid var(--rg-color-surface-muted,ButtonFace);padding:2px 6px;border-radius:999px}
+.rg-sponsor-close{width:44px;height:44px;border-radius:999px;border:1px solid var(--rg-color-surface-muted,ButtonFace);background:transparent;color:var(--rg-color-text-secondary,CanvasText);cursor:pointer}
+.rg-sponsor-close:focus-visible{outline:2px solid var(--rg-color-brand,Highlight);outline-offset:2px}
+.rg-sponsor-empty{font-size:13px;color:var(--rg-color-text-disabled,CanvasText)}
 .rg-sponsor-body{min-height:32px}
 `;
