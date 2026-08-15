@@ -17,4 +17,4 @@ The projection preserves the single identity vocabulary: `userId`, `organization
 - Organization roles must belong to both the subject organization and the requested resource organization.
 - Missing, inactive, or wrongly scoped grants fail closed with a typed `AccessDecision` reason.
 
-Role-assignment persistence remains an outbound adapter concern. T013 audit behavior and authentication are intentionally not part of this contract.
+Role-assignment persistence remains an outbound adapter concern. T013 consumes the resulting `AccessDecision` but does not reimplement authorization: a denied decision stops before the transaction, while an allowed decision may enter the privileged-change boundary. Authentication and transport remain outside both contracts.

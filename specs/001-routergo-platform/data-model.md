@@ -10,7 +10,7 @@
 - `roles(id,role_key,display_name,scope,organization_id,is_system,...)`; global roles have no organization and organization roles have an owning organization.
 - `permissions(id,permission_key,description,is_system,created_at)` with unique capability key.
 - `role_permissions(role_id,permission_id)` and `member_roles(member_id,role_id,assigned_at)`.
-- `audit_logs(id,actor_user_id,actor_organization_id,action,resource_type,resource_id,before_state,after_state,metadata,correlation_id,created_at)`; no `updated_at`, and database trigger makes it append-only.
+- `audit_logs(id,actor_user_id,actor_organization_id,action,resource_type,resource_id,before_state,after_state,metadata,correlation_id,created_at)`; no `updated_at`, and database trigger makes it append-only. T013 uses the privileged operation ID as `id` for deterministic duplicate detection.
 
 ### Economy/API
 - `credit_reservations(id,wallet_id,run_id,amount,status,expires_at,idempotency_key)`
@@ -53,3 +53,4 @@
 - QR tokens are replay-resistant and expire/version explicitly.
 - An organization-scoped role cannot be assigned to a membership from another organization; assigned roles cannot be retargeted across organizations.
 - Audit metadata is a sanitized JSON object and audit rows cannot be updated or deleted.
+- A privileged change commits its business mutation, audit row, and outbox event atomically; its outbox ID is `outbox:<operationId>`.

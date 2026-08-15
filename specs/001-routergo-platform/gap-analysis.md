@@ -32,6 +32,7 @@
 - T004 is implemented: `.github/workflows/ci.yml` runs frozen install, quality gates, tests with healthchecked PostgreSQL/Redis, build, migration plus repeated seed checksum validation, and Playwright E2E with least-privilege permissions, concurrency cancellation, finite timeouts, and failure diagnostics.
 - T010 is implemented: additive identity/RBAC/audit migration `002_identity_rbac_audit.sql`, multi-file migration runner, least-privilege system role/permission seeds, cross-organization role assignment guards, append-only audit persistence, and PostgreSQL integration tests are present. Seed version `2026-08-15-r2` is repeatable with a stable checksum.
 - T011/T012 are converged: `ResolveIdentityContextUseCase` supplies the small verified `IdentityContext` consumed by `AuthorizePermissionUseCase`; scoped/global permission decisions are fail-closed and covered by six integration scenarios. Authentication transport, HTTP enforcement, and RBAC persistence adapters remain future work.
+- T013 is implemented: `PrivilegedChangeService` requires an allowed `AccessDecision`, runs the typed mutation/audit/outbox scope through one PostgreSQL transaction, sanitizes metadata and event payloads, and uses deterministic operation IDs for idempotency. Unit tests plus PostgreSQL commit, rollback, and duplicate-operation tests cover the boundary.
 
 ### P0 — Foundation blockers
 
@@ -56,7 +57,7 @@
 ### P2 — Medium priority product/quality gaps
 
 - Admin/Studio and advertiser applications are not present.
-- Generic challenge engine, exercise safety workflow, battles, treasure, risk, analytics, and audit application workflows are not implemented; T010 provides audit persistence only.
+- Generic challenge engine, exercise safety workflow, battles, treasure, risk, analytics, and audit query/reporting workflows are not implemented; T013 covers only the privileged mutation/audit/outbox write boundary.
 - Web unit tests are absent; Playwright specs exist but the web Vite build/test execution is not yet part of a green full gate.
 - Runtime manifest versioning/cache invalidation/rollback is represented by a fixed `version: 1` loader and no manifest table or publish workflow.
 - Observability is partial; there is no end-to-end correlation/cost/revenue/reward reconciliation evidence.
@@ -71,4 +72,4 @@
 
 ## Foundation decision
 
-Do not begin Phases 3–10. T003, T004, T005, T006, T007, T008, T010, T011, and T012 are now closed locally. T013 (audit outbox/application service) is the next dependency-unlocked slice; authentication transport and HTTP authorization enforcement remain later integration work.
+Do not begin Phases 3–10. T003, T004, T005, T006, T007, T008, T010, T011, T012, and T013 are now closed locally. T014 and T015 are the next dependency-unlocked slices and can proceed in parallel in their separate runtime-manifest surfaces; both must consume the T013 boundary for privileged publication. Authentication transport and HTTP authorization enforcement remain later integration work.

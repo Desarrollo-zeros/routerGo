@@ -1,6 +1,6 @@
 # Identity, organizations, RBAC, and audit
 
-T010 adds durable persistence. T011 adds identity resolution contracts and T012 adds permission-based authorization policies. Login, sessions, JWT/OAuth, authentication endpoints, and HTTP enforcement remain future integration work.
+T010 adds durable persistence. T011 adds identity resolution contracts, T012 adds permission-based authorization policies, and T013 adds the transactional privileged-change boundary. Login, sessions, JWT/OAuth, authentication endpoints, and HTTP enforcement remain future integration work.
 
 ## Model
 
@@ -19,4 +19,4 @@ Future application authorization must check a permission and the organization sc
 
 ## Audit privacy
 
-Callers must sanitize `metadata`, `before_state`, and `after_state` before persistence. Passwords, API/provider/session secrets, tokens, and raw sensitive prompts must never be stored. T013 will add the application/outbox workflow for privileged changes; T010 provides only the durable append-only table and database invariants.
+`PrivilegedChangeService` sanitizes audit metadata and outbox payloads before persistence. Passwords, API/provider/session secrets, tokens, and raw sensitive prompts must never be stored. The service requires an allowed `AccessDecision`, executes the mutation, audit append, and outbox append through one transaction, and uses `operationId` as the deterministic audit identity for duplicate detection.
