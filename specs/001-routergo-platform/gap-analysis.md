@@ -29,6 +29,7 @@
 - T003 is implemented: the root architecture gate is executable, enforces the API hexagonal restrictions and future cross-context internal boundaries, and the line-count gate passes. Four existing web feature-to-adapter imports remain explicit transitional exceptions in `.dependency-cruiser.cjs`.
 - T008 is implemented: RouterGo PostgreSQL, Redis, and LiteLLM use explicit local ports and healthchecks; the LiteLLM image is pinned by digest and the full API/web validation matrix passes locally.
 - The dependency-install gate is implemented: `packageManager` is pinned to `pnpm@11.19.0`, and `pnpm-workspace.yaml` allows only the inspected `esbuild` and `msgpackr-extract` build scripts. A clean Corepack install completes without `ERR_PNPM_IGNORED_BUILDS`.
+- T004 is implemented: `.github/workflows/ci.yml` runs frozen install, quality gates, tests with healthchecked PostgreSQL/Redis, build, migration plus repeated seed checksum validation, and Playwright E2E with least-privilege permissions, concurrency cancellation, finite timeouts, and failure diagnostics.
 
 ### P0 — Foundation blockers
 
@@ -43,8 +44,8 @@
 
 | ID | Gap | Evidence | Impact |
 |---|---|---|---|
-| P1-001 | Architecture gate is declared but not installable/runnable. | **Resolved 2026-08-15**: root `dependency-cruiser@17.4.3` is pinned, and `pnpm check:arch` passes with 146 modules and 293 dependencies. | Closed for the current local Foundation gate; CI enforcement remains T004. |
-| P1-002 | No CI quality workflow. | `.github/workflows` is missing. | Required typecheck/lint/test/build/line/arch/secrets gates are not enforced remotely. |
+| P1-001 | Architecture gate is declared but not installable/runnable. | **Resolved 2026-08-15**: root `dependency-cruiser@17.4.3` is pinned, and `pnpm check:arch` passes with 146 modules and 293 dependencies. | Closed locally and covered by the T004 CI quality job. |
+| P1-002 | No CI quality workflow. | **Resolved 2026-08-15**: `.github/workflows/ci.yml` defines the required quality, test, build, database, and E2E jobs. | Local and workflow gates are aligned; GitHub branch protection still needs these exact checks marked required. |
 | P1-003 | External provider reliability is incomplete. | Provider files contain request/response strategies but no complete HTTP adapter with timeout, bounded retry/backoff/jitter, Retry-After handling, circuit breaker, bulkhead, or telemetry contract. | FR-005/006 and provider rollout gates cannot be proven. |
 | P1-004 | LiteLLM compose image is invalid and local Redis conflicted with another stack. | **Resolved 2026-08-15**: LiteLLM uses a fixed GHCR digest, Redis uses host port 6380, and PostgreSQL/Redis/LiteLLM report healthy after `docker compose up -d`. | Closed for the local Foundation environment; real provider execution remains intentionally out of scope. |
 | P1-005 | Runtime skill routing is absent. | No `IntentClassifierPort`, typed `SkillRegistry`, immutable skill version, deterministic classifier fallback, or injection tests exists. | US8/FR-014/FR-015 remain unimplemented. |
@@ -68,4 +69,4 @@
 
 ## Foundation decision
 
-Do not begin Phases 3–10. The first executable slices are T006 (real composition and fail-closed manifest), T007 (migration/adapter contract), and T003/T004/T005 (quality/reliability gates). T003 and T008 are now closed locally; T004 CI enforcement and T005 reliability helpers remain the next Foundation work.
+Do not begin Phases 3–10. The first executable slices are T006 (real composition and fail-closed manifest), T007 (migration/adapter contract), and T003/T004/T005 (quality/reliability gates). T003, T004, and T008 are now closed locally; T005 reliability helpers remain the next Foundation work.

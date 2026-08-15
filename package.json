@@ -17,6 +17,7 @@
     "test:e2e": "playwright test",
     "check:lines": "node scripts/check-file-lines.mjs",
     "check:arch": "dependency-cruiser --config .dependency-cruiser.cjs apps/api/src apps/web/src",
+    "check:secrets": "node scripts/check-secrets.mjs",
     "dev:web": "pnpm --filter @routergo/web dev",
     "dev:api": "pnpm --filter @routergo/api dev",
     "db:migrate": "pnpm --filter @routergo/api db:migrate",
