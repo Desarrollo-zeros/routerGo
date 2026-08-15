@@ -8,6 +8,8 @@ T012 consumes the verified `IdentityContext` produced by T011. Authentication an
 
 The projection preserves the single identity vocabulary: `userId`, `organizationId`, `membershipId`, and `membershipStatus`. The domain does not import the application `IdentityContext`; the explicit projection is the hexagonal adapter between those layers. A non-active membership is denied before grant evaluation.
 
+`AuthorizationGrantReader.findRoleAssignments(membershipId)` is deliberately membership-scoped. A future adapter can resolve `member_roles` and role scope in one bounded query without loading every grant for a user or creating an N+1 authorization read pattern.
+
 ## Policy rules
 
 - Permissions are explicit `resource.action` keys; role names and wildcards never grant access.

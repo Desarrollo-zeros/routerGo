@@ -1,6 +1,6 @@
 # Identity, organizations, RBAC, and audit
 
-T010 adds persistence only. Login, sessions, JWT/OAuth, authentication endpoints, and authorization policies belong to T011/T012.
+T010 adds durable persistence. T011 adds identity resolution contracts and T012 adds permission-based authorization policies. Login, sessions, JWT/OAuth, authentication endpoints, and HTTP enforcement remain future integration work.
 
 ## Model
 

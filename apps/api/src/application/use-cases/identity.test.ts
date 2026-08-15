@@ -4,8 +4,7 @@ import { Organization } from '../../domain/entities/Organization';
 import { OrganizationMember } from '../../domain/entities/OrganizationMember';
 import { OrganizationSlug } from '../../domain/value-objects/OrganizationSlug';
 import type { UserRepository } from '../ports/outbound/UserRepository';
-import type { OrganizationRepository } from '../ports/outbound/OrganizationRepository';
-import type { MembershipRepository } from '../ports/outbound/MembershipRepository';
+import { identityRepositories, type IdentityRepositories } from '../testing/InMemoryIdentityRepositories';
 import { GetUserUseCase } from './GetUser';
 import { GetOrganizationUseCase } from './GetOrganization';
 import { ListUserMembershipsUseCase } from './ListUserMemberships';
@@ -16,8 +15,8 @@ const user = User.create({ id: 'user-1', status: 'ACTIVE' });
 const organization = Organization.create({ id: 'org-1', name: 'Personal', slug: OrganizationSlug.create('personal'), kind: 'PERSONAL', status: 'ACTIVE' });
 const membership = OrganizationMember.create({ id: 'member-1', userId: user.id, organizationId: organization.id, status: 'ACTIVE' });
 
-function repositories(): { users: FakeUsers; organizations: FakeOrganizations; memberships: FakeMemberships } {
-  return { users: new FakeUsers([user]), organizations: new FakeOrganizations([organization]), memberships: new FakeMemberships([membership]) };
+function repositories(): IdentityRepositories {
+  return identityRepositories([user], [organization], [membership]);
 }
 
 describe('identity application contracts', () => {
@@ -45,39 +44,22 @@ describe('identity application contracts', () => {
     ['inactive organization', user, Organization.create({ id: organization.id, name: organization.name, slug: organization.slug, kind: organization.kind, status: 'DISABLED' }), membership, 'ORGANIZATION_INACTIVE'],
     ['inactive membership', user, organization, OrganizationMember.create({ id: membership.id, userId: user.id, organizationId: organization.id, status: 'REMOVED' }), 'MEMBERSHIP_INACTIVE'],
   ])('rejects %s during context resolution', async (_label, currentUser, currentOrganization, currentMembership, code) => {
-    const context = new ResolveIdentityContextUseCase(new FakeUsers([currentUser]), new FakeOrganizations([currentOrganization]), new FakeMemberships([currentMembership]));
+    const repos = identityRepositories([currentUser], [currentOrganization], [currentMembership]);
+    const context = new ResolveIdentityContextUseCase(repos.users, repos.organizations, repos.memberships);
     await expect(context.execute({ userId: user.id, organizationId: organization.id })).rejects.toMatchObject({ code });
   });
 
   it('maps missing membership and propagates repository failures', async () => {
     const repos = repositories();
-    const context = new ResolveIdentityContextUseCase(repos.users, repos.organizations, new FakeMemberships([]));
+    const emptyMemberships = identityRepositories([], [], []).memberships;
+    const context = new ResolveIdentityContextUseCase(repos.users, repos.organizations, emptyMemberships);
     await expect(context.execute({ userId: user.id, organizationId: organization.id })).rejects.toMatchObject({ code: 'MEMBERSHIP_NOT_FOUND' });
     const failure = new Error('storage unavailable');
     await expect(new GetUserUseCase(new FailingUsers(failure)).execute({ userId: user.id })).rejects.toBe(failure);
   });
 });
 
-class FakeUsers implements UserRepository {
-  constructor(private readonly values: User[]) {}
-  async findById(id: string): Promise<User | null> { return this.values.find((value) => value.id === id) ?? null; }
-}
-
 class FailingUsers implements UserRepository {
   constructor(private readonly failure: Error) {}
   async findById(_id: string): Promise<User | null> { throw this.failure; }
-}
-
-class FakeOrganizations implements OrganizationRepository {
-  constructor(private readonly values: Organization[]) {}
-  async findById(id: string): Promise<Organization | null> { return this.values.find((value) => value.id === id) ?? null; }
-}
-
-class FakeMemberships implements MembershipRepository {
-  constructor(private readonly values: OrganizationMember[]) {}
-  async findById(id: string): Promise<OrganizationMember | null> { return this.values.find((value) => value.id === id) ?? null; }
-  async findByUserAndOrganization(userId: string, organizationId: string): Promise<OrganizationMember | null> {
-    return this.values.find((value) => value.userId === userId && value.organizationId === organizationId) ?? null;
-  }
-  async findByUserId(userId: string): Promise<OrganizationMember[]> { return this.values.filter((value) => value.userId === userId); }
 }

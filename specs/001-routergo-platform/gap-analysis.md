@@ -31,6 +31,7 @@
 - The dependency-install gate is implemented: `packageManager` is pinned to `pnpm@11.19.0`, and `pnpm-workspace.yaml` allows only the inspected `esbuild` and `msgpackr-extract` build scripts. A clean Corepack install completes without `ERR_PNPM_IGNORED_BUILDS`.
 - T004 is implemented: `.github/workflows/ci.yml` runs frozen install, quality gates, tests with healthchecked PostgreSQL/Redis, build, migration plus repeated seed checksum validation, and Playwright E2E with least-privilege permissions, concurrency cancellation, finite timeouts, and failure diagnostics.
 - T010 is implemented: additive identity/RBAC/audit migration `002_identity_rbac_audit.sql`, multi-file migration runner, least-privilege system role/permission seeds, cross-organization role assignment guards, append-only audit persistence, and PostgreSQL integration tests are present. Seed version `2026-08-15-r2` is repeatable with a stable checksum.
+- T011/T012 are converged: `ResolveIdentityContextUseCase` supplies the small verified `IdentityContext` consumed by `AuthorizePermissionUseCase`; scoped/global permission decisions are fail-closed and covered by six integration scenarios. Authentication transport, HTTP enforcement, and RBAC persistence adapters remain future work.
 
 ### P0 — Foundation blockers
 
@@ -39,7 +40,7 @@
 | P0-001 | The production composition is only partially real. | T006 removed the empty-manifest fallback, wires catalog/economy/wallet ports, and turns unimplemented activity/quote/run/ledger paths into explicit 501 responses. Provider execution, quote/run orchestration, and effective authentication are still absent. | The API no longer reports synthetic success for those routes, but the public execution path is not ready for users. |
 | P0-002 | The migration/adapter contract required repair. | T007 aligned ledger, outbox, quote, run, pool, usage-window, and manifest adapters to `001_initial.sql`, with five real PostgreSQL contract tests. Run status transitions and economic reservation semantics still require separate tests/use cases. | The covered persistence paths are executable; reserve/settle accounting and broader lifecycle behavior remain open. |
 | P0-003 | Economy is debit/refund, not QUOTE → RESERVE → EXECUTE → SETTLE → RELEASE/REFUND. | `CreateRunUseCase` debits the full quote and writes a spend entry; no `credit_reservations`, budget, provider-cost, revenue, or economy circuit-breaker model exists. | Violates non-negative/concurrency-safe reserve accounting and blocks safe public API/ads rollout. |
-| P0-004 | The runtime API is not the specified RouterGo API and has no effective authorization. | Seeded routes are legacy paths such as `/catalog`, `/quotes`, and `/runs`; `/v1/models` is absent. `DynamicRouteRegistry` stores `auth_policy_key` but never enforces it. T010 now provides identity/RBAC/audit persistence, but no identity application ports, API-key, scope, rate, or budget implementation exists. | Public API and admin routes can be exposed without the required credential/security boundary. |
+| P0-004 | The runtime API is not the specified RouterGo API and has no effective HTTP authorization enforcement. | Seeded routes are legacy paths such as `/catalog`, `/quotes`, and `/runs`; `/v1/models` is absent. `DynamicRouteRegistry` stores `auth_policy_key` but never invokes the converged identity/RBAC application flow. T011/T012 provide the framework-free contracts and policy, but authentication transport, API keys, route middleware, rate limits, and budgets remain absent. | Public API and admin routes can be exposed without the required credential/security boundary. |
 
 ### P1 — High priority convergence gaps
 
@@ -70,4 +71,4 @@
 
 ## Foundation decision
 
-Do not begin Phases 3–10. T003, T004, T005, T006, T007, T008, and T010 are now closed locally. T011 (identity domain/application ports) and T012 (RBAC specifications/policies and tests) are the next dependency-unlocked slices and may proceed in parallel with separate ownership.
+Do not begin Phases 3–10. T003, T004, T005, T006, T007, T008, T010, T011, and T012 are now closed locally. T013 (audit outbox/application service) is the next dependency-unlocked slice; authentication transport and HTTP authorization enforcement remain later integration work.
