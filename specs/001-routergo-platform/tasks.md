@@ -1,0 +1,93 @@
+# Tasks: RouterGo Platform Rev.7
+
+Format: `[ID] [P?] [Story] task`. `[P]` means safe parallel ownership in different files/contexts.
+
+## Phase 0 — Baseline and governance (blocking)
+- [ ] T001 Audit current main against constitution; record gaps in `specs/001-routergo-platform/gap-analysis.md`.
+- [ ] T002 Make Rev.7 artifacts canonical and mark old `.agents/plans/*` historical.
+- [ ] T003 Enforce code-file <=200 lines and architecture gates across new apps/packages.
+- [ ] T004 [P] Add CI jobs for typecheck/lint/test/build/line/arch/secrets.
+- [ ] T005 [P] Add reliability test helpers for timeout/retry/circuit-breaker/idempotency.
+
+## Phase 1 — Identity, RBAC, audit, runtime config
+- [ ] T010 [US3] Add identity/RBAC/audit migrations and idempotent seeds.
+- [ ] T011 [P] [US3] Implement identity domain/application ports.
+- [ ] T012 [P] [US3] Implement RBAC specifications/policies and tests.
+- [ ] T013 [US3] Implement audit outbox/application service for privileged changes.
+- [ ] T014 [US3] Remove frontend/business hardcoded navigation/colors/routes where runtime manifest owns them.
+- [ ] T015 [US3] Add manifest publish/version/cache invalidation/rollback contract tests.
+
+## Phase 2 — Economy v2 (blocking for public API/ads)
+- [ ] T020 [US1] Add credit reservation/budget/provider-cost/revenue migrations.
+- [ ] T021 [P] [US1] Implement CreditReservation domain state + tests.
+- [ ] T022 [P] [US1] Implement EconomyBudgetPolicy + circuit-breaker specifications.
+- [ ] T023 [US1] Implement `ReserveCredits`, `SettleCredits`, `ReleaseCredits` use cases using UnitOfWork.
+- [ ] T024 [US1] Add concurrency/idempotency tests for reserve+settle+duplicate callbacks.
+- [ ] T025 [US1] Integrate quote/run flow with reserve before provider execution.
+- [ ] T026 [US1] Add reconciliation jobs/metrics for provider costs and ad revenue.
+
+## Phase 3 — RouterGo Developer API
+- [ ] T030 [US2] Add api-client/key/usage schema; raw keys never persisted.
+- [ ] T031 [P] [US2] Implement API key issue/revoke/rotate/scopes.
+- [ ] T032 [P] [US2] Implement layered RPM/TPM/credit/model quotas with Redis + durable policy.
+- [ ] T033 [US2] Implement `/v1/models` contract.
+- [ ] T034 [US2] Implement `/v1/chat/completions` supported compatibility subset.
+- [ ] T035 [US2] Implement `/v1/responses` supported compatibility subset + SSE.
+- [ ] T036 [US2] Contract-test errors, revocation, rate limits, budget exhaustion, stream disconnect.
+
+## Phase 4 — RouterGo Studio + CMS
+- [ ] T040 [US3] Create `apps/admin` composition and shared accessible UI primitives.
+- [ ] T041 [P] [US3] CMS content/version/publication/media domain.
+- [ ] T042 [P] [US3] Admin model/provider/runtime-config views with audited publish.
+- [ ] T043 [P] [US3] Admin wallet/economy/read-only ledger views with privilege separation.
+- [ ] T044 [US3] Responsive/a11y E2E for admin critical flows.
+
+## Phase 5 — Ads core + advertiser
+- [ ] T050 [US4] Add advertiser/funding/campaign/creative/placement schema.
+- [ ] T051 [P] [US4] Campaign state machine + budget policy + moderation.
+- [ ] T052 [P] [US4] AdDecisionPort and Strategy adapters for direct/third-party/house inventory.
+- [ ] T053 [US4] Reconcile impressions/clicks/finalized revenue idempotently.
+- [ ] T054 [US4] Create `apps/advertiser` with balance/campaign/creative/analytics flows.
+- [ ] T055 [US4] Add frequency caps, consent/region policy hooks, anti-click-fraud telemetry.
+
+## Phase 6 — Generic challenges and exercise
+- [ ] T060 [US5] Add versioned challenge schema with typed verification strategies.
+- [ ] T061 [P] [US5] Implement ChallengeVerification Strategy registry.
+- [ ] T062 [P] [US5] Implement reward eligibility/specification and budget integration.
+- [ ] T063 [US5] Migrate existing exercise flow into approved challenge template strategy.
+- [ ] T064 [US5] Add physical safety caps/cooldowns/stop controls/non-physical alternative tests.
+- [ ] T065 [US5] Studio challenge builder/publish/moderation UI.
+
+## Phase 7 — Runtime Intent/Skill Router
+- [ ] T070 [US8] Add skill definition/version/classification schema and Studio workflow.
+- [ ] T071 [P] [US8] Implement `IntentClassifierPort` + schema-constrained provider adapter.
+- [ ] T072 [P] [US8] Implement typed `SkillRegistry` + immutable skill versions.
+- [ ] T073 [US8] Add low-confidence/timeout/budget fallback heuristics.
+- [ ] T074 [US8] Integrate session-start classification without blocking core session availability.
+- [ ] T075 [US8] Test prompt-injection attempts cannot activate unknown tools/skills.
+
+## Phase 8 — Battles
+- [ ] T080 [US6] Add battle schema/state machine and server-authoritative scoring.
+- [ ] T081 [P] [US6] Implement matchmaking/battle WebSocket gateway.
+- [ ] T082 [P] [US6] Implement Redis ephemeral match state + durable results.
+- [ ] T083 [US6] Add reconnect/timeout/idempotent result/reward tests.
+- [ ] T084 [US6] Responsive battle UX + reduced-motion/accessibility.
+
+## Phase 9 — Treasure
+- [ ] T090 [US7] Add hunt/step/QR/progress schema and moderation rules.
+- [ ] T091 [P] [US7] Implement coarse geofence proof adapter with no continuous history.
+- [ ] T092 [P] [US7] Implement signed/expiring/replay-resistant QR proof.
+- [ ] T093 [US7] Add safe public-location review workflow and permission-denied alternative.
+- [ ] T094 [US7] Responsive map/list experience with privacy notices.
+
+## Phase 10 — Risk, analytics, hardening, beta
+- [ ] T100 Add risk events/scores/review cases for reward/API/ad/battle/treasure abuse.
+- [ ] T101 [P] Build unit-economics dashboard: revenue, cost, contribution, reward liability.
+- [ ] T102 [P] Add provider health/quota/cost routing analytics and alerts.
+- [ ] T103 Load-test critical API/realtime paths and enforce performance budgets.
+- [ ] T104 Run WCAG/responsive/security/secrets/provider-contract regression suite.
+- [ ] T105 Execute staged beta with feature flags, economy kill switches, and rollback drills.
+- [ ] T106 Run Spec Kit-style analyze/converge; append all discovered gaps before declaring Rev.7 complete.
+
+## Dependency order
+T001-T005 -> T010-T015 -> T020-T026. Then Phases 3, 4 and 5 can proceed in parallel. Phase 6 requires economy + Studio foundation. Phase 7 requires routing + Studio. Battles/Treasure require identity/reward foundation. Phase 10 integrates all selected beta capabilities.

@@ -2,7 +2,7 @@
   "name": "routergo",
   "private": true,
   "version": "0.1.0",
-  "description": "Esfuerzo → Tokens — PWA mobile-first, gateway dual Zen+Go, verificadores tiempo real",
+  "description": "RouterGo — ad-funded multi-provider AI access platform",
   "packageManager": "pnpm@9.12.3",
   "engines": {
     "node": ">=20"
@@ -20,7 +20,8 @@
     "dev:web": "pnpm --filter @routergo/web dev",
     "dev:api": "pnpm --filter @routergo/api dev",
     "db:migrate": "pnpm --filter @routergo/api db:migrate",
-    "db:seed": "pnpm --filter @routergo/api db:seed"
+    "db:seed": "pnpm --filter @routergo/api db:seed",
+    "mcp:routergo": "node tools/mcp-routergo/server.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",

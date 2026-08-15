@@ -1,0 +1,24 @@
+openapi: 3.1.0
+info:
+  title: RouterGo Public API
+  version: 0.1.0
+paths:
+  /v1/models:
+    get:
+      summary: List models available to the authenticated RouterGo API key
+  /v1/chat/completions:
+    post:
+      summary: OpenAI-compatible chat completion subset with RouterGo accounting
+  /v1/responses:
+    post:
+      summary: RouterGo response endpoint with streaming support
+  /v1/usage:
+    get:
+      summary: Return scoped RouterGo usage and GoCredit consumption
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+security:
+  - bearerAuth: []

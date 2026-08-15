@@ -1,0 +1,4 @@
+[mcp_servers.routergo]
+command = "node"
+args = ["tools/mcp-routergo/server.mjs"]
+enabled = true
