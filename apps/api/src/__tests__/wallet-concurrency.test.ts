@@ -5,7 +5,7 @@ import { Wallet } from '../domain/entities/Wallet.js';
 import { Credits } from '../domain/value-objects/Credits.js';
 import { LedgerEntry } from '../domain/entities/LedgerEntry.js';
 
-const DB = process.env.DATABASE_URL ?? 'postgres://routergo:routergo@localhost:5433/routergo';
+const DB = process.env.DATABASE_URL ?? 'postgres://routergo:routergo@localhost:5432/routergo';
 const pool = new pg.Pool({ connectionString: DB, max: 20 });
 
 async function createWallet(initial: bigint): Promise<{ userId: string; walletId: string }> {

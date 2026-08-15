@@ -3,11 +3,14 @@
 Format: `[ID] [P?] [Story] task`. `[P]` means safe parallel ownership in different files/contexts.
 
 ## Phase 0 — Baseline and governance (blocking)
-- [ ] T001 Audit current main against constitution; record gaps in `specs/001-routergo-platform/gap-analysis.md`.
-- [ ] T002 Make Rev.7 artifacts canonical and mark old `.agents/plans/*` historical.
-- [ ] T003 Enforce code-file <=200 lines and architecture gates across new apps/packages.
+- [x] T001 Audit current main against constitution; record gaps in `specs/001-routergo-platform/gap-analysis.md`.
+- [x] T002 Make Rev.7 artifacts canonical and mark old `.agents/plans/*` historical.
+- [x] T003 Enforce code-file <=200 lines and architecture gates across new apps/packages.
 - [ ] T004 [P] Add CI jobs for typecheck/lint/test/build/line/arch/secrets.
 - [ ] T005 [P] Add reliability test helpers for timeout/retry/circuit-breaker/idempotency.
+- [x] T006 Repair composition-root wiring to real application ports/use cases and fail closed when the runtime manifest cannot load.
+- [x] T007 Align PostgreSQL adapters with the canonical migration schema; add adapter contract tests for ledger, outbox, quote, run, pool, and manifest persistence.
+- [x] T008 [P] Make local integration environment reproducible: explicit host-port translation, health/readiness checks, and a reviewed valid LiteLLM image reference.
 
 ## Phase 1 — Identity, RBAC, audit, runtime config
 - [ ] T010 [US3] Add identity/RBAC/audit migrations and idempotent seeds.
