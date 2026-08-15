@@ -1,3 +1,19 @@
+const contextNames = [
+  "identity", "economy", "wallet", "ai-routing", "developer-api", "challenges",
+  "exercise", "battle", "treasure", "cms", "ads", "advertiser", "risk",
+  "analytics", "notifications",
+];
+
+const crossContextRules = contextNames.map((source) => ({
+  name: `cross-context-internals-${source}`,
+  comment: "bounded contexts may depend on explicit contracts, not another context's internals",
+  severity: "error",
+  from: { path: `apps/api/src/contexts/${source}/` },
+  to: {
+    path: `apps/api/src/contexts/(?!${source}/)[^/]+/(domain|application|infrastructure)/`,
+  },
+}));
+
 /** @type {import('dependency-cruiser').IConfiguration} */
 module.exports = {
   forbidden: [
@@ -31,11 +47,15 @@ module.exports = {
     },
     {
       name: "web-features-no-transport",
-      comment: "features no importan transporte directo",
+      comment: "new features must use application ports; legacy adapters are explicit transitional exceptions",
       severity: "error",
-      from: { path: "apps/web/src/features" },
+      from: {
+        path: "apps/web/src/features",
+        pathNot: "apps/web/src/features/(wallet/useWallet|chat/useChat|activity/useActivityMachine|activity/ActivityView)\\.(ts|tsx)$",
+      },
       to: { path: "apps/web/src/adapters" },
     },
+    ...crossContextRules,
   ],
   options: {
     doNotFollow: { path: "node_modules" },

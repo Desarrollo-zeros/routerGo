@@ -1,3 +1,10 @@
 packages:
   - "apps/*"
   - "packages/*"
+
+# Reviewed native build steps required by the current dependency graph.
+# esbuild provides Vite's platform binary; msgpackr-extract provides BullMQ's
+# optional native MessagePack acceleration. All other dependency scripts stay blocked.
+allowBuilds:
+  esbuild: true
+  msgpackr-extract: true
