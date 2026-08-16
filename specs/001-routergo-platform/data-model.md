@@ -60,13 +60,14 @@ revenue remains an idempotent USD reconciliation entry. Funding and policy
 hooks remain T054-T055.
 
 ### Battle/Treasure/Risk
-- `battle_matches`, `battle_players`, `battle_rounds`, `battle_answers`
+- `battle_matches`, `battle_players`, `battle_rounds`, `battle_answers`, `battle_results`
 - `treasure_hunts`, `treasure_steps`, `treasure_qr_tokens`, `treasure_progress`
 - `risk_events`, `risk_scores`, `review_cases`
 
 Battle scores are server-owned integers. Answer rows store hashes and a unique
 `battle_id + round_number + user_id` key, so clients cannot submit duplicate
 answers or supply their own score. Matches have no stake or wager columns.
+Redis stores short-lived match state with an explicit TTL; `battle_results` is the durable, one-result-per-match projection with server-owned scores and idempotent recording.
 
 ## Invariants
 - User GoCredit balance >=0.

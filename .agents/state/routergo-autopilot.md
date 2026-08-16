@@ -1,7 +1,7 @@
 phase: 4
 current_objective: T081
 status: executing
-last_green_commit: 6d7b8d0
+last_green_commit: 9cdc2be
 last_completed_tasks:
   - T020
   - T021
@@ -36,6 +36,7 @@ last_completed_tasks:
   - T074
   - T075
   - T080
+  - T082
 next_candidates:
   - T042
   - T043
@@ -43,4 +44,4 @@ next_candidates:
   - T065
   - T081
 blocked_tasks: []
-last_validation: clean temporary database migrations 001-013 and double seed pass with checksum a97a1259b6596eb4; full tests pass 64 files/280 API tests, E2E 7/7, install frozen, build, typecheck, lint, lines, architecture, secrets. Main volume retains historical snapshots and is not used for clean-seed claims.
+last_validation: T082 unit and persistence tests pass; local database migrations 001-014 pass; clean temporary database double seed pass with checksum a97a1259b6596eb4; full tests pass 64 files/280 API tests, E2E 7/7, install frozen, build, typecheck, lint, lines, architecture, secrets. Main volume retains historical snapshots and is not used for clean-seed claims.
