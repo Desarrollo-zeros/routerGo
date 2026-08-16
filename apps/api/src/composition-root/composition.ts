@@ -40,6 +40,10 @@ import { ApiQuotaPostgresRepository } from '../infrastructure/adapters/postgres/
 import { RedisApiQuotaCounter } from '../infrastructure/adapters/redis/RedisApiQuotaCounter.js';
 import { CheckApiQuotaUseCase } from '../application/use-cases/CheckApiQuota.js';
 import { ResponsesUseCase } from '../application/use-cases/Responses.js';
+import { GetProviderAnalyticsUseCase } from '../application/use-cases/GetProviderAnalytics.js';
+import { HttpProviderHealthProbe } from '../infrastructure/adapters/providers/HttpProviderHealthProbe.js';
+import { PostgresProviderAnalyticsSource } from '../infrastructure/adapters/postgres/PostgresProviderAnalyticsSource.js';
+import { PostgresProviderAnalyticsAlertSink } from '../infrastructure/adapters/postgres/PostgresProviderAnalyticsAlertSink.js';
 
 const { Pool } = pg;
 
@@ -69,6 +73,10 @@ export async function createComposition() {
   });
   const quota = new CheckApiQuotaUseCase({ policies: new ApiQuotaPostgresRepository(pool), counter: new RedisApiQuotaCounter(redis) });
   const chatCompletions = new ChatCompletionsUseCase({ createQuote, executeRun, clock: economyClock, quota });
+  const providerAnalytics = new GetProviderAnalyticsUseCase(
+    new PostgresProviderAnalyticsSource(pool, new HttpProviderHealthProbe()),
+    new PostgresProviderAnalyticsAlertSink(pool),
+  );
   const useCases = createUseCaseRegistry({
     manifest, catalog: catalogUseCase, models: new ListModelsUseCase(catalogUseCase),
     wallet: new GetWalletUseCase(wallet), economy,
@@ -76,7 +84,7 @@ export async function createComposition() {
     authenticateApiKey: createApiKeyAuthenticator(pool),
   });
   const streams = new RedisStreamAdapter(redis as never);
-  return { pool, redis, manifest, schemas, useCases, creditOperations, sseDeps: { streams } };
+  return { pool, redis, manifest, schemas, useCases, creditOperations, providerAnalytics, sseDeps: { streams } };
 }
 
 function createApiKeyAuthenticator(pool: pg.Pool) {
