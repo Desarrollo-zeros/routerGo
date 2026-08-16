@@ -1,5 +1,5 @@
 phase: 4
-current_objective: T084
+current_objective: T101
 status: executing
 last_green_commit: 645f309
 last_completed_tasks:
@@ -52,9 +52,11 @@ last_completed_tasks:
   - T081
   - T083
   - T084
+  - T101
 next_candidates:
+  - T102
+  - T103
   - T105
-  - T093
 blocked_tasks:
   - T105: staged beta deployment and rollback drill require an external staging controller/environment
-last_validation: T084 clean database migrations 001-017, double seed checksum dd4613438cb884f3, 91 API files/334 tests, web 9 tests, full typecheck/lint/lines/architecture/secrets/build, web E2E 7/7, admin E2E 2/2, and PostgreSQL/Redis/LiteLLM healthy. Validation used routergo_t084_validation. T105 remains externally blocked.
+last_validation: T101 clean database migrations 001-017, double seed checksum dd4613438cb884f3, 91 API files/334 tests, admin 11 tests, full root typecheck/lint/lines/architecture/secrets/build, web E2E 7/7, admin E2E 2/2, and PostgreSQL/Redis/LiteLLM healthy. Validation used routergo_t084_validation. T105 remains externally blocked.
