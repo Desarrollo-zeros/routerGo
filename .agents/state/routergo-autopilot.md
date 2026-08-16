@@ -1,7 +1,7 @@
 phase: 3
-current_objective: T061
+current_objective: T062
 status: executing
-last_green_commit: 7404b4b
+last_green_commit: 6e646be
 last_completed_tasks:
   - T020
   - T021
@@ -24,11 +24,12 @@ last_completed_tasks:
   - T052
   - T053
   - T060
+  - T061
 next_candidates:
   - T042
   - T043
   - T054
   - T055
-  - T061
+  - T062
 blocked_tasks: []
-last_validation: T060 migration and PostgreSQL persistence test pass; full validation passes 49 API suites/243 tests, web 6 tests, advertiser/admin builds, typecheck, lint, lines, architecture, secrets, repeated seed checksum a97a1259b6596eb4, and healthy local services. T042/T043/T054/T055 remain open; T061 is next.
+last_validation: T061 registry tests pass; typecheck, lint, lines, architecture and secrets pass. T042/T043/T054/T055 remain open; T062 is next.
