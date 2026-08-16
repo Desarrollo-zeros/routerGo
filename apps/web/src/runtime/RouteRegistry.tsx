@@ -3,6 +3,7 @@ import { ActivityView } from "../features/activity/ActivityView";
 import { ChatView } from "../features/chat/ChatView";
 import { EconomySimulator } from "../features/economy/EconomySimulator";
 import { WalletView } from "../features/wallet/WalletView";
+import { TreasureView } from "../features/treasure/TreasureView";
 import type { CatalogRegistry } from "./CatalogRegistry";
 import type { HttpApiPort } from "./ApiPort";
 import type { NavigationItem } from "./NavigationRegistry";
@@ -20,6 +21,7 @@ const SCREEN_REGISTRY = new Map<string, ScreenDefinition>([
   ["chat", { screenKey: "chat", path: "", available: true, render: ({ catalog, api }) => <ChatView catalog={catalog.list()} balance={0} api={api} /> }],
   ["wallet", { screenKey: "wallet", path: "", available: true, render: ({ api }) => <WalletView api={api} /> }],
   ["admin-economy", { screenKey: "admin-economy", path: "", available: true, render: () => <EconomySimulator /> }],
+  ["treasure", { screenKey: "treasure", path: "", available: true, render: () => <TreasureView hunts={[]} permission="unknown" /> }],
 ]);
 
 export class RouteRegistry {

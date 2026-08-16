@@ -58,3 +58,12 @@ button{font:inherit;cursor:pointer;border:none;background:none}
 .rg-camera{position:relative;background:var(--rg-color-bg,Canvas);border-radius:var(--rg-radius-md,12px);overflow:hidden;min-height:220px}
 .rg-camera video{width:100%;height:320px;object-fit:cover;object-position:center}
 .rg-privacy-note{font-size:12px;color:var(--rg-color-text-disabled,CanvasText);margin:0}
+.rg-treasure{display:grid;gap:16px}
+.rg-treasure-layout{display:grid;gap:16px}
+.rg-treasure-map,.rg-treasure-list{border:1px solid var(--rg-color-surface-muted,ButtonFace);background:var(--rg-color-surface,Canvas);padding:16px;border-radius:8px;display:grid;gap:12px}
+.rg-treasure-map-grid{min-height:180px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:16px;background:var(--rg-color-bg,Canvas);border:1px solid var(--rg-color-surface-muted,ButtonFace)}
+.rg-treasure-marker{display:block;min-height:28px;background:var(--rg-color-brand-soft,Highlight);border-radius:50%;opacity:.8}
+.rg-treasure-notice{display:flex;flex-wrap:wrap;align-items:center;gap:12px;border-left:3px solid var(--rg-color-warning,var(--rg-color-brand,Highlight));padding:12px;background:var(--rg-color-surface,Canvas)}
+.rg-treasure-item{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px;border:1px solid var(--rg-color-surface-muted,ButtonFace);border-radius:8px}
+.rg-treasure-status{font-size:13px;color:var(--rg-color-text-secondary,CanvasText)}
+@media(min-width:720px){.rg-treasure-layout{grid-template-columns:minmax(0,1.1fr) minmax(260px,.9fr)}}

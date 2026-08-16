@@ -66,6 +66,7 @@
 - T091 is implemented: `CoarseGeofenceProofPort` and its adapter compare only bounded geohash cells, reject stale/invalid/overly inaccurate samples, and retain no location history. Signed QR proofs, public-location workflow, and client permission fallback remain T092-T094.
 - T092 is implemented: `HmacQrProofSigner` creates bounded signed tokens, `RedeemQrProof` separates invalid from replayed proofs, and `RedisQrProofReplayStore` atomically claims nonces until expiry without storing raw tokens. Public-location review workflow and client permission fallback remain T093-T094.
 - T093 is implemented: `PublicLocationReview` requires explicit submission before approval, rejects unsafe state transitions, and returns a non-location alternative or unavailable result when permission is denied. Responsive map/list UX and browser integration remain T094.
+- T094 is implemented: the web runtime includes an accessible responsive treasure map/list screen with coarse-zone privacy copy, empty state, permission-denied alternative, and no coordinate rendering. Activation remains manifest-driven; backend hunt listing and browser geolocation wiring remain outside this UI task.
 
 ### P0 — Foundation blockers
 

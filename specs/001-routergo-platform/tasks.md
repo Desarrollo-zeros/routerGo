@@ -81,7 +81,7 @@ Format: `[ID] [P?] [Story] task`. `[P]` means safe parallel ownership in differe
 - [x] T091 [P] [US7] Implement coarse geofence proof adapter with no continuous history.
 - [x] T092 [P] [US7] Implement signed/expiring/replay-resistant QR proof.
 - [x] T093 [US7] Add safe public-location review workflow and permission-denied alternative.
-- [ ] T094 [US7] Responsive map/list experience with privacy notices.
+- [x] T094 [US7] Responsive map/list experience with privacy notices.
 
 ## Phase 10 — Risk, analytics, hardening, beta
 - [ ] T100 Add risk events/scores/review cases for reward/API/ad/battle/treasure abuse.
