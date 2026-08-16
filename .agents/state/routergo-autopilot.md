@@ -1,7 +1,7 @@
 phase: 3
 current_objective: T042
 status: executing
-last_green_commit: b3cfe99
+last_green_commit: 58f8b66
 last_completed_tasks:
   - T020
   - T021
@@ -23,4 +23,4 @@ next_candidates:
   - T042
   - T043
 blocked_tasks: []
-last_validation: T042 partial Studio views pass admin typecheck/build, root line, architecture, and lint gates. The manifest-backed catalog/provider/runtime views are committed; audited publish transport is still required before T042 can close. T043 remains parallel-safe.
+last_validation: T042 partial Studio views and T043 privilege-gated read-only economy/ledger views pass admin typecheck/build, root line, architecture, and lint gates. T042 audited publish transport and T043 real read ports remain open; no task was falsely marked done.
