@@ -3,10 +3,10 @@ export type BudgetUnit = typeof BUDGET_UNITS[number];
 export const BUDGET_SCOPE_TYPES = ['GLOBAL', 'PROVIDER', 'MODEL', 'REWARD', 'AD_FUNDED_COMPUTE'] as const;
 export type BudgetScopeType = typeof BUDGET_SCOPE_TYPES[number];
 
-export class EconomicAmount {
-  private constructor(readonly amount: bigint, readonly unit: BudgetUnit) {}
+export class EconomicAmount<Unit extends BudgetUnit = BudgetUnit> {
+  private constructor(readonly amount: bigint, readonly unit: Unit) {}
 
-  static of(amount: bigint, unit: BudgetUnit): EconomicAmount {
+  static of<Unit extends BudgetUnit>(amount: bigint, unit: Unit): EconomicAmount<Unit> {
     return new EconomicAmount(amount, unit);
   }
 }

@@ -22,8 +22,8 @@ Format: `[ID] [P?] [Story] task`. `[P]` means safe parallel ownership in differe
 
 ## Phase 2 — Economy v2 (blocking for public API/ads)
 - [x] T020 [US1] Add credit reservation/budget/provider-cost/revenue migrations.
-- [ ] T021 [P] [US1] Implement CreditReservation domain state + tests.
-- [ ] T022 [P] [US1] Implement EconomyBudgetPolicy + circuit-breaker specifications.
+- [x] T021 [P] [US1] Implement CreditReservation domain state + tests.
+- [x] T022 [P] [US1] Implement EconomyBudgetPolicy + circuit-breaker specifications.
 - [ ] T023 [US1] Implement `ReserveCredits`, `SettleCredits`, `ReleaseCredits` use cases using UnitOfWork.
 - [ ] T024 [US1] Add concurrency/idempotency tests for reserve+settle+duplicate callbacks.
 - [ ] T025 [US1] Integrate quote/run flow with reserve before provider execution.
