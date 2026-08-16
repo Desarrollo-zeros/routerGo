@@ -32,6 +32,10 @@ import { RetryPolicy } from '../infrastructure/reliability/retry-policy.js';
 import { SystemSleeper } from '../infrastructure/reliability/system-sleeper.js';
 import { ReliabilityExecutor } from '../infrastructure/reliability/reliability-executor.js';
 import { CircuitBreaker } from '../infrastructure/reliability/circuit-breaker.js';
+import { ApiKeyPostgresRepository } from '../infrastructure/adapters/postgres/ApiKeyPostgresRepository.js';
+import { ApiKeyContextPostgresAdapter } from '../infrastructure/adapters/postgres/ApiKeyContextPostgresAdapter.js';
+import { Sha256ApiKeyHasher } from '../infrastructure/security/Sha256ApiKeyHasher.js';
+import { ApiKeyLifecycleUseCase } from '../application/use-cases/ApiKeyLifecycle.js';
 import { ResponsesUseCase } from '../application/use-cases/Responses.js';
 
 const { Pool } = pg;
@@ -65,9 +69,21 @@ export async function createComposition() {
     manifest, catalog: catalogUseCase, models: new ListModelsUseCase(catalogUseCase),
     wallet: new GetWalletUseCase(wallet), economy,
     chatCompletions, responses: new ResponsesUseCase(chatCompletions),
+    authenticateApiKey: createApiKeyAuthenticator(pool),
   });
   const streams = new RedisStreamAdapter(redis as never);
   return { pool, redis, manifest, schemas, useCases, creditOperations, sseDeps: { streams } };
+}
+
+function createApiKeyAuthenticator(pool: pg.Pool) {
+  const lifecycle = new ApiKeyLifecycleUseCase({ repository: new ApiKeyPostgresRepository(pool), hasher: new Sha256ApiKeyHasher(), clock: new SystemClock() });
+  const context = new ApiKeyContextPostgresAdapter(pool);
+  return async (rawKey: string, scope: string) => {
+    const principal = await lifecycle.authenticate(rawKey, scope);
+    const resolved = await context.resolve(principal);
+    if (!resolved) throw new Error('API_KEY_CONTEXT_NOT_FOUND');
+    return resolved;
+  };
 }
 
 function createProvider(clock: SystemClock): HttpProviderAdapter {

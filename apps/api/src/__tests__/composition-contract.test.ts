@@ -34,11 +34,11 @@ describe('composition root contracts', () => {
     );
   });
 
-  it('serves the OpenAI-compatible models list contract', async () => {
+  it('protects the OpenAI-compatible models list contract', async () => {
     const app = await appPromise;
     const response = await app.inject({ method: 'GET', url: '/v1/models' });
-    expect(response.statusCode).toBe(200);
-    expect(response.json()).toMatchObject({ object: 'list', data: expect.arrayContaining([expect.objectContaining({ object: 'model', owned_by: 'routergo' })]) });
+    expect(response.statusCode).toBe(401);
+    expect(response.json()).toEqual({ error: 'authentication_required' });
   });
 
   it('exposes chat completions without allowing unauthenticated execution', async () => {
