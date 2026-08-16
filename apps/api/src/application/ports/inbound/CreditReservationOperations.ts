@@ -17,6 +17,8 @@ export interface ReserveCreditsInput {
   credits: bigint;
   reservationId?: string;
   expiresAt?: Date;
+  quoteId?: string;
+  runId?: string;
 }
 
 export interface SettleCreditsInput {

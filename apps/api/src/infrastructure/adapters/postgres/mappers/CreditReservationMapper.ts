@@ -10,6 +10,8 @@ export interface CreditReservationRow {
   status: CreditReservationSnapshot['status'];
   expires_at: string | Date | null;
   created_at: string | Date;
+  quote_id?: string | null;
+  run_id?: string | null;
 }
 
 export const CreditReservationMapper = {
@@ -24,6 +26,8 @@ export const CreditReservationMapper = {
       status: row.status,
       createdAt: new Date(row.created_at),
       expiresAt: row.expires_at ? new Date(row.expires_at) : undefined,
+      quoteId: row.quote_id ?? undefined,
+      runId: row.run_id ?? undefined,
     });
   },
 };

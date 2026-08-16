@@ -7,6 +7,9 @@ export interface ChatQuoteProps {
   modelId: string;
   tier: string;
   creditPrice: Credits;
+  estimatedPlatformCostMicrousd?: bigint;
+  pricingVersion?: string;
+  maxOutputTokens?: number;
   idempotencyKey: string;
   createdAt: Date;
   expiresAt: Date;
@@ -33,6 +36,18 @@ export class ChatQuote {
 
   get creditPrice(): Credits {
     return this.props.creditPrice;
+  }
+
+  get estimatedPlatformCostMicrousd(): bigint {
+    return this.props.estimatedPlatformCostMicrousd ?? 0n;
+  }
+
+  get pricingVersion(): string {
+    return this.props.pricingVersion ?? 'catalog-v1';
+  }
+
+  get maxOutputTokens(): number {
+    return this.props.maxOutputTokens ?? 4096;
   }
 
   get idempotencyKey(): string {

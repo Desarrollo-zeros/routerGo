@@ -12,6 +12,10 @@ export interface ProviderResponse {
   content: string;
   usage?: { inputTokens: number; outputTokens: number };
   raw: unknown;
+  requestId?: string;
+  deliveryStarted?: boolean;
+  billableUserCredits?: bigint;
+  providerCostMicrousd?: bigint;
 }
 
 export interface ProviderStreamChunk {

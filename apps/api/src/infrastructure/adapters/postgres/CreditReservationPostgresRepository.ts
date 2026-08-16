@@ -22,9 +22,9 @@ export class CreditReservationPostgresRepository implements CreditReservationRep
     const s = reservation.toSnapshot();
     await this.pool.query(
       `INSERT INTO credit_reservations
-       (id,wallet_id,operation_id,reserved_credits,settled_credits,released_credits,status,expires_at,created_at)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
-      [s.reservationId, s.walletId, s.operationId, s.reservedCredits.toString(), s.settledCredits.toString(), s.releasedCredits.toString(), s.status, s.expiresAt ?? null, s.createdAt],
+       (id,wallet_id,operation_id,quote_id,run_id,reserved_credits,settled_credits,released_credits,status,expires_at,created_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
+      [s.reservationId, s.walletId, s.operationId, s.quoteId ?? null, s.runId ?? null, s.reservedCredits.toString(), s.settledCredits.toString(), s.releasedCredits.toString(), s.status, s.expiresAt ?? null, s.createdAt],
     );
   }
 
@@ -43,7 +43,7 @@ export class CreditReservationPostgresRepository implements CreditReservationRep
 
   private async find(where: string, params: string[]): Promise<CreditReservation | null> {
     const result = await this.pool.query<CreditReservationRow>(
-      `SELECT id,wallet_id,operation_id,reserved_credits,settled_credits,released_credits,status,expires_at,created_at
+      `SELECT id,wallet_id,operation_id,quote_id,run_id,reserved_credits,settled_credits,released_credits,status,expires_at,created_at
        FROM credit_reservations ${where}`,
       params,
     );

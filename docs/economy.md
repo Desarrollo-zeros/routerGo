@@ -43,11 +43,21 @@ history as a substitute for a correction event.
 
 ## Future flow
 
-The intended application sequence is `QUOTE -> RESERVE -> EXECUTE -> SETTLE ->
-RELEASE/REFUND`. T021 defines the reservation lifecycle, T022 defines the
-budget circuit policy, and T023 coordinates user-credit state changes with a
-transactional unit of work. T025 will connect this foundation to quote/run
-execution and any independent platform-cost budget decision.
+The implemented application sequence is `QUOTE -> budget gate -> RESERVE ->
+EXECUTE -> SETTLE -> RELEASE/REFUND`. T025 evaluates the selected model budget
+before reserving, claims the run in a short PostgreSQL transaction, commits the
+GoCredit reservation before calling the provider, and never holds a database
+transaction across the provider network call. Quote snapshots retain the
+pricing version and estimated platform cost; run snapshots retain the
+reservation, provider request, token usage, and known provider cost.
+
+Provider failure before delivery releases the full reservation. A billable
+partial failure settles the declared actual amount and releases the remainder.
+If usage exceeds the reservation, delivery occurred without billable usage, or
+settlement/release fails, the run is marked `RECONCILIATION_REQUIRED` and the
+reservation remains discoverable for T026. Duplicate idempotency claims use
+the PostgreSQL unique constraint, so the provider call is attempted at most
+once per run.
 
 ## Domain policy boundaries
 
@@ -100,9 +110,10 @@ stored result without another economic effect.
 
 T023 intentionally does not evaluate `EconomyBudgetPolicy`: it moves user
 GoCredits, while platform cost is a separate `USD_MICRO` concern and no
-conversion exists. Quote/run integration and any durable platform-budget
-commitment belong to T025/T026 according to their later acceptance criteria.
-Caller authentication and wallet ownership remain API-boundary concerns.
+conversion exists. T025 performs a pre-execution budget check using actual
+provider-cost history, but does not create a durable platform-cost commitment;
+that reservation/reconciliation job belongs to T026. Caller authentication
+and wallet ownership remain API-boundary concerns.
 
 ## Concurrency & Idempotency Guarantees
 

@@ -11,6 +11,8 @@ export interface CreditReservationCreateInput {
   reservedCredits: bigint;
   createdAt: Date;
   expiresAt?: Date;
+  quoteId?: string;
+  runId?: string;
 }
 
 export interface CreditReservationSnapshot extends CreditReservationCreateInput {
@@ -18,7 +20,6 @@ export interface CreditReservationSnapshot extends CreditReservationCreateInput 
   releasedCredits: bigint;
   status: ReservationStatus;
 }
-
 interface ReservationState {
   reservationId: string;
   walletId: string;
@@ -29,8 +30,9 @@ interface ReservationState {
   status: ReservationStatus;
   createdAt: Date;
   expiresAt?: Date;
+  quoteId?: string;
+  runId?: string;
 }
-
 export class CreditReservation {
   private constructor(private readonly state: ReservationState) {}
 
@@ -41,9 +43,9 @@ export class CreditReservation {
       reservationId: input.reservationId, walletId: input.walletId, operationId: input.operationId, reserved,
       settled: nonNegativeCredits(0n), released: nonNegativeCredits(0n), status: 'RESERVED',
       createdAt: cloneDate(input.createdAt), expiresAt: cloneOptionalDate(input.expiresAt),
+      quoteId: input.quoteId, runId: input.runId,
     });
   }
-
   static rehydrate(input: CreditReservationSnapshot): CreditReservation {
     validateIdentifiers(input);
     if (!RESERVATION_STATUSES.includes(input.status)) {
@@ -54,11 +56,11 @@ export class CreditReservation {
       reserved: positiveCredits(input.reservedCredits), settled: nonNegativeCredits(input.settledCredits),
       released: nonNegativeCredits(input.releasedCredits), status: input.status,
       createdAt: cloneDate(input.createdAt), expiresAt: cloneOptionalDate(input.expiresAt),
+      quoteId: input.quoteId, runId: input.runId,
     });
     reservation.assertState();
     return reservation;
   }
-
   get reservationId(): string { return this.state.reservationId; }
   get walletId(): string { return this.state.walletId; }
   get operationId(): string { return this.state.operationId; }
@@ -68,11 +70,11 @@ export class CreditReservation {
   get status(): ReservationStatus { return this.state.status; }
   get createdAt(): Date { return cloneDate(this.state.createdAt); }
   get expiresAt(): Date | undefined { return cloneOptionalDate(this.state.expiresAt); }
-
+  get quoteId(): string | undefined { return this.state.quoteId; }
+  get runId(): string | undefined { return this.state.runId; }
   get remainingCredits(): Credits {
     return this.state.reserved.subtract(this.state.settled).subtract(this.state.released);
   }
-
   settle(amount: CreditInput): void {
     this.assertStatus('RESERVED');
     const credits = normalizeAmount(amount, 'INVALID_SETTLEMENT', 'Settlement must be positive');
@@ -90,7 +92,6 @@ export class CreditReservation {
     this.state.released = this.state.released.add(credits);
     if (this.remainingCredits.isZero()) this.state.status = 'RELEASED';
   }
-
   expire(now: Date): void {
     this.assertStatus('RESERVED');
     if (!this.state.expiresAt || now < this.state.expiresAt) {
@@ -106,7 +107,6 @@ export class CreditReservation {
     }
     this.state.status = 'CANCELLED';
   }
-
   toSnapshot(): CreditReservationSnapshot {
     return {
       reservationId: this.reservationId,
@@ -118,9 +118,9 @@ export class CreditReservation {
       status: this.status,
       createdAt: this.createdAt,
       expiresAt: this.expiresAt,
+      quoteId: this.quoteId, runId: this.runId,
     };
   }
-
   private assertWithinRemaining(amount: Credits, code: 'INVALID_SETTLEMENT' | 'INVALID_RELEASE'): void {
     if (amount.gt(this.remainingCredits)) {
       throw new CreditReservationError(code, 'Amount exceeds remaining reserved credits');

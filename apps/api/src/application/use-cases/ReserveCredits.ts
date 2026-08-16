@@ -45,6 +45,8 @@ export class ReserveCreditsUseCase implements ReserveCreditsPort {
       reservedCredits: input.credits,
       createdAt: this.clock.now(),
       expiresAt: input.expiresAt,
+      quoteId: input.quoteId,
+      runId: input.runId,
     });
     wallet.debit(amount);
     await scope.wallets.save(wallet);
