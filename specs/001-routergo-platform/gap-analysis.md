@@ -68,7 +68,8 @@
 - T093 is implemented: `PublicLocationReview` requires explicit submission before approval, rejects unsafe state transitions, and returns a non-location alternative or unavailable result when permission is denied. Responsive map/list UX and browser integration remain T094.
 - T094 is implemented: the web runtime includes an accessible responsive treasure map/list screen with coarse-zone privacy copy, empty state, permission-denied alternative, and no coordinate rendering. Activation remains manifest-driven; backend hunt listing and browser geolocation wiring remain outside this UI task.
 - T100 is implemented: migration `017_risk_events.sql` adds idempotent cross-context abuse events, bounded user scores, and review cases; `RiskSignalPolicy` maps duplicate/replay/velocity/severity signals to normal/review/blocked actions without role-name or raw-payload decisions. Risk ingestion orchestration, dashboards, and analyst workflows remain T102-T106.
-- T101 is implemented: the economy read model now derives finalized revenue, provider cost, infrastructure cost, contribution, and current wallet-based reward liability; the admin UI exposes the measures with explicit USD micro-unit versus GoCredit labels. Risk/analytics dashboards beyond unit economics remain T102-T106.
+- T101 is implemented: the economy read model now derives finalized revenue, provider cost, infrastructure cost, contribution, and current wallet-based reward liability; the admin UI exposes the measures with explicit USD micro-unit versus GoCredit labels. Risk/analytics dashboards beyond unit economics remain T103-T106.
+- T102 is implemented: `ProviderAnalyticsSource` supplies explicit health, quota usage, and cost signals; `GetProviderAnalyticsUseCase` evaluates bounded quota alerts with health-failure precedence. No fake health is inferred from gateway configuration; concrete probes and operator alert delivery remain follow-up hardening.
 
 ### P0 — Foundation blockers
 

@@ -64,6 +64,7 @@ hooks remain T054-T055.
 - `battle_matches`, `battle_players`, `battle_rounds`, `battle_answers`, `battle_results`
 - `treasure_hunts(owner_organization_id,status,public_location_reviewed)`, `treasure_steps(sequence,proof_type,coarse_geohash,radius_meters)`, `treasure_qr_tokens(token_hash,expires_at,consumed_at)`, `treasure_progress(hunt_id,user_id,current_sequence,status)`
 - `risk_events(subject_user_id,category,event_key,severity,signal_json)`, `risk_scores(subject_user_id,score,action,policy_version)`, `review_cases(subject_user_id,risk_event_id,status,reason)`
+- Provider analytics is a read contract over explicit health probes, quota-window usage, and fixed-precision provider costs. Health is not inferred from a gateway's enabled flag; alert evaluation remains pure and deny-safe.
 
 Battle scores are server-owned integers. Answer rows store hashes and a unique
 `battle_id + round_number + user_id` key, so clients cannot submit duplicate
