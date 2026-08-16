@@ -90,7 +90,7 @@ Format: `[ID] [P?] [Story] task`. `[P]` means safe parallel ownership in differe
 - [x] T103 Load-test critical API/realtime paths and enforce performance budgets.
 - [x] T104 Run WCAG/responsive/security/secrets/provider-contract regression suite.
 - [ ] T105 Execute staged beta with feature flags, economy kill switches, and rollback drills.
-- [ ] T106 Run Spec Kit-style analyze/converge; append all discovered gaps before declaring Rev.7 complete.
+- [x] T106 Run Spec Kit-style analyze/converge; append all discovered gaps before declaring Rev.7 complete.
 
 ## Dependency order
 T001-T005 -> T010-T015 -> T020-T026. Then Phases 3, 4 and 5 can proceed in parallel. Phase 6 requires economy + Studio foundation. Phase 7 requires routing + Studio. Battles/Treasure require identity/reward foundation. Phase 10 integrates all selected beta capabilities.
