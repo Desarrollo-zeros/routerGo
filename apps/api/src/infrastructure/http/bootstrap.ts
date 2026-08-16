@@ -9,6 +9,7 @@ import { ExecuteQuotedRunError } from '../../application/errors/ExecuteQuotedRun
 import { ApiQuotaExceededError } from '../../application/use-cases/ChatCompletions.js';
 import { PrivilegedChangeError } from '../../application/errors/PrivilegedChangeError.js';
 import { AuthorizationDeniedError } from '../../application/errors/AuthorizationDeniedError.js';
+import { registerBattleGateway, type BattleGatewayDeps } from './battle-websocket.js';
 
 export interface BootstrapDeps {
   manifest: RuntimeManifest;
@@ -16,6 +17,7 @@ export interface BootstrapDeps {
   schemas: SchemaRegistry;
   sseDeps: SseDeps;
   trustProxy?: boolean | string | number;
+  battleGateway?: BattleGatewayDeps;
 }
 
 export function toWebManifest(m: RuntimeManifest): Record<string, unknown> {
@@ -64,6 +66,7 @@ export function buildApp(deps: BootstrapDeps): ReturnType<typeof Fastify> {
     .filter((r) => r.enabled)
     .filter((r) => !reserved.some((p) => r.path_template === p));
   if (filtered.length > 0) registry.register(app, filtered);
+  if (deps.battleGateway) registerBattleGateway(app, deps.battleGateway);
 
   return app;
 }

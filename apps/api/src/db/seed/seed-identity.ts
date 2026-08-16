@@ -24,13 +24,14 @@ const PERMISSION_DESCRIPTIONS: Record<PermissionKey, string> = {
   'challenges.read': 'Read challenge definitions',
   'challenges.manage': 'Create and submit challenge definitions',
   'challenges.publish': 'Approve and publish challenge versions',
+  'battles.play': 'Join realtime battles',
   'audit.read': 'Read audit records',
 };
 
 const PERMISSIONS: Permission[] = PERMISSION_KEYS.map((key) => ({ key, description: PERMISSION_DESCRIPTIONS[key] }));
 
 const ROLES: Role[] = [
-  { id: 'role-user', key: 'USER', name: 'User', permissions: ['wallet.read', 'models.read'] },
+  { id: 'role-user', key: 'USER', name: 'User', permissions: ['wallet.read', 'models.read', 'battles.play'] },
   {
     id: 'role-owner', key: 'OWNER', name: 'Organization Owner',
     permissions: ['users.read', 'wallet.read', 'runtime.read', 'models.read', 'campaigns.read', 'campaigns.manage', 'challenges.read', 'challenges.manage', 'challenges.publish'],

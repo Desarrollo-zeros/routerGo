@@ -18,6 +18,7 @@ export const PERMISSION_KEYS = [
   'challenges.read',
   'challenges.manage',
   'challenges.publish',
+  'battles.play',
   'audit.read',
 ] as const;
 

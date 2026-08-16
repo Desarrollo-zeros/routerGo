@@ -53,6 +53,7 @@ import { PostgresAdvertiserRepository } from '../infrastructure/adapters/postgre
 import { GetAdvertiserAccount, ListAdvertiserCampaigns, ListAdvertiserCreatives, GetAdvertiserAnalytics, CreateAdvertiserCampaign, CreateAdvertiserCreative, SubmitAdvertiserCampaign } from '../application/use-cases/AdvertiserUseCases.js';
 import { PostgresChallengeAdminRepository } from '../infrastructure/adapters/postgres/PostgresChallengeAdminRepository.js';
 import { ApproveChallenge, CreateChallenge, ListChallenges, SubmitChallenge } from '../application/use-cases/ChallengeAdminUseCases.js';
+import { RedisBattleStateStore } from '../infrastructure/adapters/redis/RedisBattleStateStore.js';
 
 const { Pool } = pg;
 
@@ -78,23 +79,23 @@ export async function createComposition() {
   });
   const quota = new CheckApiQuotaUseCase({ policies: new ApiQuotaPostgresRepository(pool), counter: new RedisApiQuotaCounter(redis) });
   const chatCompletions = new ChatCompletionsUseCase({ createQuote, executeRun, clock: economyClock, quota });
-  const providerAnalytics = new GetProviderAnalyticsUseCase(
-    new PostgresProviderAnalyticsSource(pool, new HttpProviderHealthProbe()),
-    new PostgresProviderAnalyticsAlertSink(pool),
-  );
+  const providerAnalytics = createProviderAnalytics(pool);
   const runtimeManifest = createRuntimeManifestUseCases(pool, redis); const authorizePermission = new AuthorizePermissionUseCase(new PostgresAuthorizationGrantReader(pool));
+  const identity = createIdentityDependencies(pool);
   const useCases = createUseCaseRegistry({
     manifest, catalog: catalogUseCase, models: new ListModelsUseCase(catalogUseCase),
     wallet: new GetWalletUseCase(wallet), economy,
     chatCompletions, responses: new ResponsesUseCase(chatCompletions),
-    authenticateApiKey: createApiKeyAuthenticator(pool),
-    resolveApiKeyIdentity: new PostgresApiKeyIdentityResolver(pool), authorizePermission,
+    authenticateApiKey: identity.authenticateApiKey, resolveApiKeyIdentity: identity.resolveApiKeyIdentity, authorizePermission,
     publishRuntime: runtimeManifest.publish, rollbackRuntime: runtimeManifest.rollback,
     ledger: new GetLedgerUseCase(new PostgresAdminLedgerReader(pool)),
     advertiser: createAdvertiserHandlers(pool),
     challenges: createChallengeHandlers(pool),
   });
-  const streams = new RedisStreamAdapter(redis as never); return { pool, redis, manifest, schemas, useCases, creditOperations, providerAnalytics, sseDeps: { streams } };
+  const streams = new RedisStreamAdapter(redis as never); return {
+    pool, redis, manifest, schemas, useCases, creditOperations, providerAnalytics, sseDeps: { streams },
+    battleGateway: { store: new RedisBattleStateStore(redis), authenticateApiKey: identity.authenticateApiKey, identity: identity.resolveApiKeyIdentity, authorize: authorizePermission },
+  };
 }
 
 function createAdvertiserHandlers(pool: pg.Pool) {
@@ -125,6 +126,17 @@ function createApiKeyAuthenticator(pool: pg.Pool) {
     if (!resolved) throw new Error('API_KEY_CONTEXT_NOT_FOUND');
     return resolved;
   };
+}
+
+function createIdentityDependencies(pool: pg.Pool) {
+  return { authenticateApiKey: createApiKeyAuthenticator(pool), resolveApiKeyIdentity: new PostgresApiKeyIdentityResolver(pool) };
+}
+
+function createProviderAnalytics(pool: pg.Pool): GetProviderAnalyticsUseCase {
+  return new GetProviderAnalyticsUseCase(
+    new PostgresProviderAnalyticsSource(pool, new HttpProviderHealthProbe()),
+    new PostgresProviderAnalyticsAlertSink(pool),
+  );
 }
 
 function createProvider(clock: SystemClock): HttpProviderAdapter {
@@ -181,5 +193,5 @@ async function queryRewardLiability(pool: pg.Pool): Promise<number> {
 }
 
 export function buildCompositionApp(deps: Awaited<ReturnType<typeof createComposition>>) {
-  return buildApp({ manifest: deps.manifest, useCases: deps.useCases, schemas: deps.schemas, sseDeps: deps.sseDeps });
+  return buildApp({ manifest: deps.manifest, useCases: deps.useCases, schemas: deps.schemas, sseDeps: deps.sseDeps, battleGateway: deps.battleGateway });
 }

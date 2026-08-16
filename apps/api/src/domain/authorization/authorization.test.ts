@@ -128,7 +128,7 @@ describe('AuthorizationPolicy', () => {
   });
 
   it('keeps the seeded permission vocabulary explicit', () => {
-    expect(PERMISSION_KEYS).toHaveLength(20);
+    expect(PERMISSION_KEYS).toHaveLength(21);
     expect(PERMISSION_KEYS).not.toContain('*');
     expect(PERMISSION_KEYS).not.toContain('admin.*');
   });

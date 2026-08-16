@@ -1,7 +1,7 @@
 import type Redis from 'ioredis';
-import type { BattleState, BattleStateStore } from '../../../application/ports/outbound/BattleStateStore.js';
+import type { BattleMatchmakingStore, BattleState, BattleStateStore } from '../../../application/ports/outbound/BattleStateStore.js';
 
-export class RedisBattleStateStore implements BattleStateStore {
+export class RedisBattleStateStore implements BattleMatchmakingStore {
   constructor(private readonly redis: Redis) {}
 
   async save(state: BattleState, ttlSeconds: number): Promise<void> {
@@ -16,6 +16,21 @@ export class RedisBattleStateStore implements BattleStateStore {
 
   async remove(battleId: string): Promise<void> {
     await this.redis.del(key(battleId));
+  }
+
+  async create(input: { id: string; category: string; maxPlayers: number }): Promise<BattleState> {
+    if (!Number.isInteger(input.maxPlayers) || input.maxPlayers < 2 || input.maxPlayers > 8) throw new Error('BATTLE_CONFIG_INVALID');
+    const state: BattleState = { id: input.id, category: input.category, maxPlayers: input.maxPlayers, status: 'WAITING', players: [], currentRound: 0 };
+    await this.save(state, 300);
+    return state;
+  }
+
+  async join(battleId: string, userId: string): Promise<BattleState> {
+    if (!userId) throw new Error('BATTLE_USER_INVALID');
+    const redisKey = key(battleId);
+    const result = await this.redis.eval(JOIN_SCRIPT, 1, redisKey, userId, 300) as string;
+    if (result === 'BATTLE_NOT_FOUND' || result === 'BATTLE_NOT_JOINABLE') throw new Error(result);
+    return parseState(result);
   }
 }
 
@@ -33,13 +48,21 @@ function isBattleState(value: unknown): value is BattleState {
   if (!value || typeof value !== 'object') return false;
   const state = value as Record<string, unknown>;
   const statuses = ['WAITING', 'ACTIVE', 'COMPLETED', 'CANCELLED'];
-  return typeof state.id === 'string'
-    && typeof state.category === 'string'
-    && typeof state.status === 'string'
-    && statuses.includes(state.status)
+  return hasBattleIdentity(state) && hasBattleStatus(state, statuses) && hasBattlePlayers(state);
+}
+
+function hasBattleIdentity(state: Record<string, unknown>): boolean {
+  return typeof state.id === 'string' && typeof state.category === 'string';
+}
+
+function hasBattleStatus(state: Record<string, unknown>, statuses: string[]): boolean {
+  return typeof state.status === 'string' && statuses.includes(state.status)
     && Number.isInteger(state.currentRound)
-    && Array.isArray(state.players)
-    && state.players.every(isBattlePlayer);
+    && (state.maxPlayers === undefined || Number.isInteger(state.maxPlayers));
+}
+
+function hasBattlePlayers(state: Record<string, unknown>): boolean {
+  return Array.isArray(state.players) && state.players.every(isBattlePlayer);
 }
 
 function isBattlePlayer(value: unknown): boolean {
@@ -50,3 +73,18 @@ function isBattlePlayer(value: unknown): boolean {
     && Number.isInteger(player.score)
     && player.score >= 0;
 }
+
+const JOIN_SCRIPT = `
+local raw = redis.call('GET', KEYS[1])
+if not raw then return 'BATTLE_NOT_FOUND' end
+local state = cjson.decode(raw)
+for _, player in ipairs(state.players) do
+  if player.userId == ARGV[1] then return raw end
+end
+local maxPlayers = state.maxPlayers or 8
+if state.status ~= 'WAITING' or #state.players >= maxPlayers then return 'BATTLE_NOT_JOINABLE' end
+table.insert(state.players, { userId = ARGV[1], score = 0 })
+local next = cjson.encode(state)
+redis.call('SET', KEYS[1], next, 'EX', ARGV[2])
+return next
+`;
