@@ -1,7 +1,7 @@
 phase: 3
-current_objective: T040
+current_objective: T041
 status: executing
-last_green_commit: c8f1f09
+last_green_commit: de62cec
 last_completed_tasks:
   - T020
   - T021
@@ -17,7 +17,10 @@ last_completed_tasks:
   - T034
   - T035
   - T036
-next_candidates:
   - T040
+next_candidates:
+  - T041
+  - T042
+  - T043
 blocked_tasks: []
-last_validation: T036 Developer API authentication, scope errors, quota preflight, stream reliability, typecheck, lint, lines, architecture, secrets, 41 API suites/222 tests, web tests, build, E2E 7/7, and Docker health pass against routergo_t035. T040 is next by dependency order.
+last_validation: T040 admin composition passes frozen install, root/admin typecheck, lint, line, architecture, secrets, 41 API suites/222 tests, web tests, and admin/root builds. T041, T042, and T043 are parallel-safe next candidates.
