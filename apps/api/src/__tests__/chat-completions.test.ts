@@ -1,14 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { ChatCompletionsError, ChatCompletionsUseCase } from '../application/use-cases/ChatCompletions';
+import { ApiQuotaExceededError, ChatCompletionsError, ChatCompletionsUseCase } from '../application/use-cases/ChatCompletions';
 
 const clock = { now: () => new Date('2030-01-01T00:00:00Z') };
 
-function create() {
+function create(quota?: { check: () => Promise<{ allowed: boolean; reason: 'CREDITS_EXCEEDED'; retryAfterMs: number }> }) {
   const calls: string[] = [];
   const useCase = new ChatCompletionsUseCase({
     clock,
     createQuote: { execute: async (input) => { calls.push(`quote:${input.modelId}`); return { quoteId: 'quote-1', creditPrice: '2', expiresAt: '2030-01-01T00:05:00Z', reused: false }; } },
     executeRun: { execute: async (input) => { calls.push(`run:${input.quoteId}`); return { runId: 'run-1', status: 'COMPLETED', economyStatus: 'SETTLED', content: 'hello world', actualUserCredits: 2n, providerRequestId: 'provider-1', reused: false }; } },
+    quota,
   });
   return { calls, useCase };
 }
@@ -29,5 +30,10 @@ describe('chat completions application boundary', () => {
   it('rejects empty requests before economic operations', async () => {
     const { useCase } = create();
     await expect(useCase.execute({ userId: 'u', walletId: 'w', model: 'm', messages: [], idempotencyKey: 'k' })).rejects.toBeInstanceOf(ChatCompletionsError);
+  });
+
+  it('returns a typed quota decision before execution', async () => {
+    const { useCase } = create({ check: async () => ({ allowed: false, reason: 'CREDITS_EXCEEDED', retryAfterMs: 60000 }) });
+    await expect(useCase.execute({ userId: 'u', walletId: 'w', clientId: 'c', apiKeyId: 'k', model: 'm', messages: [{ role: 'user', content: 'x' }], idempotencyKey: 'k' })).rejects.toBeInstanceOf(ApiQuotaExceededError);
   });
 });

@@ -9,6 +9,8 @@ export interface ChatCompletionsInput {
   model: string;
   messages: ChatCompletionMessage[];
   idempotencyKey: string;
+  clientId?: string;
+  apiKeyId?: string;
   maxTokens?: number;
   temperature?: number;
   stream?: boolean;

@@ -6,6 +6,7 @@ import { sseHandler, type SseDeps } from './sse-handler.js';
 import { AuthenticationRequiredError, RouteNotReadyError } from './http-errors.js';
 import { ApiKeyLifecycleError } from '../../application/use-cases/ApiKeyLifecycle.js';
 import { ExecuteQuotedRunError } from '../../application/errors/ExecuteQuotedRunError.js';
+import { ApiQuotaExceededError } from '../../application/use-cases/ChatCompletions.js';
 
 export interface BootstrapDeps {
   manifest: RuntimeManifest;
@@ -50,6 +51,7 @@ export function buildApp(deps: BootstrapDeps): ReturnType<typeof Fastify> {
     if (error instanceof ApiKeyLifecycleError) return reply.code(apiKeyStatus(error.code)).send({ error: apiKeyError(error.code) });
     if (error instanceof Error && error.message === 'API_KEY_CONTEXT_NOT_FOUND') return reply.code(401).send({ error: 'authentication_required' });
     if (error instanceof ExecuteQuotedRunError) return reply.code(runErrorStatus(error.code)).send({ error: runErrorName(error.code) });
+    if (error instanceof ApiQuotaExceededError) return reply.code(429).header('retry-after-ms', error.retryAfterMs).send({ error: error.reason.toLowerCase() });
     if (error instanceof RouteNotReadyError) return reply.code(501).send({ error: 'route_not_ready' });
     return reply.send(error);
   });

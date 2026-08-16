@@ -14,5 +14,8 @@ through the run result for accounting and the OpenAI-compatible response.
 `POST /v1/responses` reuses the same accounting boundary and supports provider
 SSE delivery for `stream=true`; `/v1/chat/completions` remains non-streaming in
 this compatibility subset. A request without an authenticated API-key context
-returns `401`; transport key validation, revocation, quota errors, and richer
-error contracts remain T036.
+returns `401`. Keys are resolved by hash, checked for active/revoked/expired
+state and required scope, then mapped to the client wallet context used by the
+economic flow. Layered client/key/model quotas run before provider execution;
+denied requests return `429` with a bounded `retry-after-ms` value. Stream
+disconnects preserve the no-retry-after-visible-chunk reliability boundary.

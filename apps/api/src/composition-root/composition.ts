@@ -36,6 +36,9 @@ import { ApiKeyPostgresRepository } from '../infrastructure/adapters/postgres/Ap
 import { ApiKeyContextPostgresAdapter } from '../infrastructure/adapters/postgres/ApiKeyContextPostgresAdapter.js';
 import { Sha256ApiKeyHasher } from '../infrastructure/security/Sha256ApiKeyHasher.js';
 import { ApiKeyLifecycleUseCase } from '../application/use-cases/ApiKeyLifecycle.js';
+import { ApiQuotaPostgresRepository } from '../infrastructure/adapters/postgres/ApiQuotaPostgresRepository.js';
+import { RedisApiQuotaCounter } from '../infrastructure/adapters/redis/RedisApiQuotaCounter.js';
+import { CheckApiQuotaUseCase } from '../application/use-cases/CheckApiQuota.js';
 import { ResponsesUseCase } from '../application/use-cases/Responses.js';
 
 const { Pool } = pg;
@@ -64,7 +67,8 @@ export async function createComposition() {
     uowFactory: unitOfWork, creditOperations, budget: new PostgresBudgetEvaluator(pool),
     provider, target, pricing: new QuoteUsagePricing(), clock: economyClock,
   });
-  const chatCompletions = new ChatCompletionsUseCase({ createQuote, executeRun, clock: economyClock });
+  const quota = new CheckApiQuotaUseCase({ policies: new ApiQuotaPostgresRepository(pool), counter: new RedisApiQuotaCounter(redis) });
+  const chatCompletions = new ChatCompletionsUseCase({ createQuote, executeRun, clock: economyClock, quota });
   const useCases = createUseCaseRegistry({
     manifest, catalog: catalogUseCase, models: new ListModelsUseCase(catalogUseCase),
     wallet: new GetWalletUseCase(wallet), economy,

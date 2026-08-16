@@ -64,7 +64,7 @@ async function readChatInput(req: unknown, authenticateApiKey: RegistryDeps['aut
   const key = request.headers?.['idempotency-key'];
   if (typeof userId !== 'string' || typeof walletId !== 'string' || typeof key !== 'string') throw new AuthenticationRequiredError();
   const body = request.body ?? {};
-  return { userId, walletId, idempotencyKey: key, model: String(body.model ?? ''), messages: body.messages as ChatCompletionMessage[], maxTokens: body.max_tokens as number | undefined, temperature: body.temperature as number | undefined, stream: body.stream as boolean | undefined };
+  return { userId, walletId, clientId: context.clientId, apiKeyId: context.keyId, idempotencyKey: key, model: String(body.model ?? ''), messages: body.messages as ChatCompletionMessage[], maxTokens: body.max_tokens as number | undefined, temperature: body.temperature as number | undefined, stream: body.stream as boolean | undefined };
 }
 
 async function readResponsesInput(req: unknown, authenticateApiKey: RegistryDeps['authenticateApiKey'], reply: unknown) {
@@ -78,7 +78,7 @@ async function readResponsesInput(req: unknown, authenticateApiKey: RegistryDeps
   const stream = body.stream as boolean | undefined;
   const response = reply as { raw?: { writeHead?: (status: number, headers: Record<string, string>) => void; write?: (data: string) => void; end?: () => void } };
   const onChunk = stream ? createSseWriter(response) : undefined;
-  return { userId, walletId, idempotencyKey: key, model: String(body.model ?? ''), input: body.input as string | ChatCompletionMessage[], maxOutputTokens: body.max_output_tokens as number | undefined, stream, onChunk };
+  return { userId, walletId, clientId: context.clientId, apiKeyId: context.keyId, idempotencyKey: key, model: String(body.model ?? ''), input: body.input as string | ChatCompletionMessage[], maxOutputTokens: body.max_output_tokens as number | undefined, stream, onChunk };
 }
 
 function bearerToken(req: unknown): string {

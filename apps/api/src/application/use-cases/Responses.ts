@@ -11,6 +11,8 @@ export class ResponsesUseCase implements ResponsesPort {
       model: input.model,
       messages: normalizeInput(input.input),
       idempotencyKey: input.idempotencyKey,
+      clientId: input.clientId,
+      apiKeyId: input.apiKeyId,
       maxTokens: input.maxOutputTokens,
       stream: input.stream,
       onChunk: input.onChunk,

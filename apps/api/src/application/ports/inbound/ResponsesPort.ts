@@ -4,6 +4,8 @@ export interface ResponsesInput {
   model: string;
   input: string | Array<{ role: 'system' | 'user' | 'assistant'; content: string }>;
   idempotencyKey: string;
+  clientId?: string;
+  apiKeyId?: string;
   maxOutputTokens?: number;
   stream?: boolean;
   onChunk?: (chunk: { delta: string; done: boolean }) => void;

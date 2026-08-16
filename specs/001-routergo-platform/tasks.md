@@ -36,7 +36,7 @@ Format: `[ID] [P?] [Story] task`. `[P]` means safe parallel ownership in differe
 - [x] T033 [US2] Implement `/v1/models` contract.
 - [x] T034 [US2] Implement `/v1/chat/completions` supported compatibility subset.
 - [x] T035 [US2] Implement `/v1/responses` supported compatibility subset + SSE.
-- [ ] T036 [US2] Contract-test errors, revocation, rate limits, budget exhaustion, stream disconnect.
+- [x] T036 [US2] Contract-test errors, revocation, rate limits, budget exhaustion, stream disconnect.
 
 ## Phase 4 — RouterGo Studio + CMS
 - [ ] T040 [US3] Create `apps/admin` composition and shared accessible UI primitives.
