@@ -9,6 +9,7 @@ import type { UsagePricingPort } from '../ports/outbound/UsagePricingPort';
 import type { ExecuteQuotedRunInput, ExecuteQuotedRunOutput, ExecuteQuotedRunPort } from '../ports/inbound/ExecuteQuotedRunPort';
 import { EconomyOperationError } from '../errors/EconomyOperationError';
 import { ExecuteQuotedRunError, ProviderExecutionError, type ProviderFailureOutcome } from '../errors/ExecuteQuotedRunError';
+import { ExecuteFreeRun } from '../services/ExecuteFreeRun';
 import type { ReserveCreditsPort, SettleCreditsPort, ReleaseCreditsPort, ReserveCreditsInput, SettleCreditsInput, ReleaseCreditsInput, CreditReservationResult } from '../ports/inbound/CreditReservationOperations';
 type CreditOperation =
   | { kind: 'reserve'; input: ReserveCreditsInput }
@@ -26,8 +27,10 @@ export interface ExecuteQuotedRunDependencies {
 }
 export class ExecuteQuotedRunUseCase implements ExecuteQuotedRunPort {
   private readonly idGenerator: () => string;
+  private readonly freeRun: ExecuteFreeRun;
   constructor(private readonly dependencies: ExecuteQuotedRunDependencies) {
     this.idGenerator = dependencies.idGenerator ?? nanoid;
+    this.freeRun = new ExecuteFreeRun(dependencies.uowFactory, dependencies.provider);
   }
 
   private get uowFactory(): UnitOfWorkFactory { return this.dependencies.uowFactory; }
@@ -49,6 +52,7 @@ export class ExecuteQuotedRunUseCase implements ExecuteQuotedRunPort {
     const claimed = await this.claimRun(input, quote);
     input.onRunCreated?.(claimed.run.id);
     if (!claimed.created) return this.reused(claimed.run);
+    if (quote.creditPrice.isZero()) return this.freeRun.execute(input, claimed.run.id, model);
     let reservation: CreditReservationResult;
     try {
       reservation = await this.reserve(input, quote, claimed.run);

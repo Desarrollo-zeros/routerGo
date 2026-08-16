@@ -115,8 +115,9 @@ function quote(expiresAt = new Date(now.getTime() + 60_000)): ChatQuote {
   return ChatQuote.create(props);
 }
 
-function setup(allowed = true) {
-  const quotes = new MemoryQuotes(new Map([['quote-1', quote()]]));
+function setup(allowed = true, free = false) {
+  const currentQuote = free ? ChatQuote.create({ ...quote().toProps(), tier: 'FREE', creditPrice: Credits.zero() }) : quote();
+  const quotes = new MemoryQuotes(new Map([['quote-1', currentQuote]]));
   const runs = new MemoryRuns();
   const credits = new FakeCredits();
   const provider = new FakeProvider();
@@ -138,6 +139,15 @@ describe('ExecuteQuotedRunUseCase', () => {
     expect(context.credits.settled).toBe(72n);
     expect(context.credits.released).toBe(28n);
     expect(context.runs.values.get('run-1')?.providerRequestId).toBe('provider-1');
+  });
+
+  it('executes a zero-credit model without creating a reservation', async () => {
+    const context = setup(true, true);
+    const result = await context.useCase.execute({ userId: 'user-1', quoteId: 'quote-1', idempotencyKey: 'run-key', messages: [{ role: 'user', content: 'hi' }] });
+    expect(result).toMatchObject({ status: 'COMPLETED', economyStatus: 'UNRESERVED', actualUserCredits: 0n });
+    expect(context.provider.calls).toBe(1);
+    expect(context.credits.reserved).toBe(0n);
+    expect(context.runs.values.get('run-1')?.economyStatus).toBe('UNRESERVED');
   });
 
   it('does not call provider when the budget denies', async () => {

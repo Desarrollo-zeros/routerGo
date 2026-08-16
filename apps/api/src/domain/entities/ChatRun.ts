@@ -60,9 +60,9 @@ export class ChatRun {
     return this.props.status === 'FAILED' || this.props.status === 'PENDING';
   }
 
-  markRunning(): void {
+  markRunning(economyStatus: 'RESERVED' | 'UNRESERVED' = 'RESERVED'): void {
     this.props.status = 'RUNNING';
-    this.props.economyStatus = 'RESERVED';
+    this.props.economyStatus = economyStatus;
     this.props.updatedAt = new Date();
   }
 
