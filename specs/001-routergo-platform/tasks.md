@@ -88,7 +88,7 @@ Format: `[ID] [P?] [Story] task`. `[P]` means safe parallel ownership in differe
 - [x] T101 [P] Build unit-economics dashboard: revenue, cost, contribution, reward liability.
 - [x] T102 [P] Add provider health/quota/cost routing analytics and alerts.
 - [x] T103 Load-test critical API/realtime paths and enforce performance budgets.
-- [ ] T104 Run WCAG/responsive/security/secrets/provider-contract regression suite.
+- [x] T104 Run WCAG/responsive/security/secrets/provider-contract regression suite.
 - [ ] T105 Execute staged beta with feature flags, economy kill switches, and rollback drills.
 - [ ] T106 Run Spec Kit-style analyze/converge; append all discovered gaps before declaring Rev.7 complete.
 

@@ -71,6 +71,7 @@
 - T101 is implemented: the economy read model now derives finalized revenue, provider cost, infrastructure cost, contribution, and current wallet-based reward liability; the admin UI exposes the measures with explicit USD micro-unit versus GoCredit labels. Risk/analytics dashboards beyond unit economics remain T103-T106.
 - T102 is implemented: `ProviderAnalyticsSource` supplies explicit health, quota usage, and cost signals; `GetProviderAnalyticsUseCase` evaluates bounded quota alerts with health-failure precedence. No fake health is inferred from gateway configuration; concrete probes and operator alert delivery remain follow-up hardening.
 - T103 is implemented: a deterministic API smoke load and pure latency/error evaluator enforce a p95/error budget through `pnpm test:performance`; realtime soak testing and production-scale load remain T104/T105 hardening work.
+- T104 is implemented: provider-contract tests (11), secrets scan, responsive/offline/camera/screenshot E2E (7) and performance smoke pass. Production security review and staged beta operations remain T105-T106.
 
 ### P0 — Foundation blockers
 
