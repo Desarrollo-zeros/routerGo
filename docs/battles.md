@@ -22,3 +22,8 @@ of the result application port and PostgreSQL adapter.
 
 Reconnect, timeout, idempotent completion, reward integration, and the battle
 UI are tracked separately in T083 and T084.
+
+The resilience boundary is covered by persistence tests: reconnect reads the
+same Redis match state, expired rounds reject answers, concurrent completion
+records one PostgreSQL result, and reward decisions remain bounded by the
+configured challenge and daily caps.
