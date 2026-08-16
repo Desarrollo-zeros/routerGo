@@ -78,7 +78,7 @@ export class CreditReservation {
     const credits = normalizeAmount(amount, 'INVALID_SETTLEMENT', 'Settlement must be positive');
     this.assertWithinRemaining(credits, 'INVALID_SETTLEMENT');
     this.state.settled = this.state.settled.add(credits);
-    if (this.remainingCredits.isZero()) this.state.status = 'SETTLED';
+    if (this.remainingCredits.isZero()) this.state.status = this.state.released.isZero() ? 'SETTLED' : 'RELEASED';
   }
 
   release(amount: CreditInput): void {

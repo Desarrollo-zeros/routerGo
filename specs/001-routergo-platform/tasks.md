@@ -24,7 +24,7 @@ Format: `[ID] [P?] [Story] task`. `[P]` means safe parallel ownership in differe
 - [x] T020 [US1] Add credit reservation/budget/provider-cost/revenue migrations.
 - [x] T021 [P] [US1] Implement CreditReservation domain state + tests.
 - [x] T022 [P] [US1] Implement EconomyBudgetPolicy + circuit-breaker specifications.
-- [ ] T023 [US1] Implement `ReserveCredits`, `SettleCredits`, `ReleaseCredits` use cases using UnitOfWork.
+- [x] T023 [US1] Implement `ReserveCredits`, `SettleCredits`, `ReleaseCredits` use cases using UnitOfWork.
 - [ ] T024 [US1] Add concurrency/idempotency tests for reserve+settle+duplicate callbacks.
 - [ ] T025 [US1] Integrate quote/run flow with reserve before provider execution.
 - [ ] T026 [US1] Add reconciliation jobs/metrics for provider costs and ad revenue.

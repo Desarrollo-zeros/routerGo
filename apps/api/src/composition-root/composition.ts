@@ -9,6 +9,11 @@ import { RedisStreamAdapter } from '../infrastructure/adapters/redis/RedisStream
 import { buildApp } from '../infrastructure/http/bootstrap.js';
 import { SchemaRegistry } from '../infrastructure/http/schema-registry.js';
 import { GetEconomyUseCase } from '../application/use-cases/GetEconomy.js';
+import { SystemClock } from '../application/ports/outbound/Clock.js';
+import { PgEconomyUnitOfWorkFactory } from '../infrastructure/adapters/postgres/PgEconomyUnitOfWork.js';
+import { ReserveCreditsUseCase } from '../application/use-cases/ReserveCredits.js';
+import { SettleCreditsUseCase } from '../application/use-cases/SettleCredits.js';
+import { ReleaseCreditsUseCase } from '../application/use-cases/ReleaseCredits.js';
 import { z } from 'zod';
 
 const { Pool } = pg;
@@ -16,6 +21,13 @@ const { Pool } = pg;
 export async function createComposition() {
   const pool = new Pool({ connectionString: process.env.DATABASE_URL ?? 'postgres://routergo:routergo@localhost:5432/routergo' });
   const redis = new Redis(process.env.REDIS_URL ?? 'redis://localhost:6379', { lazyConnect: true });
+  const economyUnitOfWork = new PgEconomyUnitOfWorkFactory(pool);
+  const economyClock = new SystemClock();
+  const creditOperations = {
+    reserve: new ReserveCreditsUseCase(economyUnitOfWork, economyClock),
+    settle: new SettleCreditsUseCase(economyUnitOfWork),
+    release: new ReleaseCreditsUseCase(economyUnitOfWork, economyClock),
+  };
   let manifest: Awaited<ReturnType<typeof loadRuntimeManifest>>;
   try {
     manifest = await loadRuntimeManifest(pool);
@@ -66,7 +78,7 @@ export async function createComposition() {
   const streamAdapter = new RedisStreamAdapter(redis as never);
   const sseDeps = { streamAdapter, chatPorts };
   void walletRepo; void ledgerRepo; void catalogPort;
-  return { pool, redis, manifest, schemas, useCases, sseDeps };
+  return { pool, redis, manifest, schemas, useCases, creditOperations, sseDeps };
 }
 
 export function buildCompositionApp(deps: Awaited<ReturnType<typeof createComposition>>) {

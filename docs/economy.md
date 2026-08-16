@@ -1,9 +1,9 @@
 # RouterGo economy persistence
 
 T020 establishes the durable accounting records used by the later economy
-application flows. T021 now models the reservation lifecycle and T022 provides
-the pure budget policy; application orchestration and reconciliation remain
-future work.
+application flows. T021 models the reservation lifecycle, T022 provides the
+pure budget policy, and T023 now coordinates user-credit accounting through
+PostgreSQL transactions.
 
 ## Units and invariants
 
@@ -22,6 +22,9 @@ future work.
   window. Credit budgets have no currency; `USD_MICRO` budgets require `USD`.
 - Reservation operations are idempotent through unique `operation_id`.
   `settled_credits + released_credits` cannot exceed the reserved amount.
+- Settle and release command results use `credit_reservation_operations` for
+  durable per-command idempotency; reserve uses the reservation's unique
+  `operation_id`.
 - Provider cost entries retain token counters separately from `cost_microusd`,
   identify the pricing version, and require a provider gateway. Operation and
   provider request identifiers are unique when supplied.
@@ -41,9 +44,10 @@ history as a substitute for a correction event.
 ## Future flow
 
 The intended application sequence is `QUOTE -> RESERVE -> EXECUTE -> SETTLE ->
-RELEASE/REFUND`. T021 defines the reservation lifecycle and T022 defines the
-budget circuit policy; T023 must coordinate the state changes with a unit of
-work. T020 provides the persistence contract consumed by these policies.
+RELEASE/REFUND`. T021 defines the reservation lifecycle, T022 defines the
+budget circuit policy, and T023 coordinates user-credit state changes with a
+transactional unit of work. T025 will connect this foundation to quote/run
+execution and any independent platform-cost budget decision.
 
 ## Domain policy boundaries
 
@@ -66,3 +70,36 @@ protects platform spending and subsidy limits. Pending or reversed revenue is
 never treated as funding; only finalized USD micro-units can fund an
 `AD_FUNDED_COMPUTE` scope. The policy is correct for the supplied snapshot; it
 does not claim to solve concurrent readers, which belongs to T023/T024.
+
+## T023 accounting boundary
+
+`Wallet.balance` is the currently available GoCredit balance. Reserve debits
+the full requested amount and appends one `SPEND` ledger entry. Settle records
+actual consumption on the reservation only; it does not debit the wallet a
+second time and does not create a zero-value ledger row. Release credits the
+unused amount and appends one positive `REFUND` entry.
+
+The canonical flow is therefore `1000 - 100 + 28 = 928`: 72 GoCredits are the
+net user cost. The reservation ends with `reserved=100`, `settled=72`,
+`released=28`, `remaining=0`, and status `RELEASED`. A mixed settle/release
+completion remains rehydratable as `RELEASED`.
+
+`ReserveCredits`, `SettleCredits`, and `ReleaseCredits` run through a small
+Economy Unit of Work. PostgreSQL locks the wallet for reserve and release and
+locks the reservation row for settle and release. Existing-reservation
+mutations use the consistent reservation-then-wallet order; reserve only needs
+the wallet lock. Wallet, ledger, reservation, and command-idempotency writes
+commit or roll back together. No Redis lock or in-memory mutex is part of the
+correctness boundary.
+
+Reserve idempotency is backed by `credit_reservations.operation_id` and its
+`reserve:<operationId>` ledger key. Settle and release use independent command
+IDs in `credit_reservation_operations`; release also uses
+`release:<operationId>` for its `REFUND` entry. Repeating a command returns its
+stored result without another economic effect.
+
+T023 intentionally does not evaluate `EconomyBudgetPolicy`: it moves user
+GoCredits, while platform cost is a separate `USD_MICRO` concern and no
+conversion exists. Quote/run integration and any durable platform-budget
+commitment belong to T025/T024 according to their later acceptance criteria.
+Caller authentication and wallet ownership remain API-boundary concerns.

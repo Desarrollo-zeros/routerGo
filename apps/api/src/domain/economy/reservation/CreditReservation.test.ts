@@ -74,6 +74,16 @@ describe('CreditReservation', () => {
     expect(() => cancelled.release(1n)).toThrowError(CreditReservationError);
   });
 
+  it('keeps a mixed settle and release completion rehydratable', () => {
+    const reservation = createReservation();
+
+    reservation.release(40n);
+    reservation.settle(60n);
+
+    expect(reservation.status).toBe('RELEASED');
+    expect(CreditReservation.rehydrate(reservation.toSnapshot()).status).toBe('RELEASED');
+  });
+
   it('expires only after its deadline and permits release but never settlement', () => {
     const reservation = createReservation({ expiresAt: new Date('2030-01-02T00:00:00Z') });
 
