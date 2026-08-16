@@ -36,6 +36,7 @@
 - T015 is implemented: published runtime snapshots are validated, hashed, immutable, selected through an explicit active pointer, and exposed with separate API/UI projections. Publish and rollback reuse T013, enforce expected-version/idempotency/concurrency boundaries, and synchronize a versioned Redis cache after commit.
 - T014 is implemented: the PWA consumes the canonical `version`/`contentHash`, `apiRoutes`, nested UI routes/navigation, feature flags, catalog, and design-token projection. Labels resolve through a local registry, screen paths come from `ui.routes`, unknown screens/labels/capabilities fail closed, and the shared contract parser is covered by web tests.
 - T031/T032 are implemented: developer keys are issued once and persisted only as hashes; scoped authentication supports revocation and rotation; durable client/key/model quota policies are evaluated through an atomic Redis RPM/TPM/credit counter. HTTP route enforcement and OpenAI-compatible endpoints remain later tasks.
+- T033 is implemented: the runtime manifest seeds `/v1/models`, and the API returns the OpenAI list/object contract from the persisted catalog. Authentication enforcement and completion endpoints remain later tasks.
 
 ### P0 — Foundation blockers
 
