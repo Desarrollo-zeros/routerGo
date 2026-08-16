@@ -1,7 +1,7 @@
 phase: 4
-current_objective: T042
+current_objective: T065
 status: ready_to_commit
-last_green_commit: 4ed3dce
+last_green_commit: 8d45c19
 last_completed_tasks:
   - T020
   - T021
@@ -23,6 +23,7 @@ last_completed_tasks:
   - T051
   - T052
   - T053
+  - T055
   - T060
   - T061
   - T062
@@ -38,7 +39,6 @@ next_candidates:
   - T042
   - T043
   - T054
-  - T055
   - T065
   - T074
 blocked_tasks: []

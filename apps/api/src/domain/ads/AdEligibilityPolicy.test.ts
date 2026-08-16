@@ -14,4 +14,9 @@ describe('evaluateAdEligibility', () => {
   ] as const)('denies with the explicit %s reason', (reason, override) => {
     expect(evaluateAdEligibility({ ...base(), ...override })).toEqual({ allowed: false, reason });
   });
+
+  it('rejects invalid counters and rates before eligibility checks', () => {
+    expect(evaluateAdEligibility({ ...base(), impressionsInWindow: -1 })).toEqual({ allowed: false, reason: 'INVALID_POLICY_INPUT' });
+    expect(evaluateAdEligibility({ ...base(), clickRate: Number.NaN })).toEqual({ allowed: false, reason: 'INVALID_POLICY_INPUT' });
+  });
 });

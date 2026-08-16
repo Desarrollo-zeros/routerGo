@@ -51,7 +51,7 @@ Format: `[ID] [P?] [Story] task`. `[P]` means safe parallel ownership in differe
 - [x] T052 [P] [US4] AdDecisionPort and Strategy adapters for direct/third-party/house inventory.
 - [x] T053 [US4] Reconcile impressions/clicks/finalized revenue idempotently.
 - [ ] T054 [US4] Create `apps/advertiser` with balance/campaign/creative/analytics flows.
-- [ ] T055 [US4] Add frequency caps, consent/region policy hooks, anti-click-fraud telemetry.
+- [x] T055 [US4] Add frequency caps, consent/region policy hooks, anti-click-fraud telemetry.
 
 ## Phase 6 — Generic challenges and exercise
 - [x] T060 [US5] Add versioned challenge schema with typed verification strategies.
