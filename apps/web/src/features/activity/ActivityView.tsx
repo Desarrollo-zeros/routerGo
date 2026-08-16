@@ -2,6 +2,7 @@ import React, { useCallback } from "react";
 import { SponsorPlacement } from "../../design-system/SponsorPlacement";
 import type { HttpApiPort } from "../../runtime/ApiPort";
 import { useActivityMachine } from "./useActivityMachine";
+import { DEFAULT_EXERCISE, EXERCISES } from "./exerciseCatalog";
 
 type ActivityMachine = ReturnType<typeof useActivityMachine>;
 
@@ -27,6 +28,7 @@ function actionLabel(state: string): string {
 
 export function ActivityView({ api }: { api: HttpApiPort }): React.ReactElement {
   const machine = useActivityMachine();
+  const [exerciseId, setExerciseId] = React.useState(DEFAULT_EXERCISE.id);
   const [verified, setVerified] = React.useState<number | undefined>();
   const [balance, setBalance] = React.useState(0);
   React.useEffect(() => {
@@ -48,13 +50,15 @@ export function ActivityView({ api }: { api: HttpApiPort }): React.ReactElement 
   const action = primaryAction(machine.state, machine, submit);
   const isCameraVisible = !["idle", "permission"].includes(machine.state);
   const shownReps = machine.state === "verified" ? verified ?? machine.count : machine.count;
+  const exercise = EXERCISES.find((item) => item.id === exerciseId) ?? DEFAULT_EXERCISE;
 
   return <div className="rg-activity-page">
-    <section className="rg-activity-hero"><p>Una forma distinta de acceder</p><h1>Recupera GoCredits<br /><span>con tu esfuerzo 💪</span></h1><p>Entrena, verifica tu esfuerzo y usa tus créditos al instante.</p></section>
+    <section className="rg-activity-hero"><p>Una forma distinta de acceder</p><h1>Recupera GoCredits<br /><span>con tu esfuerzo 💪</span></h1><p>Entrena, verifica tu esfuerzo y usa tus créditos al instante.</p><div className="rg-exercise-picker"><label htmlFor="exercise-select">Actividad actual</label><select id="exercise-select" value={exercise.id} onChange={(event) => setExerciseId(event.target.value)} disabled={machine.state !== "idle"}><option value="" disabled>Elige un ejercicio</option>{EXERCISES.map((item) => <option key={item.id} value={item.id}>{item.name} · {item.target}</option>)}</select></div></section>
     <section className="rg-exercise-card" aria-live="polite">
-      <div className="rg-exercise-meta"><div><span className="rg-exercise-tag">♟ Ejercicio actual</span><h2>Flexiones</h2><p>Ejercicio corporal</p></div><div className="rg-rep-ring">{shownReps}<small>reps</small></div></div>
-      <div className="rg-exercise-visual"><img src="/exercise-pushup.png" alt="Persona haciendo flexiones sobre una colchoneta" /></div>
-      <div className="rg-credit-strip"><div className="rg-credit-token"><span>G</span></div><p>Cada flexión equivale a<strong>1 GoCredit</strong></p><span className="rg-credit-arrow">→</span><p>Úsalos al instante<br />sin esperar.</p></div>
+      <div className="rg-exercise-meta"><div><span className="rg-exercise-tag">♟ {exercise.category} · {exercise.level}</span><h2>{exercise.name}</h2><p>{exercise.target} · {exercise.equipment}</p></div><div className="rg-rep-ring">{shownReps}<small>reps</small></div></div>
+      <div className="rg-exercise-visual"><img src={exercise.imageUrl ?? "/exercise-pushup.png"} onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = "/exercise-pushup.png"; }} alt={`Demostración de ${exercise.name.toLowerCase()}`} /></div>
+      <div className="rg-exercise-details"><p>{exercise.instruction}</p><small>{exercise.muscles} · Catálogo: {exercise.source}</small></div>
+      <div className="rg-credit-strip"><div className="rg-credit-token"><span>G</span></div><p>Cada repetición equivale a<strong>1 GoCredit</strong></p><span className="rg-credit-arrow">→</span><p>Úsalos al instante<br />sin esperar.</p></div>
       {machine.error ? <p className="rg-error-copy" role="alert">{machine.error}</p> : null}
     </section>
     <SponsorPlacement placement="activity-inline"><div className="rg-sponsor-content"><span>Patrocinado</span><strong>Tu esfuerzo merece impulso.</strong><small>Descubre una oferta que acompaña tu entrenamiento.</small></div></SponsorPlacement>

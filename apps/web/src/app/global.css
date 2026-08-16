@@ -72,6 +72,7 @@ button{font:inherit;cursor:pointer;border:none;background:none}
 .rg-activity-hero h1{font-size:clamp(32px,6vw,58px);line-height:1.02;letter-spacing:-.04em}
 .rg-activity-hero h1 span{color:var(--rg-color-brand-soft,#a29bfe)}
 .rg-activity-hero p{color:var(--rg-color-text-secondary,#a0a0b8);font-size:16px;max-width:500px}
+.rg-exercise-picker{display:grid;gap:7px;max-width:440px;margin-top:10px}.rg-exercise-picker label{font-size:12px;color:var(--rg-color-text-secondary,#a0a0b8);font-weight:700}.rg-exercise-picker select{min-height:46px;padding:10px 12px;border:1px solid rgba(162,155,254,.4);border-radius:10px;background:var(--rg-color-surface,#14141c);color:var(--rg-color-text-primary,#fff)}
 .rg-exercise-card{display:grid;gap:0;overflow:hidden;border:1px solid var(--rg-color-surface-muted,#1e1e2a);border-radius:14px;background:var(--rg-color-surface,#14141c)}
 .rg-exercise-meta{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:22px 22px 14px}
 .rg-exercise-tag{color:var(--rg-color-brand-soft,#a29bfe);font-weight:700;font-size:14px}
@@ -81,6 +82,7 @@ button{font:inherit;cursor:pointer;border:none;background:none}
 .rg-rep-ring small{display:block;font-size:10px;color:var(--rg-color-text-secondary,#a0a0b8);font-weight:400;margin-top:-18px;transform:translateY(28px)}
 .rg-exercise-visual{min-height:240px;margin:0 14px;position:relative;overflow:hidden;border-radius:10px;background:#14131d;isolation:isolate}.rg-exercise-visual::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(9,8,15,.28));pointer-events:none}.rg-exercise-visual img{width:100%;height:100%;min-height:240px;object-fit:cover;object-position:center;filter:saturate(.92) contrast(1.04)}
 .rg-credit-strip{display:flex;align-items:center;gap:16px;margin:14px;padding:16px;border:1px solid rgba(162,155,254,.35);border-radius:10px;background:rgba(108,92,231,.08)}
+.rg-exercise-details{display:grid;gap:5px;margin:0 14px;padding:12px 14px;border-left:2px solid var(--rg-color-brand,#6c5ce7);background:rgba(108,92,231,.06)}.rg-exercise-details p{font-size:13px;line-height:1.5;color:var(--rg-color-text-primary,#f0f0f5)}.rg-exercise-details small{font-size:11px;color:var(--rg-color-text-disabled,#63637a)}
 .rg-credit-token{display:grid;place-items:center;width:46px;height:46px;border:2px solid var(--rg-color-brand-soft,#a29bfe);border-radius:14px;color:var(--rg-color-brand-soft,#a29bfe);font-size:22px;font-weight:800;transform:rotate(45deg);flex:none}
 .rg-credit-token span{transform:rotate(-45deg)}
 .rg-credit-strip p{color:var(--rg-color-text-secondary,#a0a0b8);font-size:14px}

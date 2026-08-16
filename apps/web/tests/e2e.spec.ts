@@ -128,7 +128,7 @@ test.describe("RouterGo E2E",()=>{
     await mockApi(page);
     await page.goto("/");
     await expect(page.getByText("Una forma distinta de acceder")).toBeVisible();
-    await expect(page.getByText("Cada flexión equivale a")).toBeVisible();
+    await expect(page.getByText("Cada repetición equivale a")).toBeVisible();
     await expect(page.getByRole("button", { name: "Comenzar entrenamiento" })).toBeEnabled();
   });
 });
