@@ -13,8 +13,8 @@ import { seedIdentity } from './seed-identity.js';
 import { seedUiRoutes } from './seed-ui-routes.js';
 import { seedRuntimeManifest } from './seed-runtime-manifest.js';
 
-export const SEED_VERSION = '2026-08-16-r8';
-export const MANIFEST_VERSION = 6;
+export const SEED_VERSION = '2026-08-16-r9';
+export const MANIFEST_VERSION = 7;
 
 function checksumFor(version: string): string {
   return createHash('sha256').update(version).digest('hex').slice(0, 16);
@@ -51,10 +51,10 @@ export async function runSeed(pool: pg.Pool): Promise<{ status: string; seedVers
     await seedRoutes(client);
     await seedPolicies(client);
     await seedDesignTokens(client);
+    await seedUiRoutes(client);
     await seedNavigation(client);
     await seedFeatureFlags(client);
     await seedIdentity(client);
-    await seedUiRoutes(client);
     await seedRuntimeManifest(client, MANIFEST_VERSION);
     await completeSeedRun(client, runId);
     await client.query('COMMIT');

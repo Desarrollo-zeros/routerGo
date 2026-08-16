@@ -6,6 +6,7 @@ const UI_ROUTES = [
   ['activity-verify', '/', 'activity'],
   ['quote-create', '/chat', 'chat'],
   ['admin-economy', '/economy', 'admin-economy'],
+  ['battle-matchmaking', '/battles', 'battle'],
 ] as const;
 
 export async function seedUiRoutes(client: pg.PoolClient): Promise<void> {

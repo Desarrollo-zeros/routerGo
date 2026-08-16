@@ -74,7 +74,7 @@ Format: `[ID] [P?] [Story] task`. `[P]` means safe parallel ownership in differe
 - [x] T081 [P] [US6] Implement matchmaking/battle WebSocket gateway.
 - [x] T082 [P] [US6] Implement Redis ephemeral match state + durable results.
 - [x] T083 [US6] Add reconnect/timeout/idempotent result/reward tests.
-- [ ] T084 [US6] Responsive battle UX + reduced-motion/accessibility.
+- [x] T084 [US6] Responsive battle UX + reduced-motion/accessibility.
 
 ## Phase 9 — Treasure
 - [x] T090 [US7] Add hunt/step/QR/progress schema and moderation rules.

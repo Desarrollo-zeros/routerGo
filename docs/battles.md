@@ -27,3 +27,8 @@ The resilience boundary is covered by persistence tests: reconnect reads the
 same Redis match state, expired rounds reject answers, concurrent completion
 records one PostgreSQL result, and reward decisions remain bounded by the
 configured challenge and daily caps.
+
+The PWA Battle screen is enabled through the runtime UI route and feature flag.
+It is usable at narrow widths, exposes a keyboard-visible disabled state when
+there is no authenticated session, and does not claim that a match is active
+before the secure realtime connection is available.

@@ -9,6 +9,7 @@ const FLAGS: Flag[] = [
   { key: 'admin_enabled', default_value: false, rollout: { roles: ['admin'] } },
   { key: 'pose_calibration', default_value: true, rollout: {} },
   { key: 'stream_resume', default_value: true, rollout: { ttl_minutes: 45 } },
+  { key: 'battles_enabled', default_value: true, rollout: {} },
 ];
 
 export async function seedFeatureFlags(client: pg.PoolClient): Promise<void> {
