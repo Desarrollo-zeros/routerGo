@@ -63,7 +63,7 @@ Format: `[ID] [P?] [Story] task`. `[P]` means safe parallel ownership in differe
 
 ## Phase 7 — Runtime Intent/Skill Router
 - [x] T070 [US8] Add skill definition/version/classification schema and Studio workflow.
-- [ ] T071 [P] [US8] Implement `IntentClassifierPort` + schema-constrained provider adapter.
+- [x] T071 [P] [US8] Implement `IntentClassifierPort` + schema-constrained provider adapter.
 - [ ] T072 [P] [US8] Implement typed `SkillRegistry` + immutable skill versions.
 - [ ] T073 [US8] Add low-confidence/timeout/budget fallback heuristics.
 - [ ] T074 [US8] Integrate session-start classification without blocking core session availability.
