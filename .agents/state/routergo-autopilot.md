@@ -1,5 +1,5 @@
 phase: 3
-current_objective: T031
+current_objective: T032
 status: selecting_next_objective
 last_green_commit: 950dd20
 last_completed_tasks:
@@ -11,7 +11,8 @@ last_completed_tasks:
   - T025
   - T026
   - T030
+  - T031
 blocked_tasks: []
 next_candidates:
-  - T031
-last_validation: Full T030 gates pass; API 36 suites/207 tests, web tests, build, migration 007, and developer API schema constraints verified.
+  - T032
+last_validation: T031 lifecycle and PostgreSQL repository tests pass; full quality gates pending before commit closure.
