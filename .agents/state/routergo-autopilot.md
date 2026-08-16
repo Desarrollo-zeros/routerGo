@@ -1,7 +1,7 @@
 phase: 3
-current_objective: T042
+current_objective: T051
 status: executing
-last_green_commit: 58f8b66
+last_green_commit: 29b399e
 last_completed_tasks:
   - T020
   - T021
@@ -19,8 +19,10 @@ last_completed_tasks:
   - T036
   - T040
   - T041
+  - T050
 next_candidates:
   - T042
   - T043
+  - T051
 blocked_tasks: []
-last_validation: T042 partial Studio views and T043 privilege-gated read-only economy/ledger views pass admin typecheck/build, root line, architecture, and lint gates. T042 audited publish transport and T043 real read ports remain open; no task was falsely marked done.
+last_validation: T050 migration and real PostgreSQL tests pass; concurrent run claim fix passes 43 API suites/227 tests, web tests, build, E2E 7/7, typecheck, lint, lines, architecture, secrets, repeated seed checksum a97a1259b6596eb4, and healthy PostgreSQL/Redis/LiteLLM. T042/T043 remain open; T051 is the next Ads application candidate.
