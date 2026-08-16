@@ -1,5 +1,11 @@
 # RouterGo — Agent Operating Manual
 
+When the persistent objective is completing the RouterGo MVP, use the
+repository skill `.agents/skills/routergo-autopilot/SKILL.md` as the operating
+algorithm. Reconcile its checkpoint with Git, Specs, tasks, tests, and current
+runtime state before acting; the checkpoint is operational state, not a source
+of truth.
+
 ## Mission
 Build RouterGo as an ad-funded, multi-provider AI access platform. Users earn internal GoCredits through approved activities and spend them on AI access. Businesses fund campaigns/challenges. Operators manage product, economy, providers, ads, content, risk, and configuration.
 
