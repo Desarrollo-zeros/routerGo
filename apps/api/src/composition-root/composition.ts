@@ -64,6 +64,19 @@ import { PostgresWalletLedgerReader } from '../infrastructure/adapters/postgres/
 import { CreateBattle } from '../application/services/CreateBattle.js';
 import { ListPublicTreasureHunts } from '../application/use-cases/ListPublicTreasureHunts.js';
 import { PostgresTreasureHuntReader } from '../infrastructure/adapters/postgres/PostgresTreasureHuntReader.js';
+import { ListPublishedLearning } from '../application/use-cases/ListPublishedLearning.js';
+import { PostgresPublishedLearningReader } from '../infrastructure/adapters/postgres/PostgresPublishedLearningReader.js';
+import { ListLeaderboard } from '../application/use-cases/ListLeaderboard.js';
+import { PostgresLeaderboardReader } from '../infrastructure/adapters/postgres/PostgresLeaderboardReader.js';
+import { PostgresAdCandidateReader } from '../infrastructure/adapters/postgres/PostgresAdCandidateReader.js';
+import { DecideAd } from '../application/use-cases/DecideAd.js';
+import { DirectInventoryStrategy, HouseInventoryStrategy, ThirdPartyInventoryStrategy } from '../application/services/AdInventoryStrategies.js';
+import { GetPublicAd } from '../application/use-cases/GetPublicAd.js';
+import { PostgresPublishedContentReader } from '../infrastructure/adapters/postgres/PostgresPublishedContentReader.js';
+import { ListPublishedContent } from '../application/use-cases/ListPublishedContent.js';
+import { GetPublishedContent } from '../application/use-cases/GetPublishedContent.js';
+import { PublishContent } from '../application/use-cases/PublishContent.js';
+import { PostgresContentPublisher } from '../infrastructure/adapters/postgres/PostgresContentPublisher.js';
 
 const { Pool } = pg;
 
@@ -87,6 +100,7 @@ export async function createComposition() {
   const verifyActivity = new VerifyActivityUseCase(unitOfWork, new RewardPolicy({ creditsPerRep: 500n, maxRepsPerSession: 50 }), new DailyCapPolicy({ dailyCapCredits: 25000n }), economyClock);
   const walletLedger = new PostgresWalletLedgerReader(pool);
   const streams = new RedisStreamAdapter(redis as never); const battleStore = new RedisBattleStateStore(redis);
+  const content = createContentUseCases(pool);
   const useCases = createUseCaseRegistry({
     manifest, catalog: catalogUseCase, models: new ListModelsUseCase(catalogUseCase),
     wallet: new GetWalletUseCase(wallet), economy,
@@ -99,11 +113,21 @@ export async function createComposition() {
     providerAnalytics,
     createQuote, executeRun, streams, battle: new CreateBattle(battleStore),
     treasureHunts: new ListPublicTreasureHunts(new PostgresTreasureHuntReader(pool)),
+    learning: new ListPublishedLearning(new PostgresPublishedLearningReader(pool)),
+    leaderboard: new ListLeaderboard(new PostgresLeaderboardReader(pool)),
+    publicAd: createPublicAd(pool), publishedContent: content.list, contentBySlug: content.get, publishContent: content.publish,
   });
-  return {
-    pool, redis, manifest, schemas, useCases, creditOperations, providerAnalytics, session, sseDeps: { streams },
-    battleGateway: { store: battleStore, authenticateApiKey: identity.authenticateApiKey, identity: identity.resolveApiKeyIdentity, authorize: authorizePermission },
-  };
+  return { pool, redis, manifest, schemas, useCases, creditOperations, providerAnalytics, session, sseDeps: { streams }, battleGateway: { store: battleStore, authenticateApiKey: identity.authenticateApiKey, identity: identity.resolveApiKeyIdentity, authorize: authorizePermission } };
+}
+
+function createPublicAd(pool: pg.Pool): GetPublicAd {
+  const strategies = [new DirectInventoryStrategy(), new ThirdPartyInventoryStrategy(), new HouseInventoryStrategy()];
+  return new GetPublicAd(new PostgresAdCandidateReader(pool), new DecideAd(strategies));
+}
+
+function createContentUseCases(pool: pg.Pool): { list: ListPublishedContent; get: GetPublishedContent; publish: PublishContent } {
+  const reader = new PostgresPublishedContentReader(pool);
+  return { list: new ListPublishedContent(reader), get: new GetPublishedContent(reader), publish: new PublishContent(new PostgresContentPublisher(pool)) };
 }
 
 function createAdvertiserHandlers(pool: pg.Pool) {

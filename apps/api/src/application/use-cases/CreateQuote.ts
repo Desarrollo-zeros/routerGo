@@ -33,7 +33,7 @@ export class CreateQuoteUseCase implements CreateQuotePort {
         modelId: input.modelId,
         tier: model.tier,
         creditPrice: price,
-        estimatedPlatformCostMicrousd: 0n,
+        estimatedPlatformCostMicrousd: estimatedCost(model.capabilities),
         pricingVersion: 'catalog-v1',
         maxOutputTokens: input.maxOutputTokens ?? 4096,
         idempotencyKey: input.idempotencyKey,
@@ -52,4 +52,9 @@ export class CreateQuoteUseCase implements CreateQuotePort {
 
 function validMaxOutputTokens(value: number | undefined): boolean {
   return value === undefined || (Number.isInteger(value) && value > 0);
+}
+
+function estimatedCost(capabilities: Record<string, unknown>): bigint {
+  const value = capabilities.estimated_platform_cost_microusd;
+  return typeof value === 'number' && Number.isSafeInteger(value) && value > 0 ? BigInt(value) : 1n;
 }

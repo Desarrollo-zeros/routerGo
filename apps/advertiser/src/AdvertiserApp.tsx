@@ -46,10 +46,10 @@ export function AdvertiserApp({ accessToken, apiBaseUrl = '' }: { accessToken?: 
   useEffect(() => { if (token) load(); }, [token, apiBaseUrl]);
   return <div className="advertiser-shell">
     <a className="skip-link" href="#main">Saltar al contenido</a>
-    <header><span className="brand">RouterGo Ads Manager</span><span className="status">{snapshot ? 'Datos cargados' : 'Acceso bloqueado'}</span></header>
-    <main id="main"><h1>Centro del anunciante</h1><p className="intro">Gestiona fondos, campañas y resultados de tu organización.</p>
+    <header className="advertiser-header"><div className="advertiser-brand"><span className="advertiser-mark" aria-hidden="true">G</span><span className="brand">RouterGo Ads Manager</span></div><nav className="advertiser-nav" aria-label="Navegación de campañas"><a href="#overview">Resumen</a><a href="#campaigns">Campañas</a><a href="#create">Crear</a></nav><span className="status">{snapshot ? 'Datos cargados' : 'Acceso bloqueado'}</span></header>
+    <main id="main"><section className="advertiser-hero" id="overview"><div><span className="advertiser-kicker">Business workspace</span><h1>Conecta tu marca con la comunidad RouterGo.</h1><p className="intro">Gestiona fondos, campañas y resultados de tu organización.</p></div><div className="advertiser-hero-art" aria-hidden="true">G</div></section>
       {!token ? <AccessForm onSubmit={setToken} /> : null}
-      {snapshot ? <><LoadedView snapshot={snapshot} /><CampaignForm client={client} onCreated={load} /></> : <p role="alert" className="error">{error}. Introduce una API key con alcance de campañas para continuar.</p>}
+      {snapshot ? <><div id="campaigns"><LoadedView snapshot={snapshot} /></div><div id="create"><CampaignForm client={client} onCreated={load} /></div></> : <p role="alert" className="error">{error}. Introduce una API key con alcance de campañas para continuar.</p>}
     </main>
   </div>;
 }

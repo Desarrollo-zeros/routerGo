@@ -9,7 +9,7 @@ test("usuario real se registra, navega y recibe GoCredits", async ({ page }) => 
   await page.getByLabel("Contraseña").fill("routergo-real-123");
   await page.getByRole("button", { name: "Crear mi cuenta" }).click();
   await expect(page.getByRole("link", { name: "Actividad" })).toBeVisible();
-  await expect(page.getByText(/ejercicios de peso corporal disponibles/)).toBeVisible({ timeout: 25_000 });
+  await expect(page.getByText(/(ejercicios de peso corporal disponibles|Catálogo local disponible)/)).toBeVisible({ timeout: 25_000 });
   await page.screenshot({ path: "output/playwright/activity-real-desktop.png", fullPage: true });
 
   await page.goto("/catalog");
@@ -46,6 +46,20 @@ test("usuario real se registra, navega y recibe GoCredits", async ({ page }) => 
   await expect(page.getByRole("heading", { name: "Treasure hunts" })).toBeVisible();
   await expect(page.getByText("Ruta de bienvenida")).toBeVisible();
 
+  await page.goto("/learning");
+  await expect(page.getByRole("heading", { name: "Aprende algo útil." })).toBeVisible();
+  await expect(page.getByText("Primeros pasos con IA")).toBeVisible();
+  await page.getByRole("button", { name: "Abrir ruta" }).click();
+  await expect(page.getByText("Elige con intención")).toBeVisible();
+  await page.screenshot({ path: "output/playwright/learning-detail-real-mobile.png", fullPage: true });
+
+  await page.goto("/ranking");
+  await expect(page.getByRole("heading", { name: "Tu progreso" })).toBeVisible();
+  await page.goto("/help");
+  await expect(page.getByRole("heading", { name: "Todo claro." })).toBeVisible();
+  await page.goto("/developers");
+  await expect(page.getByRole("heading", { name: "Construye sobre" })).toBeVisible();
+
   await page.getByRole("button", { name: "Salir" }).click();
   await expect(page.getByRole("tab", { name: "Iniciar sesión" })).toBeVisible();
   await page.getByLabel("Correo electrónico").fill(email);
@@ -70,6 +84,10 @@ test("usuario real recorre las pantallas principales en desktop y móvil", async
     ["chat", "/chat", "Piensa en voz alta."],
     ["battles", "/battles", "Juega en tiempo real"],
     ["treasure", "/treasure", "Treasure hunts"],
+    ["learning", "/learning", "Aprende algo útil."],
+    ["ranking", "/ranking", "Tu progreso"],
+    ["help", "/help", "Todo claro."],
+    ["developer", "/developers", "Construye sobre"],
   ] as const;
   for (const width of [1440, 390, 360]) {
     await page.setViewportSize({ width, height: width === 1440 ? 900 : 844 });

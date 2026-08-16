@@ -14,6 +14,7 @@ import { HttpAdminLedgerClient, type AdminLedgerSummary } from "../runtime/Admin
 import { HttpAdminRuntimeClient } from "../runtime/AdminRuntimeClient";
 import { HttpAdminWalletClient, type AdminWalletSummary } from "../runtime/AdminWalletClient";
 import { ChallengeBuilderView } from "../features/challenges/ChallengeBuilderView";
+import { ContentManagerView } from "../features/content/ContentManagerView";
 
 interface AdminAppProps {
   manifest?: WebRuntimeManifest;
@@ -34,9 +35,9 @@ export function AdminApp({ manifest, economyAccessToken }: AdminAppProps): React
   const reads = useAdminReads(accessToken);
   const publishRuntime = usePublishRuntime(accessToken);
   return <AdminShell brand={<span aria-label="RouterGo Studio">RouterGo Studio</span>} navigation={manifest ? <RuntimeNavigation manifest={manifest} /> : undefined}>
-    <h1>Studio</h1>
+    <div className="admin-page-heading"><div><span className="admin-kicker">RouterGo / Operations</span><h1>Studio</h1><p>Configura el runtime y revisa la economía publicada desde un único espacio.</p></div><span className="admin-live-indicator">● Local runtime</span></div>
     {!accessToken ? <AccessForm onSubmit={setAccessToken} /> : null}
-    {manifest ? <div className="admin-stack"><RuntimeConfigView manifest={manifest} onPublish={publishRuntime} /><ChallengeBuilderView accessToken={accessToken} /><ModelCatalogView models={manifest.catalog} /><ProviderView models={manifest.catalog} /><WalletReadView authorized={Boolean(reads.wallet)} summary={reads.wallet} /><UnitEconomicsDashboard authorized={Boolean(reads.economy)} summary={reads.economy?.unitEconomics} /><LedgerReadView authorized={Boolean(reads.ledger)} rows={reads.ledger?.entries} /></div> : <Panel title="Área de administración"><StatusMessage>La configuración runtime no está disponible.</StatusMessage></Panel>}
+    {manifest ? <div className="admin-stack"><RuntimeConfigView manifest={manifest} onPublish={publishRuntime} /><ContentManagerView accessToken={accessToken} /><ChallengeBuilderView accessToken={accessToken} /><ModelCatalogView models={manifest.catalog} /><ProviderView models={manifest.catalog} /><WalletReadView authorized={Boolean(reads.wallet)} summary={reads.wallet} /><UnitEconomicsDashboard authorized={Boolean(reads.economy)} summary={reads.economy?.unitEconomics} /><LedgerReadView authorized={Boolean(reads.ledger)} rows={reads.ledger?.entries} /></div> : <Panel title="Área de administración"><StatusMessage>La configuración runtime no está disponible.</StatusMessage></Panel>}
   </AdminShell>;
 }
 

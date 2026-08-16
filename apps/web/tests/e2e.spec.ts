@@ -62,6 +62,9 @@ test.describe("RouterGo E2E",()=>{
     await page.goto("/");
     await expect(page.getByRole("tab",{name:"Iniciar sesión"})).toBeVisible();
     await expect(page.getByRole("tab",{name:"Crear cuenta"})).toBeVisible();
+    await expect(page.getByRole("button",{name:"Google"})).toBeVisible();
+    await expect(page.getByRole("button",{name:"GitHub"})).toBeVisible();
+    await expect(page.getByRole("button",{name:"Apple"})).toHaveCount(0);
     await page.getByRole("tab",{name:"Crear cuenta"}).click();
     await page.getByLabel("Correo electrónico").fill(`e2e-${Date.now()}@example.com`);
     await page.getByLabel("Contraseña").fill("secreto123");
@@ -130,7 +133,7 @@ test.describe("RouterGo E2E",()=>{
   test("actividad presenta el CTA y el estado inicial real",async({page})=>{
     await mockApi(page);
     await page.goto("/");
-    await expect(page.getByText("Una forma distinta de acceder")).toBeVisible();
+    await expect(page.getByText("Tu esfuerzo te acerca a lo que quieres")).toBeVisible();
     await expect(page.getByText("Cada repetición equivale a")).toBeVisible();
     await expect(page.getByRole("button", { name: "Comenzar entrenamiento" })).toBeEnabled();
   });

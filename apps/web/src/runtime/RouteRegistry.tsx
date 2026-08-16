@@ -6,6 +6,10 @@ import { WalletView } from "../features/wallet/WalletView";
 import { TreasureView } from "../features/treasure/TreasureView";
 import { BattleView } from "../features/battle/BattleView";
 import { CatalogView } from "../features/catalog/CatalogView";
+import { LearningView } from "../features/learning/LearningView";
+import { RankingView } from "../features/ranking/RankingView";
+import { HelpView } from "../features/help/HelpView";
+import { DeveloperView } from "../features/developer/DeveloperView";
 import type { CatalogRegistry } from "./CatalogRegistry";
 import type { HttpApiPort } from "./ApiPort";
 import type { NavigationItem } from "./NavigationRegistry";
@@ -26,6 +30,10 @@ const SCREEN_REGISTRY = new Map<string, ScreenDefinition>([
   ["admin-economy", { screenKey: "admin-economy", path: "", available: true, render: () => <EconomySimulator /> }],
   ["treasure", { screenKey: "treasure", path: "", available: true, render: ({ api }) => <TreasureView permission="unknown" api={api} /> }],
   ["battle", { screenKey: "battle", path: "", available: true, render: ({ api }) => <BattleView authenticated api={api} /> }],
+  ["learning", { screenKey: "learning", path: "", available: true, render: ({ api }) => <LearningView api={api} /> }],
+  ["ranking", { screenKey: "ranking", path: "", available: true, render: ({ api }) => <RankingView api={api} /> }],
+  ["help", { screenKey: "help", path: "", available: true, render: ({ api }) => <HelpView api={api} /> }],
+  ["developer", { screenKey: "developer", path: "", available: true, render: ({ api }) => <DeveloperView api={api} /> }],
 ]);
 
 export class RouteRegistry {

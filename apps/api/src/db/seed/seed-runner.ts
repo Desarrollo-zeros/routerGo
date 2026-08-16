@@ -12,9 +12,14 @@ import { seedFeatureFlags } from './seed-feature-flags.js';
 import { seedIdentity } from './seed-identity.js';
 import { seedUiRoutes } from './seed-ui-routes.js';
 import { seedRuntimeManifest } from './seed-runtime-manifest.js';
+import { seedLocalBudget } from './seed-local-budget.js';
+import { seedTreasure } from './seed-treasure.js';
+import { seedLearning } from './seed-learning.js';
+import { seedAds } from './seed-ads.js';
+import { seedCms } from './seed-cms.js';
 
-export const SEED_VERSION = '2026-08-16-r11';
-export const MANIFEST_VERSION = 8;
+export const SEED_VERSION = '2026-08-16-r16';
+export const MANIFEST_VERSION = 12;
 
 function checksumFor(version: string): string {
   return createHash('sha256').update(version).digest('hex').slice(0, 16);
@@ -55,6 +60,11 @@ export async function runSeed(pool: pg.Pool): Promise<{ status: string; seedVers
     await seedNavigation(client);
     await seedFeatureFlags(client);
     await seedIdentity(client);
+    await seedLocalBudget(client);
+    await seedTreasure(client);
+    await seedLearning(client);
+    await seedAds(client);
+    await seedCms(client);
     await seedRuntimeManifest(client, MANIFEST_VERSION);
     await completeSeedRun(client, runId);
     await client.query('COMMIT');

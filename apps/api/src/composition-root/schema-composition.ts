@@ -26,6 +26,10 @@ export function createSchemas(): SchemaRegistry {
   schemas.register('runResponse', { type: 'object', properties: { runId: { type: 'string' } } });
   schemas.register('streamResponse', { type: 'object' });
   registerAdvertiserSchemas(schemas);
+  schemas.register('publicAdResponse', { type: 'object', required: ['outcome', 'placementKey', 'reason'], properties: { outcome: { enum: ['SELECTED', 'NO_FILL'] }, placementKey: { type: 'string' }, reason: { enum: ['SELECTED', 'NO_ELIGIBLE_CANDIDATE'] }, sponsoredLabel: { type: 'string' }, title: { type: 'string' }, body: { type: 'string' }, imageUrl: { type: 'string' }, clickUrl: { type: 'string' } } });
+  schemas.register('publishedContentResponse', { type: 'array', items: { type: 'object', required: ['slug', 'title', 'body'], properties: { slug: { type: 'string' }, title: { type: 'string' }, body: { type: 'string' } } } });
+  schemas.register('publishedContentEntryResponse', { type: 'object', required: ['slug', 'title', 'body'], properties: { slug: { type: 'string' }, title: { type: 'string' }, body: { type: 'string' } } });
+  schemas.register('contentPublishRequest', { type: 'object', required: ['slug', 'title', 'body'], properties: { slug: { type: 'string', pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$' }, title: { type: 'string', minLength: 1 }, body: { type: 'string', minLength: 1 } }, additionalProperties: false });
   return schemas;
 }
 

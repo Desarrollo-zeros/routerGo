@@ -8,6 +8,10 @@ const UI_ROUTES = [
   ['admin-economy', '/economy', 'admin-economy'],
   ['battle-matchmaking', '/battles', 'battle'],
   ['treasure-list', '/treasure', 'treasure'],
+  ['learning-list', '/learning', 'learning'],
+  ['leaderboard-list', '/ranking', 'ranking'],
+  ['help-center', '/help', 'help'],
+  ['developer-portal', '/developers', 'developer'],
 ] as const;
 
 export async function seedUiRoutes(client: pg.PoolClient): Promise<void> {

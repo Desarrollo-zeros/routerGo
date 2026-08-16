@@ -7,6 +7,7 @@ import { RuntimeStatusView } from "./runtime/RuntimeStatusView";
 import type { RuntimeBundle } from "./runtime/bootstrap";
 import { AuthView } from "./features/auth/AuthView";
 import "./app/global.css";
+import "./app/visual-convergence.css";
 
 const rootEl = document.getElementById("root")!;
 

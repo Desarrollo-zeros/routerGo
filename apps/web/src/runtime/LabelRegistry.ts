@@ -6,6 +6,10 @@ const LABELS: Record<string, string> = {
   "nav.economy": "Economía",
   "nav.catalog": "Catálogo",
   "nav.battles": "Batallas",
+  "nav.learning": "Aprender",
+  "nav.ranking": "Ranking",
+  "nav.help": "Ayuda",
+  "nav.developer": "Desarrollar",
 };
 
 export class LabelRegistry {

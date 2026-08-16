@@ -10,6 +10,10 @@ const NAVS: Nav[] = [
   { route_key: 'admin-economy', screen_key: 'admin-economy', label_key: 'nav.economy', icon_key: 'chart', order_index: 99, flag: 'admin_enabled' },
   { route_key: 'battle-matchmaking', screen_key: 'battle', label_key: 'nav.battles', icon_key: 'bolt', order_index: 4, flag: 'battles_enabled' },
   { route_key: 'treasure-list', screen_key: 'treasure', label_key: 'nav.treasure', icon_key: 'map', order_index: 5, flag: 'treasure_enabled' },
+  { route_key: 'learning-list', screen_key: 'learning', label_key: 'nav.learning', icon_key: 'book', order_index: 6, flag: 'learning_enabled' },
+  { route_key: 'leaderboard-list', screen_key: 'ranking', label_key: 'nav.ranking', icon_key: 'trophy', order_index: 7, flag: 'ranking_enabled' },
+  { route_key: 'help-center', screen_key: 'help', label_key: 'nav.help', icon_key: 'help', order_index: 8, flag: 'help_enabled' },
+  { route_key: 'developer-portal', screen_key: 'developer', label_key: 'nav.developer', icon_key: 'code', order_index: 9, flag: 'developer_enabled' },
 ];
 
 export async function seedNavigation(client: pg.PoolClient): Promise<void> {

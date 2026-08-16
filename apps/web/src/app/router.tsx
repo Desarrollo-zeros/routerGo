@@ -5,6 +5,7 @@ import { CreditBalance } from "../design-system/CreditBalance";
 import type { RuntimeBundle } from "../runtime/bootstrap";
 import { useRuntime } from "../runtime/RuntimeProvider";
 import type { NavigationItem } from "../runtime/NavigationRegistry";
+import { NavIcon } from "../design-system/NavIcon";
 
 function Layout({ bundle }: { bundle: RuntimeBundle }): React.ReactElement {
   const [balance, setBalance] = React.useState(0);
@@ -23,13 +24,18 @@ function RuntimeHeader({ balance }: { balance: number }): React.ReactElement {
 
 function RuntimeNavigation({ items }: { items: NavigationItem[] }): React.ReactElement {
   const location = useLocation();
+  const [moreOpen, setMoreOpen] = React.useState(false);
+  const primary = items.slice(0, 5);
+  const secondary = items.slice(5);
+  const renderLink = (item: NavigationItem): React.ReactElement => {
+    const current = location.pathname === item.path;
+    return <Link key={item.route_key} className="rg-nav-link" to={item.path} aria-current={current ? "page" : undefined} data-route-key={item.route_key} onClick={() => setMoreOpen(false)}><NavIcon iconKey={item.icon_key} /><span>{item.label}</span></Link>;
+  };
   return (
     <div className="rg-nav-list">
       <p className="rg-nav-title">Tu espacio</p>
-      {items.map((item) => {
-        const current = location.pathname === item.path;
-        return <Link key={item.route_key} className="rg-nav-link" to={item.path} aria-current={current ? "page" : undefined} data-route-key={item.route_key}>{item.label}</Link>;
-      })}
+      <div className="rg-nav-primary">{primary.map(renderLink)}</div>
+      {secondary.length > 0 ? <div className="rg-nav-secondary"><button type="button" className="rg-more-toggle" aria-expanded={moreOpen} onClick={() => setMoreOpen((open) => !open)}><span className="rg-more-icon" aria-hidden="true">•••</span><span>Más</span></button>{moreOpen ? <div className="rg-more-menu">{secondary.map(renderLink)}</div> : null}</div> : null}
     </div>
   );
 }

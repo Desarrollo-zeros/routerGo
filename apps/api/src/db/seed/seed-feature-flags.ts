@@ -11,6 +11,10 @@ const FLAGS: Flag[] = [
   { key: 'stream_resume', default_value: true, rollout: { ttl_minutes: 45 } },
   { key: 'battles_enabled', default_value: true, rollout: {} },
   { key: 'treasure_enabled', default_value: true, rollout: {} },
+  { key: 'learning_enabled', default_value: true, rollout: {} },
+  { key: 'ranking_enabled', default_value: true, rollout: {} },
+  { key: 'help_enabled', default_value: true, rollout: {} },
+  { key: 'developer_enabled', default_value: true, rollout: {} },
 ];
 
 export async function seedFeatureFlags(client: pg.PoolClient): Promise<void> {

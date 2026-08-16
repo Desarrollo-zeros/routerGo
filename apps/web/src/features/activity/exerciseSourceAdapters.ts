@@ -2,7 +2,7 @@ import type { ExerciseDefinition } from "./exerciseCatalog";
 
 export type DatasetExercise = {
   id?: string; name?: string; category?: string; equipment?: string; target?: string;
-  muscle_group?: string; secondary_muscles?: string[];
+  body_part?: string; muscle_group?: string; secondary_muscles?: string[];
   instructions?: { es?: string; en?: string }; image?: string; gif_url?: string;
 };
 
@@ -20,8 +20,8 @@ export function mapDatasetExercise(item: DatasetExercise): ExerciseDefinition | 
   if (!item.id || !item.name || item.equipment !== "body weight") return undefined;
   return {
     id: `dataset-${item.id}`, name: label(item.name), category: label(item.category ?? "Movimiento"),
-    equipment: "Peso corporal", target: label(item.target ?? "Cuerpo completo"),
-    muscles: [item.muscle_group, ...(item.secondary_muscles ?? [])].filter(isText).map(label).join(" · "),
+    equipment: "Peso corporal", target: label(item.target ?? item.body_part ?? "Cuerpo completo"),
+    muscles: [item.muscle_group, item.body_part, ...(item.secondary_muscles ?? [])].filter(isText).map(label).join(" · "),
     level: "Catálogo", instruction: item.instructions?.es ?? item.instructions?.en ?? safeInstruction(),
     source: "exercises-dataset · Gym visual",
     imageUrl: mediaUrl(item.image, "images"), animationUrl: mediaUrl(item.gif_url, "videos"),

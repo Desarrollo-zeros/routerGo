@@ -26,7 +26,9 @@ import type { RedisStreamAdapter } from '../infrastructure/adapters/redis/RedisS
 import { createQuoteHandler, createRunHandler } from './chat-session-handlers.js';
 import type { CreateBattle } from '../application/services/CreateBattle.js';
 import { createBattleHandler } from './battle-handlers.js';
-import type { ListPublicTreasureHunts } from '../application/use-cases/ListPublicTreasureHunts.js'; import { listTreasureHandler } from './treasure-handlers.js';
+import type { ListPublicTreasureHunts } from '../application/use-cases/ListPublicTreasureHunts.js'; import { listTreasureHandler } from './treasure-handlers.js'; import type { ListPublishedLearning } from '../application/use-cases/ListPublishedLearning.js'; import { listLearningHandler } from './learning-handlers.js'; import type { ListLeaderboard } from '../application/use-cases/ListLeaderboard.js'; import { listLeaderboardHandler } from './leaderboard-handlers.js';
+import type { GetPublicAd } from '../application/use-cases/GetPublicAd.js'; import { publicAdHandler } from './ad-handlers.js';
+import type { ListPublishedContent } from '../application/use-cases/ListPublishedContent.js'; import type { GetPublishedContent } from '../application/use-cases/GetPublishedContent.js'; import type { PublishContent } from '../application/use-cases/PublishContent.js'; import { adminPublishedContent, getPublishedContent, listPublishedContent, publishContent } from './content-handlers.js';
 interface RegistryDeps {
   manifest: RuntimeManifest;
   catalog: GetCatalogPort;
@@ -50,7 +52,9 @@ interface RegistryDeps {
   executeRun: ExecuteQuotedRunPort;
   streams: RedisStreamAdapter;
   battle: CreateBattle;
-  treasureHunts: ListPublicTreasureHunts;
+  treasureHunts: ListPublicTreasureHunts; learning: ListPublishedLearning; leaderboard: ListLeaderboard;
+  publicAd: GetPublicAd;
+  publishedContent: ListPublishedContent; contentBySlug: GetPublishedContent; publishContent: PublishContent;
 }
 export function createUseCaseRegistry(deps: RegistryDeps): UseCaseRegistry {
   return {
@@ -83,7 +87,12 @@ export function createUseCaseRegistry(deps: RegistryDeps): UseCaseRegistry {
     chatCompletions: async (req) => deps.chatCompletions.execute(await readChatInput(req, deps.authenticateApiKey)),
     responses: async (req, reply) => deps.responses.execute(await readResponsesInput(req, deps.authenticateApiKey, reply)),
     createBattle: async (req) => createBattleHandler(req, deps.battle),
-    listTreasureHunts: async (req) => listTreasureHandler(req, deps.treasureHunts),
+    listTreasureHunts: async (req) => listTreasureHandler(req, deps.treasureHunts), listLearning: async (req) => listLearningHandler(req, deps.learning), listLeaderboard: async (req) => listLeaderboardHandler(req, deps.leaderboard),
+    publicAd: async (req) => publicAdHandler(req, deps.publicAd),
+    publishedContent: async () => listPublishedContent(deps.publishedContent),
+    contentBySlug: async (req) => getPublishedContent(req, deps.contentBySlug),
+    adminContent: async (req) => adminPublishedContent(req, { reader: deps.publishedContent, authenticate: deps.authenticateApiKey, identity: deps.resolveApiKeyIdentity, authorize: deps.authorizePermission }),
+    adminContentPublish: async (req) => publishContent(req, { publisher: deps.publishContent, authenticate: deps.authenticateApiKey, identity: deps.resolveApiKeyIdentity, authorize: deps.authorizePermission }),
   };
 }
 async function executeWalletLedger(req: unknown, deps: RegistryDeps): Promise<unknown> {
@@ -138,13 +147,11 @@ async function executeRollback(req: unknown, deps: RegistryDeps): Promise<unknow
   if (typeof targetVersion !== 'number' || !Number.isInteger(targetVersion) || targetVersion < 1) throw new Error('INVALID_RUNTIME_ROLLBACK');
   return deps.rollbackRuntime.execute({ identity, decision, operationId: requiredHeader(req, 'idempotency-key'), correlationId: correlationId(req), targetVersion });
 }
-
 async function requireIdentity(context: ApiKeyRequestContext, resolver: ApiKeyIdentityResolver) {
   const identity = await resolver.resolve(context);
   if (!identity) throw new AuthenticationRequiredError();
   return identity;
 }
-
 function requestBody(req: unknown): Record<string, unknown> {
   const body = (req as { body?: unknown }).body;
   return typeof body === 'object' && body !== null ? body as Record<string, unknown> : {};
@@ -155,20 +162,17 @@ function sessionUser(req: unknown): { userId: string; walletId: string } | undef
   const user = (req as { user?: { userId?: unknown; walletId?: unknown } }).user;
   return typeof user?.userId === 'string' && typeof user.walletId === 'string' ? { userId: user.userId, walletId: user.walletId } : undefined;
 }
-
 function requiredHeader(req: unknown, name: string): string {
   const headers = (req as { headers?: Record<string, unknown> }).headers;
   const value = headers?.[name];
   if (typeof value !== 'string' || !value.trim()) throw new AuthenticationRequiredError();
   return value.trim();
 }
-
 function correlationId(req: unknown): string {
   const headers = (req as { headers?: Record<string, unknown> }).headers;
   const value = headers?.['x-correlation-id'];
   return typeof value === 'string' && value.trim() ? value.trim() : requiredHeader(req, 'idempotency-key');
 }
-
 function requireAllowed(decision: { allowed: boolean; reason: 'ALLOWED' | 'MISSING_PERMISSION' | 'NO_ACTIVE_MEMBERSHIP' | 'WRONG_ORGANIZATION' | 'INACTIVE_ROLE' }): void {
   if (!decision.allowed) throw new AuthorizationDeniedError(decision.reason);
 }
@@ -178,11 +182,9 @@ function queryLimit(req: unknown): number | undefined {
   const value = query?.limit;
   return typeof value === 'string' ? Number(value) : typeof value === 'number' ? value : undefined;
 }
-
 const notReady: UseCaseHandler = async () => {
   throw new RouteNotReadyError();
 };
-
 function readWalletInput(req: unknown): { userId: string; walletId: string } {
   const user = (req as { user?: { userId?: unknown; walletId?: unknown } }).user;
   if (typeof user?.userId !== 'string' || typeof user.walletId !== 'string') {
@@ -190,10 +192,8 @@ function readWalletInput(req: unknown): { userId: string; walletId: string } {
   }
   return { userId: user.userId, walletId: user.walletId };
 }
-
 async function authenticate(req: unknown, authenticateApiKey: RegistryDeps['authenticateApiKey'], scope: string): Promise<ApiKeyRequestContext> {
   const rawKey = bearerToken(req);
   return authenticateApiKey(rawKey, scope);
 }
-
 function bearerToken(req: unknown): string { const headers = (req as { headers?: Record<string, unknown> }).headers; const authorization = headers?.authorization; if (typeof authorization !== 'string' || !authorization.startsWith('Bearer ')) throw new AuthenticationRequiredError(); return authorization.slice(7).trim(); }

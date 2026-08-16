@@ -1,11 +1,11 @@
 import type pg from 'pg';
 
-type Model = { logical_id: string; provider_model_id: string; gateway_id: string; endpoint_id: string; tier: string; price: number; caps: Record<string, unknown> };
+type Model = { logical_id: string; provider_model_id: string; gateway_id: string; endpoint_id: string; tier: string; price: number; estimate?: number; caps: Record<string, unknown> };
 
 const MODELS: Model[] = [
   // FREE — Zen FREE pool, saldo cero
-  { logical_id: 'deepseek-v4-flash-free', provider_model_id: 'deepseek-v4-flash', gateway_id: 'gw-zen', endpoint_id: 'ep-zen-chat', tier: 'FREE', price: 0, caps: { context: 32768 } },
-  { logical_id: 'mimo-v2.5-free', provider_model_id: 'mimo-v2.5', gateway_id: 'gw-zen', endpoint_id: 'ep-zen-chat', tier: 'FREE', price: 0, caps: { context: 32768 } },
+  { logical_id: 'deepseek-v4-flash-free', provider_model_id: 'deepseek-v4-flash', gateway_id: 'gw-zen', endpoint_id: 'ep-zen-chat', tier: 'FREE', price: 0, estimate: 1, caps: { context: 32768 } },
+  { logical_id: 'mimo-v2.5-free', provider_model_id: 'mimo-v2.5', gateway_id: 'gw-zen', endpoint_id: 'ep-zen-chat', tier: 'FREE', price: 0, estimate: 1, caps: { context: 32768 } },
   { logical_id: 'laguna-s-2.1-free', provider_model_id: 'laguna-s-2.1', gateway_id: 'gw-zen', endpoint_id: 'ep-zen-chat', tier: 'FREE', price: 0, caps: { context: 16384 } },
   { logical_id: 'ling-3.0-tiny-free', provider_model_id: 'ling-3.0-tiny', gateway_id: 'gw-zen', endpoint_id: 'ep-zen-chat', tier: 'FREE', price: 0, caps: { context: 16384 } },
   { logical_id: 'longcat-2.0-free', provider_model_id: 'longcat-2.0', gateway_id: 'gw-zen', endpoint_id: 'ep-zen-chat', tier: 'FREE', price: 0, caps: { context: 32768 } },
@@ -32,7 +32,7 @@ export async function seedModels(client: pg.PoolClient): Promise<void> {
       `INSERT INTO model_catalog(logical_id, provider_model_id, gateway_id, endpoint_id, tier, credit_price, limits_json, capabilities_json, enabled, manifest_version)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,true,1)
        ON CONFLICT (logical_id) DO UPDATE SET provider_model_id=EXCLUDED.provider_model_id, gateway_id=EXCLUDED.gateway_id, endpoint_id=EXCLUDED.endpoint_id, tier=EXCLUDED.tier, credit_price=EXCLUDED.credit_price, limits_json=EXCLUDED.limits_json, capabilities_json=EXCLUDED.capabilities_json, enabled=true, manifest_version=1`,
-      [m.logical_id, m.provider_model_id, m.gateway_id, m.endpoint_id, m.tier, m.price, JSON.stringify({ max_output_tokens: 4096 }), JSON.stringify(m.caps)],
+      [m.logical_id, m.provider_model_id, m.gateway_id, m.endpoint_id, m.tier, m.price, JSON.stringify({ max_output_tokens: 4096 }), JSON.stringify({ ...m.caps, estimated_platform_cost_microusd: m.estimate ?? 1 })],
     );
   }
 }
