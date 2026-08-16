@@ -19,7 +19,7 @@ const ROUTES: Route[] = [
   { route_key: 'admin-economy', method: 'GET', path: '/admin/economy', use_case: 'getEconomy', auth: 'api_key', req: null, res: 'economyResponse' },
   { route_key: 'admin-provider-analytics', method: 'GET', path: '/admin/providers/analytics', use_case: 'getProviderAnalytics', auth: 'api_key', req: null, res: 'providerAnalyticsResponse' },
   { route_key: 'admin-wallet', method: 'GET', path: '/admin/wallet', use_case: 'getAdminWallet', auth: 'api_key', req: null, res: 'walletResponse' },
-  { route_key: 'admin-ledger', method: 'GET', path: '/admin/ledger', use_case: 'getLedger', auth: 'api_key', req: null, res: 'ledgerResponse' },
+  { route_key: 'admin-ledger', method: 'GET', path: '/admin/ledger', use_case: 'getLedger', auth: 'api_key', req: null, res: 'adminLedgerResponse' },
   { route_key: 'admin-runtime-publish', method: 'POST', path: '/admin/runtime/publish', use_case: 'publishRuntime', auth: 'api_key', req: null, res: 'runtimeManifestResponse' },
   { route_key: 'admin-runtime-rollback', method: 'POST', path: '/admin/runtime/rollback', use_case: 'rollbackRuntime', auth: 'api_key', req: 'runtimeRollbackRequest', res: 'runtimeManifestResponse' },
   { route_key: 'advertiser-account', method: 'GET', path: '/advertiser/account', use_case: 'advertiserAccount', auth: 'api_key', req: null, res: 'advertiserAccountResponse' },

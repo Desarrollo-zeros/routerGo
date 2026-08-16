@@ -7,7 +7,7 @@ import { CatalogPostgresAdapter } from '../infrastructure/adapters/postgres/Cata
 import { RedisStreamAdapter } from '../infrastructure/adapters/redis/RedisStreamAdapter.js';
 import { buildApp } from '../infrastructure/http/bootstrap.js';
 import { createSchemas } from './schema-composition.js';
-import { GetEconomyUseCase } from '../application/use-cases/GetEconomy.js';
+import { createEconomy } from './economy-composition.js';
 import { GetCatalogUseCase } from '../application/use-cases/GetCatalog.js';
 import { ListModelsUseCase } from '../application/use-cases/ListModels.js';
 import { GetWalletUseCase } from '../application/use-cases/GetWallet.js';
@@ -54,24 +54,23 @@ import { GetAdvertiserAccount, ListAdvertiserCampaigns, ListAdvertiserCreatives,
 import { PostgresChallengeAdminRepository } from '../infrastructure/adapters/postgres/PostgresChallengeAdminRepository.js';
 import { ApproveChallenge, CreateChallenge, ListChallenges, SubmitChallenge } from '../application/use-cases/ChallengeAdminUseCases.js';
 import { RedisBattleStateStore } from '../infrastructure/adapters/redis/RedisBattleStateStore.js';
+import { PostgresAuthUserRepository } from '../infrastructure/adapters/postgres/PostgresAuthUserRepository.js';
+import { ScryptPasswordHasher } from '../infrastructure/security/ScryptPasswordHasher.js';
+import { SessionAuthService } from '../application/services/SessionAuthService.js';
+import { VerifyActivityUseCase } from '../application/use-cases/VerifyActivity.js';
+import { RewardPolicy } from '../domain/policies/RewardPolicy.js';
+import { DailyCapPolicy } from '../domain/policies/DailyCapPolicy.js';
+import { PostgresWalletLedgerReader } from '../infrastructure/adapters/postgres/PostgresWalletLedgerReader.js';
 
 const { Pool } = pg;
 
 export async function createComposition() {
   const pool = new Pool({ connectionString: databaseUrl() });
   const redis = new Redis(redisUrl(), { lazyConnect: true });
-  const manifest = await loadRequiredManifest(pool);
-  const schemas = createSchemas();
-  const catalog = new CatalogPostgresAdapter(pool);
-  const wallet = new WalletPostgresRepository(pool);
-  const economyUnitOfWork = new PgEconomyUnitOfWorkFactory(pool);
-  const unitOfWork = new PgUnitOfWorkFactory(pool);
-  const economyClock = new SystemClock();
-  const creditOperations = createCreditOperations(economyUnitOfWork, economyClock);
-  const economy = createEconomy(pool);
-  const catalogUseCase = new GetCatalogUseCase(catalog);
-  const target = new PostgresExecutionTargetAdapter(pool);
-  const provider = createProvider(economyClock);
+  const manifest = await loadRequiredManifest(pool); const schemas = createSchemas();
+  const catalog = new CatalogPostgresAdapter(pool); const wallet = new WalletPostgresRepository(pool); const economyUnitOfWork = new PgEconomyUnitOfWorkFactory(pool);
+  const unitOfWork = new PgUnitOfWorkFactory(pool); const economyClock = new SystemClock(); const creditOperations = createCreditOperations(economyUnitOfWork, economyClock); const economy = createEconomy(pool);
+  const catalogUseCase = new GetCatalogUseCase(catalog); const target = new PostgresExecutionTargetAdapter(pool); const provider = createProvider(economyClock);
   const createQuote = new CreateQuoteUseCase(catalog, economyClock, unitOfWork);
   const executeRun = new ExecuteQuotedRunUseCase({
     uowFactory: unitOfWork, creditOperations, budget: new PostgresBudgetEvaluator(pool),
@@ -81,11 +80,14 @@ export async function createComposition() {
   const chatCompletions = new ChatCompletionsUseCase({ createQuote, executeRun, clock: economyClock, quota });
   const providerAnalytics = createProviderAnalytics(pool); const runtimeManifest = createRuntimeManifestUseCases(pool, redis); const authorizePermission = new AuthorizePermissionUseCase(new PostgresAuthorizationGrantReader(pool));
   const identity = createIdentityDependencies(pool);
+  const session = new SessionAuthService(new PostgresAuthUserRepository(pool), new ScryptPasswordHasher());
+  const verifyActivity = new VerifyActivityUseCase(unitOfWork, new RewardPolicy({ creditsPerRep: 500n, maxRepsPerSession: 50 }), new DailyCapPolicy({ dailyCapCredits: 25000n }), economyClock);
+  const walletLedger = new PostgresWalletLedgerReader(pool);
   const useCases = createUseCaseRegistry({
     manifest, catalog: catalogUseCase, models: new ListModelsUseCase(catalogUseCase),
     wallet: new GetWalletUseCase(wallet), economy,
     chatCompletions, responses: new ResponsesUseCase(chatCompletions),
-    authenticateApiKey: identity.authenticateApiKey, resolveApiKeyIdentity: identity.resolveApiKeyIdentity, authorizePermission,
+    authenticateApiKey: identity.authenticateApiKey, resolveApiKeyIdentity: identity.resolveApiKeyIdentity, authorizePermission, verifyActivity, walletLedger,
     publishRuntime: runtimeManifest.publish, rollbackRuntime: runtimeManifest.rollback,
     ledger: new GetLedgerUseCase(new PostgresAdminLedgerReader(pool)),
     advertiser: createAdvertiserHandlers(pool),
@@ -93,7 +95,7 @@ export async function createComposition() {
     providerAnalytics,
   });
   const streams = new RedisStreamAdapter(redis as never); return {
-    pool, redis, manifest, schemas, useCases, creditOperations, providerAnalytics, sseDeps: { streams },
+    pool, redis, manifest, schemas, useCases, creditOperations, providerAnalytics, session, sseDeps: { streams },
     battleGateway: { store: new RedisBattleStateStore(redis), authenticateApiKey: identity.authenticateApiKey, identity: identity.resolveApiKeyIdentity, authorize: authorizePermission },
   };
 }
@@ -157,41 +159,6 @@ function redisUrl(): string {
   return process.env.REDIS_URL ?? 'redis://localhost:6379';
 }
 
-function createEconomy(pool: pg.Pool): GetEconomyUseCase {
-  return new GetEconomyUseCase({
-    getGoCount: async () => queryGoCount(pool),
-    getWindows: async () => queryWindows(pool),
-    getOperatorRevenueMicro: async () => queryRevenue(pool),
-    getProviderCostMicro: async () => queryProviderCost(pool),
-    getRewardLiabilityCredits: async () => queryRewardLiability(pool),
-  });
-}
-
-async function queryGoCount(pool: pg.Pool): Promise<number> {
-  const result = await pool.query("SELECT count(*)::int as c FROM credential_deployments WHERE pool_kind='GO' AND status='ACTIVE'");
-  return result.rows[0]?.c ?? 0;
-}
-
-async function queryWindows(pool: pg.Pool): Promise<Array<{ quotaScopeId: string; windowType: string; usedMicro: number }>> {
-  const result = await pool.query('SELECT quota_scope_id as "quotaScopeId", window_type as "windowType", used_value::int as "usedMicro" FROM credential_usage_windows');
-  return result.rows;
-}
-
-async function queryRevenue(pool: pg.Pool): Promise<number> {
-  const result = await pool.query<{ total: string }>("SELECT COALESCE(SUM(net_revenue_microusd), 0)::text AS total FROM revenue_entries WHERE status='FINALIZED'");
-  return Number(result.rows[0]?.total ?? 0);
-}
-
-async function queryProviderCost(pool: pg.Pool): Promise<number> {
-  const result = await pool.query<{ total: string }>("SELECT COALESCE(SUM(cost_microusd), 0)::text AS total FROM provider_cost_entries WHERE source <> 'REVERSAL'");
-  return Number(result.rows[0]?.total ?? 0);
-}
-
-async function queryRewardLiability(pool: pg.Pool): Promise<number> {
-  const result = await pool.query<{ total: string }>('SELECT COALESCE(SUM(balance), 0)::text AS total FROM wallets');
-  return Number(result.rows[0]?.total ?? 0);
-}
-
 export function buildCompositionApp(deps: Awaited<ReturnType<typeof createComposition>>) {
-  return buildApp({ manifest: deps.manifest, useCases: deps.useCases, schemas: deps.schemas, sseDeps: deps.sseDeps, battleGateway: deps.battleGateway });
+  return buildApp({ manifest: deps.manifest, useCases: deps.useCases, schemas: deps.schemas, sseDeps: deps.sseDeps, battleGateway: deps.battleGateway, session: deps.session });
 }

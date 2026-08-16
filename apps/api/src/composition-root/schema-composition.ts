@@ -19,8 +19,9 @@ export function createSchemas(): SchemaRegistry {
   schemas.register('responsesRequest', { type: 'object', required: ['model', 'input'], properties: { model: { type: 'string' }, input: { oneOf: [{ type: 'string' }, { type: 'array', items: { type: 'object' } }] }, max_output_tokens: { type: 'integer', minimum: 1 }, stream: { type: 'boolean' } }, additionalProperties: false });
   schemas.register('responsesResponse', { type: 'object', required: ['id', 'object', 'status', 'model', 'output'], properties: { id: { type: 'string' }, object: { const: 'response' }, status: { const: 'completed' }, model: { type: 'string' }, output: { type: 'array' } } });
   schemas.register('walletResponse', { type: 'object', properties: { walletId: { type: 'string' }, balance: { type: 'string' }, version: { type: 'number' } } });
-  schemas.register('ledgerResponse', { type: 'object', properties: { entries: { type: 'array', items: { type: 'object', properties: { id: { type: 'string' }, kind: { type: 'string' }, amount: { type: 'string' }, occurredAt: { type: 'string' } } } } } });
-  schemas.register('verifyActivityResponse', { type: 'object', properties: { verified: { type: 'boolean' } } });
+  schemas.register('ledgerResponse', { type: 'object', properties: { entries: { type: 'array', items: { type: 'object', required: ['id', 'type', 'amount_signed', 'created_at'], properties: { id: { type: 'string' }, type: { type: 'string' }, amount_signed: { type: 'string' }, created_at: { type: 'string' } } } } } });
+  schemas.register('adminLedgerResponse', { type: 'object', properties: { entries: { type: 'array', items: { type: 'object', required: ['id', 'kind', 'amount', 'occurredAt'], properties: { id: { type: 'string' }, kind: { type: 'string' }, amount: { type: 'string' }, occurredAt: { type: 'string' } } } } } });
+  schemas.register('verifyActivityResponse', { type: 'object', required: ['ledgerId', 'credits', 'newBalance', 'reused'], properties: { ledgerId: { type: 'string' }, credits: { type: 'string' }, newBalance: { type: 'string' }, reused: { type: 'boolean' } } });
   schemas.register('quoteResponse', { type: 'object', properties: { quoteId: { type: 'string' } } });
   schemas.register('runResponse', { type: 'object', properties: { runId: { type: 'string' } } });
   schemas.register('streamResponse', { type: 'object' });
