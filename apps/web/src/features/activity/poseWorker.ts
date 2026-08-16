@@ -12,7 +12,7 @@ export type PoseDetector = {
   close(): void;
 };
 
-const WASM_URL = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm";
+const WASM_URL = "https://unpkg.com/@mediapipe/tasks-vision@0.10.14/wasm";
 const MODEL_URL = "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task";
 
 export async function createPoseDetector(): Promise<PoseDetector> {
