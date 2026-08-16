@@ -43,7 +43,7 @@ Format: `[ID] [P?] [Story] task`. `[P]` means safe parallel ownership in differe
 - [x] T041 [P] [US3] CMS content/version/publication/media domain.
 - [x] T042 [P] [US3] Admin model/provider/runtime-config views with audited publish.
 - [x] T043 [P] [US3] Admin wallet/economy/read-only ledger views with privilege separation.
-- [ ] T044 [US3] Responsive/a11y E2E for admin critical flows.
+- [x] T044 [US3] Responsive/a11y E2E for admin critical flows.
 
 ## Phase 5 — Ads core + advertiser
 - [x] T050 [US4] Add advertiser/funding/campaign/creative/placement schema.
