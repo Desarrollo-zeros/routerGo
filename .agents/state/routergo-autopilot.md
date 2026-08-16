@@ -1,6 +1,6 @@
 phase: 4
-current_objective: T103
-status: executing
+current_objective: T105
+status: blocked
 last_green_commit: 645f309
 last_completed_tasks:
   - T020

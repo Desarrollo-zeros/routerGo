@@ -71,7 +71,7 @@
 - T092 is implemented: `HmacQrProofSigner` creates bounded signed tokens, `RedeemQrProof` separates invalid from replayed proofs, and `RedisQrProofReplayStore` atomically claims nonces until expiry without storing raw tokens. Public-location review workflow and client permission fallback remain T093-T094.
 - T093 is implemented: `PublicLocationReview` requires explicit submission before approval, rejects unsafe state transitions, and returns a non-location alternative or unavailable result when permission is denied. Responsive map/list UX and browser integration remain T094.
 - T094 is implemented: the web runtime includes an accessible responsive treasure map/list screen with coarse-zone privacy copy, empty state, permission-denied alternative, and no coordinate rendering. Activation remains manifest-driven; backend hunt listing and browser geolocation wiring remain outside this UI task.
-- T100 is implemented: migration `017_risk_events.sql` adds idempotent cross-context abuse events, bounded user scores, and review cases; `RiskSignalPolicy` maps duplicate/replay/velocity/severity signals to normal/review/blocked actions without role-name or raw-payload decisions. Risk ingestion orchestration, dashboards, and analyst workflows remain T102-T106.
+- T100 is implemented: migration `017_risk_events.sql` adds idempotent cross-context abuse events, bounded user scores, and review cases; `RiskSignalPolicy` maps duplicate/replay/velocity/severity signals to normal/review/blocked actions without role-name or raw-payload decisions. Risk ingestion orchestration and analyst workflows remain outside this foundation slice.
 - T101 is implemented: the protected Studio unit-economics dashboard reads revenue, provider cost, infrastructure cost, contribution, and GoCredits reward liability as separate fixed-precision measures, with fail-closed authorization and rendering tests.
 - T101 foundation connected: `/admin/economy` is an explicit `economy.read` API-key capability route, and Studio fetches typed unit-economics, wallet, and ledger responses when an authenticated session injects an access token. A browser session/token transport remains an integration concern; privilege separation is covered by T043.
 - T102 is implemented: PostgreSQL aggregates provider quota windows and finalized costs, an HTTP HEAD probe supplies explicit health, non-zero alerts are recorded idempotently in the outbox, and `/admin/providers/analytics` exposes the typed result behind the `providers.read` API-key capability. Configurable policy storage remains open.
@@ -83,7 +83,7 @@
 
 - Local foundation gates are reproducible through clean PostgreSQL migration/seed runs, Docker health checks, typecheck, lint, line and architecture checks, secrets scan, API/web tests, build, performance smoke, provider contracts, and E2E.
 - Completed phase-10 work includes risk foundations (T100), unit economics (T101), provider analytics (T102), performance evidence (T103), and regression evidence (T104). T105 is intentionally not marked complete because staging and rollback evidence are external.
-- Remaining product and operational gaps are explicit in `tasks.md`: battle completion (T081, T083-T084), and staged beta operations (T105). Rev.7 is not declared complete.
+- The remaining operational gap is explicit in `tasks.md`: staged beta operations (T105). Rev.7 is not declared complete.
 
 ### P0 — Foundation blockers
 
