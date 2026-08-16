@@ -14,13 +14,13 @@ export class LedgerPostgresRepository implements LedgerRepository {
   async insert(entry: import('../../../domain/entities/LedgerEntry').LedgerEntry): Promise<void> {
     const row = LedgerMapper.toRow(entry);
     await this.pool.query(
-      'INSERT INTO ledger_entries (id,wallet_id,kind,amount,idempotency_key,ref_id,created_at,metadata) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT (wallet_id,idempotency_key) DO NOTHING',
-      [row.id, row.wallet_id, row.kind, row.amount, row.idempotency_key, row.ref_id, row.created_at, row.metadata ? JSON.stringify(row.metadata) : null],
+      'INSERT INTO ledger_entries (id,wallet_id,type,amount_signed,idempotency_key,request_hash,created_at,meta_json) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT (wallet_id,idempotency_key) DO NOTHING',
+      [row.id, row.wallet_id, row.type, row.amount_signed, row.idempotency_key, row.request_hash, row.created_at, JSON.stringify(row.meta_json ?? {})],
     );
   }
 
   async sumEarnedToday(walletId: string, dayStart: Date): Promise<Credits> {
-    const r = await this.pool.query("SELECT COALESCE(SUM(amount::bigint),0) as total FROM ledger_entries WHERE wallet_id=$1 AND kind='earn' AND created_at >= $2", [walletId, dayStart]);
+    const r = await this.pool.query("SELECT COALESCE(SUM(amount_signed),0) as total FROM ledger_entries WHERE wallet_id=$1 AND type='EARN' AND created_at >= $2", [walletId, dayStart]);
     return Credits.of(BigInt(r.rows[0].total));
   }
 

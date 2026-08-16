@@ -8,7 +8,11 @@ export class PoolPostgresAdapter implements PoolPort {
 
   async getEligibleDeployments(modelId: string, now: Date): Promise<import('../../../domain/entities/CredentialDeployment').CredentialDeployment[]> {
     const r = await this.pool.query(
-      "SELECT * FROM credential_deployments WHERE (model_logical_id=$1 OR model_logical_id IS NULL) AND enabled=true AND (cooldown_until IS NULL OR cooldown_until <= $2)",
+      `SELECT d.*
+       FROM credential_deployments d
+       JOIN model_catalog m ON m.gateway_id=d.gateway_id
+       WHERE m.logical_id=$1 AND d.status='ACTIVE'
+         AND (d.cooldown_until IS NULL OR d.cooldown_until <= $2)`,
       [modelId, now],
     );
     return r.rows.map(CredentialDeploymentMapper.toDomain);
@@ -20,17 +24,17 @@ export class PoolPostgresAdapter implements PoolPort {
       (row) =>
         new UsageWindow({
           scopeId: row.quota_scope_id,
-          windowKind: row.window_kind,
-          used: Number(row.used),
+          windowKind: row.window_type,
+          used: Number(row.used_value),
           limit: Number(row.limit_value),
-          windowStart: new Date(row.window_start),
-          windowEnd: new Date(row.window_end),
+          windowStart: new Date(row.starts_at),
+          windowEnd: new Date(row.ends_at),
         }),
     );
   }
 
   async recordUsage(deploymentId: string, tokens: number): Promise<void> {
-    await this.pool.query('UPDATE credential_usage_windows SET used = used + $2 WHERE quota_scope_id = (SELECT quota_scope_id FROM credential_deployments WHERE id=$1)', [
+    await this.pool.query('UPDATE credential_usage_windows SET used_value = used_value + $2 WHERE quota_scope_id = (SELECT quota_scope_id FROM credential_deployments WHERE id=$1)', [
       deploymentId,
       tokens,
     ]);

@@ -4,12 +4,12 @@ import { Credits } from '../../../../domain/value-objects/Credits';
 export interface LedgerRow {
   id: string;
   wallet_id: string;
-  kind: string;
-  amount: string;
+  type: string;
+  amount_signed: string;
   idempotency_key: string;
-  ref_id: string | null;
+  request_hash: string | null;
   created_at: string | Date;
-  metadata: Record<string, unknown> | null;
+  meta_json: Record<string, unknown> | null;
 }
 
 export const LedgerMapper = {
@@ -17,16 +17,32 @@ export const LedgerMapper = {
     return LedgerEntry.create({
       id: row.id,
       walletId: row.wallet_id,
-      kind: row.kind as never,
-      amount: Credits.of(BigInt(row.amount)),
+      kind: kindFromType(row.type),
+      amount: Credits.of(abs(BigInt(row.amount_signed))),
       idempotencyKey: row.idempotency_key,
-      refId: row.ref_id,
+      refId: row.request_hash,
       createdAt: new Date(row.created_at),
-      metadata: row.metadata,
+      metadata: row.meta_json,
     });
   },
   toRow(e: LedgerEntry): LedgerRow {
     const p = e.toProps();
-    return { id: p.id, wallet_id: p.walletId, kind: p.kind, amount: p.amount.toString(), idempotency_key: p.idempotencyKey, ref_id: p.refId, created_at: p.createdAt.toISOString(), metadata: (p.metadata as never) ?? null };
+    return { id: p.id, wallet_id: p.walletId, type: p.kind.toUpperCase(), amount_signed: signedAmount(p.kind, p.amount), idempotency_key: p.idempotencyKey, request_hash: p.refId, created_at: p.createdAt.toISOString(), meta_json: p.metadata ?? null };
   },
 };
+
+function kindFromType(type: string): 'earn' | 'spend' | 'refund' {
+  if (type === 'EARN') return 'earn';
+  if (type === 'SPEND') return 'spend';
+  if (type === 'REFUND') return 'refund';
+  throw new Error(`Unknown ledger type: ${type}`);
+}
+
+function signedAmount(kind: 'earn' | 'spend' | 'refund', amount: Credits): string {
+  const value = amount.toString();
+  return kind === 'spend' ? `-${value}` : value;
+}
+
+function abs(value: bigint): bigint {
+  return value < 0n ? -value : value;
+}

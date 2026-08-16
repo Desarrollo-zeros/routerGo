@@ -3,6 +3,7 @@ import type { RuntimeManifest } from '../../config/RuntimeManifest.js';
 import { DynamicRouteRegistry, type UseCaseRegistry } from './dynamic-route-registry.js';
 import type { SchemaRegistry } from './schema-registry.js';
 import { sseHandler, type SseDeps } from './sse-handler.js';
+import { AuthenticationRequiredError, RouteNotReadyError } from './http-errors.js';
 
 export interface BootstrapDeps {
   manifest: RuntimeManifest;
@@ -40,6 +41,12 @@ export function buildApp(deps: BootstrapDeps): ReturnType<typeof Fastify> {
   const app = Fastify({
     logger: { level: 'info', redact: ['headers.authorization', 'headers.cookie', 'body.apiKey'] },
     trustProxy: deps.trustProxy ?? false,
+  });
+
+  app.setErrorHandler((error, _request, reply) => {
+    if (error instanceof AuthenticationRequiredError) return reply.code(401).send({ error: 'authentication_required' });
+    if (error instanceof RouteNotReadyError) return reply.code(501).send({ error: 'route_not_ready' });
+    return reply.send(error);
   });
 
   app.get('/health', async () => ({ status: 'ok', uptime: process.uptime() }));
