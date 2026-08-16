@@ -14,6 +14,14 @@ describe('AdvertiserClient', () => {
     expect(fetchMock.mock.calls[0][1]).toEqual({ headers: { authorization: 'Bearer test-token' } });
     vi.unstubAllGlobals();
   });
+
+  it('creates a campaign through the authenticated write route', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true });
+    vi.stubGlobal('fetch', fetchMock);
+    await new AdvertiserClient('http://api', 'test-token').createCampaign({ name: 'Launch', budgetMicro: '2500', sponsoredLabel: 'Sponsored' });
+    expect(fetchMock).toHaveBeenCalledWith('http://api/advertiser/campaigns', expect.objectContaining({ method: 'POST', headers: { authorization: 'Bearer test-token', 'content-type': 'application/json' }, body: JSON.stringify({ name: 'Launch', budgetMicro: '2500', sponsoredLabel: 'Sponsored' }) }));
+    vi.unstubAllGlobals();
+  });
 });
 
 function responseFor(path: string): unknown {

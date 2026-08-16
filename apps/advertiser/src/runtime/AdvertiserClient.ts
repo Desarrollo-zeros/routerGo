@@ -16,9 +16,17 @@ export class AdvertiserClient {
     ]);
     return { account, campaigns, creatives, analytics } as AdvertiserSnapshot;
   }
+  async createCampaign(input: { name: string; budgetMicro: string; sponsoredLabel: string }): Promise<void> {
+    const response = await fetch(`${this.baseUrl}/advertiser/campaigns`, { method: 'POST', headers: { ...this.headers(), 'content-type': 'application/json' }, body: JSON.stringify(input) });
+    if (!response.ok) throw new Error(`ADVERTISER_REQUEST_${response.status}`);
+  }
   private async get(path: string, headers: Record<string, string>): Promise<unknown> {
-    const response = await fetch(`${this.baseUrl}${path}`, { headers });
+    const response = await fetch(`${this.baseUrl}${path}`, { headers: { ...headers, ...this.headers() } });
     if (!response.ok) throw new Error(`ADVERTISER_REQUEST_${response.status}`);
     return response.json();
+  }
+  private headers(): Record<string, string> {
+    if (!this.accessToken?.trim()) throw new Error('ADVERTISER_SESSION_REQUIRED');
+    return { authorization: `Bearer ${this.accessToken}` };
   }
 }

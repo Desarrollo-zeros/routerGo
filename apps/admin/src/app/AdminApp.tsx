@@ -20,12 +20,23 @@ interface AdminAppProps {
   economyAccessToken?: string;
 }
 
+function AccessForm({ onSubmit }: { onSubmit: (token: string) => void }): React.ReactElement {
+  const [token, setToken] = React.useState('');
+  return <form className="admin-access-form" onSubmit={(event) => { event.preventDefault(); onSubmit(token.trim()); }}>
+    <label htmlFor="studio-token">Clave de acceso de Studio</label>
+    <div><input id="studio-token" type="password" value={token} onChange={(event) => setToken(event.target.value)} placeholder="Pega una API key con scopes de Studio" autoComplete="off" required /><button className="admin-button" type="submit">Conectar Studio</button></div>
+    <small>La clave se mantiene solo en memoria y no se persiste en el navegador.</small>
+  </form>;
+}
+
 export function AdminApp({ manifest, economyAccessToken }: AdminAppProps): React.ReactElement {
-  const reads = useAdminReads(economyAccessToken);
-  const publishRuntime = usePublishRuntime(economyAccessToken);
+  const [accessToken, setAccessToken] = React.useState(economyAccessToken);
+  const reads = useAdminReads(accessToken);
+  const publishRuntime = usePublishRuntime(accessToken);
   return <AdminShell brand={<span aria-label="RouterGo Studio">RouterGo Studio</span>} navigation={manifest ? <RuntimeNavigation manifest={manifest} /> : undefined}>
     <h1>Studio</h1>
-    {manifest ? <div className="admin-stack"><RuntimeConfigView manifest={manifest} onPublish={publishRuntime} /><ChallengeBuilderView accessToken={economyAccessToken} /><ModelCatalogView models={manifest.catalog} /><ProviderView models={manifest.catalog} /><WalletReadView authorized={Boolean(reads.wallet)} summary={reads.wallet} /><UnitEconomicsDashboard authorized={Boolean(reads.economy)} summary={reads.economy?.unitEconomics} /><LedgerReadView authorized={Boolean(reads.ledger)} rows={reads.ledger?.entries} /></div> : <Panel title="Área de administración"><StatusMessage>La configuración runtime no está disponible.</StatusMessage></Panel>}
+    {!accessToken ? <AccessForm onSubmit={setAccessToken} /> : null}
+    {manifest ? <div className="admin-stack"><RuntimeConfigView manifest={manifest} onPublish={publishRuntime} /><ChallengeBuilderView accessToken={accessToken} /><ModelCatalogView models={manifest.catalog} /><ProviderView models={manifest.catalog} /><WalletReadView authorized={Boolean(reads.wallet)} summary={reads.wallet} /><UnitEconomicsDashboard authorized={Boolean(reads.economy)} summary={reads.economy?.unitEconomics} /><LedgerReadView authorized={Boolean(reads.ledger)} rows={reads.ledger?.entries} /></div> : <Panel title="Área de administración"><StatusMessage>La configuración runtime no está disponible.</StatusMessage></Panel>}
   </AdminShell>;
 }
 
