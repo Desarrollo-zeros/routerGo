@@ -65,7 +65,7 @@ Format: `[ID] [P?] [Story] task`. `[P]` means safe parallel ownership in differe
 - [x] T070 [US8] Add skill definition/version/classification schema and Studio workflow.
 - [x] T071 [P] [US8] Implement `IntentClassifierPort` + schema-constrained provider adapter.
 - [x] T072 [P] [US8] Implement typed `SkillRegistry` + immutable skill versions.
-- [ ] T073 [US8] Add low-confidence/timeout/budget fallback heuristics.
+- [x] T073 [US8] Add low-confidence/timeout/budget fallback heuristics.
 - [ ] T074 [US8] Integrate session-start classification without blocking core session availability.
 - [ ] T075 [US8] Test prompt-injection attempts cannot activate unknown tools/skills.
 

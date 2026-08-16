@@ -56,6 +56,7 @@
 - T070 is implemented: migration `011_skills.sql` adds versioned skill definitions/policies and bounded session classifications. Classifier adapters, registry activation, fallback, and Studio workflow remain T071-T074.
 - T071 is implemented: `IntentClassifierPort` and a schema-constrained adapter accept only the fixed intent taxonomy, confidence range, bounded tags, and no executable extra fields. Fallback and non-blocking session integration remain T073-T074.
 - T072 is implemented: `SkillRegistry` resolves only typed, uniquely versioned skills and deep-freezes policy JSON so callers cannot mutate registered versions. Fallback and session activation remain T073-T074.
+- T073 is implemented: intent classification falls back to deterministic keyword heuristics or configured default when budget is unavailable, confidence is low, the classifier errors, or timeout elapses; the core session is never blocked.
 
 ### P0 — Foundation blockers
 
