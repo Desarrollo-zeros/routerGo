@@ -30,9 +30,10 @@ const manifest = {
   ],
 };
 async function mockApi(page: any, balance=12){
-  await page.addInitScript(()=>localStorage.setItem("routergo.local.session","e2e@example.com"));
+  await page.route("**/api/auth/me", (r:any)=>r.fulfill({status:200,contentType:"application/json",body:JSON.stringify({user:{id:"e2e-user",email:"e2e@example.com",walletId:"e2e-wallet"}})}));
   await page.route("**/runtime-manifest", (r:any)=>r.fulfill({status:200,contentType:"application/json",body:JSON.stringify(manifest)}));
   await page.route("**/api/wallet", (r:any)=>r.fulfill({status:200,contentType:"application/json",body:JSON.stringify({balance,lifetime_earned:30,currency:"CREDITS"})}));
+  await page.route("**/api/wallet/ledger", (r:any)=>r.fulfill({status:200,contentType:"application/json",body:JSON.stringify({entries:[]})}));
   await page.route("**/api/activities/current/verify", (r:any)=>r.fulfill({status:200,contentType:"application/json",body:JSON.stringify({verified_reps:10,credits:5})}));
   await page.route("**/api/quotes", (r:any)=>r.fulfill({status:200,contentType:"application/json",body:JSON.stringify({id:"q1",credit_cost:5})}));
   await page.route("**/api/runs", (r:any)=>r.fulfill({status:200,contentType:"application/json",body:JSON.stringify({id:"run1"})}));
@@ -57,12 +58,14 @@ async function mockCameraOk(page:any){
 test.describe("RouterGo E2E",()=>{
   test("solicita iniciar sesión o crear cuenta antes de entrar",async({page})=>{
     await page.route("**/runtime-manifest",(r:any)=>r.fulfill({status:200,contentType:"application/json",body:JSON.stringify(manifest)}));
+    await page.route("**/api/auth/me",(r:any)=>r.fulfill({status:401,contentType:"application/json",body:JSON.stringify({error:"authentication_required"})}));
     await page.goto("/");
     await expect(page.getByRole("tab",{name:"Iniciar sesión"})).toBeVisible();
     await expect(page.getByRole("tab",{name:"Crear cuenta"})).toBeVisible();
-    await page.getByLabel("Correo electrónico").fill("real@example.com");
+    await page.getByRole("tab",{name:"Crear cuenta"}).click();
+    await page.getByLabel("Correo electrónico").fill(`e2e-${Date.now()}@example.com`);
     await page.getByLabel("Contraseña").fill("secreto123");
-    await page.getByRole("button",{name:"Entrar a RouterGo"}).click();
+    await page.getByRole("button",{name:"Crear mi cuenta"}).click();
     await expect(page.getByRole("link",{name:"Actividad"})).toBeVisible();
   });
 
