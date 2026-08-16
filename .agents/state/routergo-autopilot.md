@@ -17,4 +17,4 @@ last_completed_tasks:
 blocked_tasks: []
 next_candidates:
   - T034
-last_validation: T033 and composition convergence validated on clean temporary DB; API 39 suites/216 tests, build, repeated r4 seed checksum, and E2E passed. Main local DB retains immutable historical snapshots from prior runtime tests.
+last_validation: T034 application boundary composes quote and execution; typecheck, targeted tests, lines, and architecture pass. HTTP/provider wiring remains active work.
