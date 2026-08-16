@@ -173,6 +173,15 @@ function uniqueExercises(items: ExerciseDefinition[]): ExerciseDefinition[] {
   return [...new Map(items.map((item) => [item.id, item])).values()];
 }
 
+function records(payload: unknown, property?: string): unknown[] {
+  if (Array.isArray(payload)) return payload;
+  if (property && typeof payload === "object" && payload !== null) {
+    const value = (payload as Record<string, unknown>)[property];
+    return Array.isArray(value) ? value : [];
+  }
+  return [];
+}
+
 export async function loadExerciseDataset(signal?: AbortSignal): Promise<ExerciseDefinition[]> {
   const payloads = await Promise.allSettled([
     fetchJson(EXERCISE_DATASET_URL, signal),
@@ -180,10 +189,10 @@ export async function loadExerciseDataset(signal?: AbortSignal): Promise<Exercis
     fetchJson(FREE_EXERCISE_DB_URL, signal),
     fetchJson(EXERCISEDB_API_URL, signal),
   ]);
-  const first = payloads[0].status === "fulfilled" && Array.isArray(payloads[0].value) ? payloads[0].value : [];
-  const second = payloads[1].status === "fulfilled" && !Array.isArray(payloads[1].value) ? (payloads[1].value as { exercises?: unknown[] }).exercises ?? [] : [];
-  const third = payloads[2].status === "fulfilled" && Array.isArray(payloads[2].value) ? payloads[2].value : [];
-  const fourth = payloads[3].status === "fulfilled" && Array.isArray(payloads[3].value) ? payloads[3].value : [];
+  const first = payloads[0].status === "fulfilled" ? records(payloads[0].value) : [];
+  const second = payloads[1].status === "fulfilled" ? records(payloads[1].value, "exercises") : [];
+  const third = payloads[2].status === "fulfilled" ? records(payloads[2].value) : [];
+  const fourth = payloads[3].status === "fulfilled" ? records(payloads[3].value, "data") : [];
   const mapped = uniqueExercises([
     ...first.map((item) => mapDatasetExercise(item as DatasetExercise)).filter((item): item is ExerciseDefinition => Boolean(item)),
     ...second.map((item) => mapGymGifExercise(item as GymGifExercise)).filter((item): item is ExerciseDefinition => Boolean(item)),

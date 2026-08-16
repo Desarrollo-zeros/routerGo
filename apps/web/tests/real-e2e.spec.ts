@@ -9,6 +9,7 @@ test("usuario real se registra, navega y recibe GoCredits", async ({ page }) => 
   await page.getByLabel("Contraseña").fill("routergo-real-123");
   await page.getByRole("button", { name: "Crear mi cuenta" }).click();
   await expect(page.getByRole("link", { name: "Actividad" })).toBeVisible();
+  await expect(page.getByText(/ejercicios de peso corporal disponibles/)).toBeVisible({ timeout: 25_000 });
 
   await page.goto("/catalog");
   await expect(page.getByRole("heading", { name: "Elige tu forma de pensar." })).toBeVisible();

@@ -23,12 +23,24 @@ describe("exercise dataset adapter", () => {
   it("maps ExerciseDB bodyweight records and ignores equipment exercises", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
       ok: true,
-      json: async () => [{ exerciseId: "edb-1", name: "push up", bodyParts: ["chest"], equipments: ["body weight"], targetMuscles: ["pectorals"], gifUrl: "https://static.exercisedb.dev/media/edb-1.gif" }],
+      json: async () => ({ data: [{ exerciseId: "edb-1", name: "push up", bodyParts: ["chest"], equipments: ["body weight"], targetMuscles: ["pectorals"], gifUrl: "https://static.exercisedb.dev/media/edb-1.gif" }] }),
     }));
 
     const result = await loadExerciseDataset();
 
     expect(result).toHaveLength(1);
     expect(result[0]).toMatchObject({ id: "exercisedb-edb-1", equipment: "Peso corporal", source: "ExerciseDB API · free tier" });
+  });
+
+  it("maps the GIF database envelope and keeps its Spanish media URL", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ exercises: [{ id: "legs/squat", name: "Sentadilla", equipment: "bodyweight", bodyPart: "legs", gifUrl: "https://cdn.example/squat.gif" }] }),
+    }));
+
+    const result = await loadExerciseDataset();
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({ id: "gym-gifs-legs/squat", source: "ExerciseGymGifsDB · jsDelivr", animationUrl: "https://cdn.example/squat.gif" });
   });
 });
