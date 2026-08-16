@@ -110,7 +110,7 @@ describe('Postgres adapter contracts', () => {
     const manifest = await loadRuntimeManifest(pool);
 
     expect(manifest.models).toHaveLength(18);
-    expect(manifest.routes).toHaveLength(13);
+    expect(manifest.routes).toHaveLength(14);
     expect(manifest.gateways.length).toBeGreaterThan(0);
   });
 });

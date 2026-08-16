@@ -32,6 +32,7 @@ import { RetryPolicy } from '../infrastructure/reliability/retry-policy.js';
 import { SystemSleeper } from '../infrastructure/reliability/system-sleeper.js';
 import { ReliabilityExecutor } from '../infrastructure/reliability/reliability-executor.js';
 import { CircuitBreaker } from '../infrastructure/reliability/circuit-breaker.js';
+import { ResponsesUseCase } from '../application/use-cases/Responses.js';
 
 const { Pool } = pg;
 
@@ -59,10 +60,11 @@ export async function createComposition() {
     uowFactory: unitOfWork, creditOperations, budget: new PostgresBudgetEvaluator(pool),
     provider, target, pricing: new QuoteUsagePricing(), clock: economyClock,
   });
+  const chatCompletions = new ChatCompletionsUseCase({ createQuote, executeRun, clock: economyClock });
   const useCases = createUseCaseRegistry({
     manifest, catalog: catalogUseCase, models: new ListModelsUseCase(catalogUseCase),
     wallet: new GetWalletUseCase(wallet), economy,
-    chatCompletions: new ChatCompletionsUseCase({ createQuote, executeRun, clock: economyClock }),
+    chatCompletions, responses: new ResponsesUseCase(chatCompletions),
   });
   const streams = new RedisStreamAdapter(redis as never);
   return { pool, redis, manifest, schemas, useCases, creditOperations, sseDeps: { streams } };
@@ -115,6 +117,8 @@ function createSchemas(): SchemaRegistry {
   schemas.register('modelsResponse', { type: 'object', required: ['object', 'data'], properties: { object: { const: 'list' }, data: { type: 'array', items: { type: 'object', required: ['id', 'object', 'created', 'owned_by'], properties: { id: { type: 'string' }, object: { const: 'model' }, created: { type: 'number' }, owned_by: { type: 'string' } } } } } });
   schemas.register('chatCompletionsRequest', { type: 'object', required: ['model', 'messages'], properties: { model: { type: 'string' }, messages: { type: 'array', minItems: 1, items: { type: 'object', required: ['role', 'content'], properties: { role: { enum: ['system', 'user', 'assistant'] }, content: { type: 'string' } }, additionalProperties: false } }, max_tokens: { type: 'integer', minimum: 1 }, temperature: { type: 'number' }, stream: { type: 'boolean' } }, additionalProperties: false });
   schemas.register('chatCompletionsResponse', { type: 'object', required: ['id', 'object', 'created', 'model', 'choices', 'usage'], properties: { id: { type: 'string' }, object: { const: 'chat.completion' }, created: { type: 'number' }, model: { type: 'string' }, choices: { type: 'array' }, usage: { type: 'object' } } });
+  schemas.register('responsesRequest', { type: 'object', required: ['model', 'input'], properties: { model: { type: 'string' }, input: { oneOf: [{ type: 'string' }, { type: 'array', items: { type: 'object' } }] }, max_output_tokens: { type: 'integer', minimum: 1 }, stream: { type: 'boolean' } }, additionalProperties: false });
+  schemas.register('responsesResponse', { type: 'object', required: ['id', 'object', 'status', 'model', 'output'], properties: { id: { type: 'string' }, object: { const: 'response' }, status: { const: 'completed' }, model: { type: 'string' }, output: { type: 'array' } } });
   schemas.register('walletResponse', { type: 'object', properties: { walletId: { type: 'string' }, balance: { type: 'string' }, version: { type: 'number' } } });
   schemas.register('ledgerResponse', { type: 'object', properties: { entries: { type: 'array', items: { type: 'object' } } } });
   schemas.register('verifyActivityResponse', { type: 'object', properties: { verified: { type: 'boolean' } } });
