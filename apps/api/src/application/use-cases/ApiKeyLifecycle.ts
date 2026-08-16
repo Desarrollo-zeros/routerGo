@@ -10,7 +10,7 @@ import type {
   IssueApiKeyOutput,
 } from '../ports/inbound/ApiKeyLifecyclePort';
 
-export const API_SCOPES = ['models.read', 'chat.completions'] as const;
+export const API_SCOPES = ['models.read', 'chat.completions', 'economy.read', 'providers.read', 'runtime.publish', 'runtime.rollback'] as const;
 export type ApiScope = (typeof API_SCOPES)[number];
 
 export interface ApiKeyLifecycleDependencies {

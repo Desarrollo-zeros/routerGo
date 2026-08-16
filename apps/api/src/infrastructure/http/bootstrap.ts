@@ -7,6 +7,7 @@ import { AuthenticationRequiredError, RouteNotReadyError } from './http-errors.j
 import { ApiKeyLifecycleError } from '../../application/use-cases/ApiKeyLifecycle.js';
 import { ExecuteQuotedRunError } from '../../application/errors/ExecuteQuotedRunError.js';
 import { ApiQuotaExceededError } from '../../application/use-cases/ChatCompletions.js';
+import { PrivilegedChangeError } from '../../application/errors/PrivilegedChangeError.js';
 
 export interface BootstrapDeps {
   manifest: RuntimeManifest;
@@ -52,6 +53,7 @@ export function buildApp(deps: BootstrapDeps): ReturnType<typeof Fastify> {
     if (error instanceof Error && error.message === 'API_KEY_CONTEXT_NOT_FOUND') return reply.code(401).send({ error: 'authentication_required' });
     if (error instanceof ExecuteQuotedRunError) return reply.code(runErrorStatus(error.code)).send({ error: runErrorName(error.code) });
     if (error instanceof ApiQuotaExceededError) return reply.code(429).header('retry-after-ms', error.retryAfterMs).send({ error: error.reason.toLowerCase() });
+    if (isUnauthorizedPrivilegedChange(error)) return reply.code(403).send({ error: 'forbidden', reason: error.reason ?? 'MISSING_PERMISSION' });
     if (error instanceof RouteNotReadyError) return reply.code(501).send({ error: 'route_not_ready' });
     return reply.send(error);
   });
@@ -72,6 +74,10 @@ export function buildApp(deps: BootstrapDeps): ReturnType<typeof Fastify> {
   if (filtered.length > 0) registry.register(app, filtered);
 
   return app;
+}
+
+function isUnauthorizedPrivilegedChange(error: unknown): error is PrivilegedChangeError {
+  return error instanceof PrivilegedChangeError && error.code === 'UNAUTHORIZED';
 }
 
 function apiKeyStatus(code: string): number {

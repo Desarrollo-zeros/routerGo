@@ -10,7 +10,7 @@
 - Direct TypeScript checks: API and web pass.
 - Direct API/web builds: API TypeScript build passes; web TypeScript build passes; Vite binary was not available in the installed workspace links.
 - `scripts/check-file-lines.mjs`: passes, 137 files checked under 200 lines.
-- Direct ESLint: fails on `apps/api/src/composition-root/composition.ts` (`createComposition`, 55 lines); warns about `toWebManifest` complexity 14.
+- Direct ESLint: passes with the repository's existing eight `no-console` warnings in startup/migration paths; no architecture or size errors remain.
 - Docker: `routergo-pg` healthy on host port 5432 and `routergo-redis` healthy on host port 6380 after isolating it from the existing EBrisk Redis on 6379. The declared LiteLLM image `ghcr.io/berriai/litellm:v1.65.1` fails with `manifest unknown`.
 - `db:migrate`: passes against local Postgres.
 - `db:seed` twice: passes with the same seed version/checksum.
@@ -40,7 +40,7 @@
 - T034 is implemented: the runtime manifest seeds `/v1/chat/completions`; the non-streaming application flow composes quote, reserve, configured provider execution, usage propagation, and settlement/release. Provider HTTP calls consume the shared reliability boundary, and unauthenticated requests fail with 401.
 - T035 is implemented: the runtime manifest seeds `/v1/responses`; Responses input/output maps through the same economic execution boundary, provider SSE is parsed through protocol strategies, and stream chunks are delivered as SSE with a terminal event.
 - T036 is implemented: `/v1/models`, `/v1/chat/completions`, and `/v1/responses` resolve bearer keys through the persisted hash/lifecycle boundary, enforce scopes and active client membership, map failures to stable HTTP errors, and run layered quotas before provider execution. Existing reliability tests verify that a stream is not retried after its first visible chunk; quota persistence and typed application tests cover rate limits and budget denial.
-- T040 is implemented: `apps/admin` has an independent Vite/React composition, a semantic shell with skip-link/main/navigation landmarks, reusable Button/Panel/Status primitives, responsive layout, focus-visible states, and token-backed styling. Business navigation and CMS/admin workflows remain T042-T044.
+- T040 is implemented: `apps/admin` has an independent Vite/React composition, a semantic shell with skip-link/main/navigation landmarks, reusable Button/Panel/Status primitives, responsive layout, focus-visible states, and token-backed styling. Wallet/ledger privilege separation and critical admin-flow E2E remain T043-T044.
 - T041 is implemented: the CMS domain owns validated slugs, append-only content versions, explicit editorial transitions, and media metadata; `CmsContentRepository` keeps persistence behind an application port. HTTP, binary storage, and Studio workflows remain later tasks.
 - T050 is implemented: migration `009_ads_core.sql` adds advertiser organizations, USD-micro funding accounts, campaign moderation/budget state, creatives, placements, targeting rules, and idempotent delivery events. PostgreSQL guards campaign overruns and real persistence tests cover budget and duplicate-event invariants.
 - T051 is implemented: the Ads domain campaign aggregate requires explicit review/approval before activation, supports pause/resume, and enforces fixed-precision budget exhaustion without coupling delivery to persistence.
@@ -102,10 +102,10 @@
 
 ### P2 — Medium priority product/quality gaps
 
-- Admin/Studio foundation and CMS domain are present through T041; T042 now has manifest-driven navigation, runtime/catalog/provider read views, and a fail-closed guard for `admin` routes, while authenticated identity transport, audited publish actions, and critical-flow E2E remain T042-T044. The advertiser application is not present.
+- Admin/Studio foundation and CMS domain are present through T042; runtime/catalog/provider views now publish through API-key transport plus IdentityContext/RBAC and the audited privileged-change boundary. Wallet/ledger privilege separation and critical-flow E2E remain T043-T044. The advertiser application is not present.
 - Generic challenge engine, exercise safety workflow, battles, treasure, risk, analytics, and audit query/reporting workflows are not implemented; T013 covers only the privileged mutation/audit/outbox write boundary.
 - Web unit and Playwright coverage is green for the runtime projection, responsive widths, offline fallback, and manifest-driven navigation. Full WCAG auditing remains a later hardening task.
-- Runtime manifest versioning/cache invalidation/rollback is resolved by T014/T015: `runtime_manifest_snapshots`, `runtime_manifest_state`, `runtime_ui_routes`, typed publish/rollback use cases, canonical API/UI projection, PostgreSQL contract tests, and cache miss/failure coverage are present. HTTP authentication/Studio transport remains future work.
+- Runtime manifest versioning/cache invalidation/rollback is resolved by T014/T015 and T042: typed publish/rollback use cases, API-key transport, IdentityContext/RBAC authorization, audited PostgreSQL changes, canonical API/UI projection, and cache failure handling are present. Browser session acquisition remains an integration concern outside this route boundary.
 - Observability is partial; T026 adds reconciliation counters and unresolved-run gauge, while end-to-end correlation, cost/revenue margin, reward reconciliation, and dashboard presentation remain later hardening work.
 - Accessibility/responsive checks are represented by source/spec intent, not a passing browser/a11y evidence set.
 

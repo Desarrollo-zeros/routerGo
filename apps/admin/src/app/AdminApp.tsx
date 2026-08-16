@@ -10,6 +10,7 @@ import { LedgerReadView } from "../features/economy/LedgerReadView";
 import { UnitEconomicsDashboard } from "../features/economy/UnitEconomicsDashboard";
 import { RuntimeNavigation } from "../features/navigation/RuntimeNavigation";
 import { HttpAdminEconomyClient, type AdminEconomySummary } from "../runtime/AdminEconomyClient";
+import { HttpAdminRuntimeClient } from "../runtime/AdminRuntimeClient";
 
 interface AdminAppProps {
   manifest?: WebRuntimeManifest;
@@ -18,10 +19,18 @@ interface AdminAppProps {
 
 export function AdminApp({ manifest, economyAccessToken }: AdminAppProps): React.ReactElement {
   const economy = useAdminEconomy(economyAccessToken);
+  const publishRuntime = usePublishRuntime(economyAccessToken);
   return <AdminShell brand={<span aria-label="RouterGo Studio">RouterGo Studio</span>} navigation={manifest ? <RuntimeNavigation manifest={manifest} /> : undefined}>
     <h1>Studio</h1>
-    {manifest ? <div className="admin-stack"><RuntimeConfigView manifest={manifest} /><ModelCatalogView models={manifest.catalog} /><ProviderView models={manifest.catalog} /><UnitEconomicsDashboard authorized={Boolean(economy)} summary={economy?.unitEconomics} /><EconomyReadView authorized={false} /><LedgerReadView authorized={false} /></div> : <Panel title="Área de administración"><StatusMessage>La configuración runtime no está disponible.</StatusMessage></Panel>}
+    {manifest ? <div className="admin-stack"><RuntimeConfigView manifest={manifest} onPublish={publishRuntime} /><ModelCatalogView models={manifest.catalog} /><ProviderView models={manifest.catalog} /><UnitEconomicsDashboard authorized={Boolean(economy)} summary={economy?.unitEconomics} /><EconomyReadView authorized={false} /><LedgerReadView authorized={false} /></div> : <Panel title="Área de administración"><StatusMessage>La configuración runtime no está disponible.</StatusMessage></Panel>}
   </AdminShell>;
+}
+
+function usePublishRuntime(accessToken?: string): (() => void) | undefined {
+  return React.useMemo(() => {
+    if (!accessToken?.trim()) return undefined;
+    return () => { void new HttpAdminRuntimeClient().publish(accessToken, crypto.randomUUID()).then(() => window.location.reload()); };
+  }, [accessToken]);
 }
 
 function useAdminEconomy(accessToken?: string): AdminEconomySummary | undefined {

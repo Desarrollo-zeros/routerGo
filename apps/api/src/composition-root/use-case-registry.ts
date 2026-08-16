@@ -8,6 +8,10 @@ import { AuthenticationRequiredError, RouteNotReadyError } from '../infrastructu
 import type { ChatCompletionsPort, ChatCompletionMessage } from '../application/ports/inbound/ChatCompletionsPort.js';
 import type { ResponsesPort } from '../application/ports/inbound/ResponsesPort.js';
 import type { ApiKeyRequestContext } from '../application/ports/outbound/ApiKeyContextResolver.js';
+import type { ApiKeyIdentityResolver } from '../application/ports/outbound/ApiKeyIdentityResolver.js';
+import type { AuthorizePermissionUseCase } from '../application/use-cases/AuthorizePermission.js';
+import type { PublishRuntimeManifest } from '../application/use-cases/PublishRuntimeManifest.js';
+import type { RollbackRuntimeManifest } from '../application/use-cases/RollbackRuntimeManifest.js';
 
 interface RegistryDeps {
   manifest: RuntimeManifest;
@@ -18,6 +22,10 @@ interface RegistryDeps {
   chatCompletions: ChatCompletionsPort;
   responses: ResponsesPort;
   authenticateApiKey: (rawKey: string, scope: string) => Promise<ApiKeyRequestContext>;
+  resolveApiKeyIdentity: ApiKeyIdentityResolver;
+  authorizePermission: AuthorizePermissionUseCase;
+  publishRuntime: PublishRuntimeManifest;
+  rollbackRuntime: RollbackRuntimeManifest;
 }
 
 export function createUseCaseRegistry(deps: RegistryDeps): UseCaseRegistry {
@@ -34,9 +42,52 @@ export function createUseCaseRegistry(deps: RegistryDeps): UseCaseRegistry {
     createRun: notReady,
     streamRun: notReady,
     getEconomy: async (req) => { await authenticate(req, deps.authenticateApiKey, 'economy.read'); return deps.economy.execute(); },
+    publishRuntime: async (req) => executePublish(req, deps),
+    rollbackRuntime: async (req) => executeRollback(req, deps),
     chatCompletions: async (req, reply) => deps.chatCompletions.execute(await readChatInput(req, deps.authenticateApiKey, reply)),
     responses: async (req, reply) => deps.responses.execute(await readResponsesInput(req, deps.authenticateApiKey, reply)),
   };
+}
+
+async function executePublish(req: unknown, deps: RegistryDeps): Promise<unknown> {
+  const context = await authenticate(req, deps.authenticateApiKey, 'runtime.publish');
+  const identity = await requireIdentity(context, deps.resolveApiKeyIdentity);
+  const decision = await deps.authorizePermission.execute({ identity, permission: 'runtime.publish' });
+  return deps.publishRuntime.execute({ identity, decision, operationId: requiredHeader(req, 'idempotency-key'), correlationId: correlationId(req) });
+}
+
+async function executeRollback(req: unknown, deps: RegistryDeps): Promise<unknown> {
+  const context = await authenticate(req, deps.authenticateApiKey, 'runtime.rollback');
+  const identity = await requireIdentity(context, deps.resolveApiKeyIdentity);
+  const decision = await deps.authorizePermission.execute({ identity, permission: 'runtime.publish' });
+  const body = requestBody(req);
+  const targetVersion = body.targetVersion;
+  if (typeof targetVersion !== 'number' || !Number.isInteger(targetVersion) || targetVersion < 1) throw new Error('INVALID_RUNTIME_ROLLBACK');
+  return deps.rollbackRuntime.execute({ identity, decision, operationId: requiredHeader(req, 'idempotency-key'), correlationId: correlationId(req), targetVersion });
+}
+
+async function requireIdentity(context: ApiKeyRequestContext, resolver: ApiKeyIdentityResolver) {
+  const identity = await resolver.resolve(context);
+  if (!identity) throw new AuthenticationRequiredError();
+  return identity;
+}
+
+function requestBody(req: unknown): Record<string, unknown> {
+  const body = (req as { body?: unknown }).body;
+  return typeof body === 'object' && body !== null ? body as Record<string, unknown> : {};
+}
+
+function requiredHeader(req: unknown, name: string): string {
+  const headers = (req as { headers?: Record<string, unknown> }).headers;
+  const value = headers?.[name];
+  if (typeof value !== 'string' || !value.trim()) throw new AuthenticationRequiredError();
+  return value.trim();
+}
+
+function correlationId(req: unknown): string {
+  const headers = (req as { headers?: Record<string, unknown> }).headers;
+  const value = headers?.['x-correlation-id'];
+  return typeof value === 'string' && value.trim() ? value.trim() : requiredHeader(req, 'idempotency-key');
 }
 
 const notReady: UseCaseHandler = async () => {

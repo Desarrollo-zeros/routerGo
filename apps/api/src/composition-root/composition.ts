@@ -44,6 +44,10 @@ import { GetProviderAnalyticsUseCase } from '../application/use-cases/GetProvide
 import { HttpProviderHealthProbe } from '../infrastructure/adapters/providers/HttpProviderHealthProbe.js';
 import { PostgresProviderAnalyticsSource } from '../infrastructure/adapters/postgres/PostgresProviderAnalyticsSource.js';
 import { PostgresProviderAnalyticsAlertSink } from '../infrastructure/adapters/postgres/PostgresProviderAnalyticsAlertSink.js';
+import { PostgresAuthorizationGrantReader } from '../infrastructure/adapters/postgres/PostgresAuthorizationGrantReader.js';
+import { AuthorizePermissionUseCase } from '../application/use-cases/AuthorizePermission.js';
+import { PostgresApiKeyIdentityResolver } from '../infrastructure/adapters/postgres/PostgresApiKeyIdentityResolver.js';
+import { createRuntimeManifestUseCases } from './runtime-composition.js';
 
 const { Pool } = pg;
 
@@ -57,11 +61,7 @@ export async function createComposition() {
   const economyUnitOfWork = new PgEconomyUnitOfWorkFactory(pool);
   const unitOfWork = new PgUnitOfWorkFactory(pool);
   const economyClock = new SystemClock();
-  const creditOperations = {
-    reserve: new ReserveCreditsUseCase(economyUnitOfWork, economyClock),
-    settle: new SettleCreditsUseCase(economyUnitOfWork),
-    release: new ReleaseCreditsUseCase(economyUnitOfWork, economyClock),
-  };
+  const creditOperations = createCreditOperations(economyUnitOfWork, economyClock);
   const economy = createEconomy(pool);
   const catalogUseCase = new GetCatalogUseCase(catalog);
   const target = new PostgresExecutionTargetAdapter(pool);
@@ -77,14 +77,22 @@ export async function createComposition() {
     new PostgresProviderAnalyticsSource(pool, new HttpProviderHealthProbe()),
     new PostgresProviderAnalyticsAlertSink(pool),
   );
+  const runtimeManifest = createRuntimeManifestUseCases(pool, redis);
+  const authorizePermission = new AuthorizePermissionUseCase(new PostgresAuthorizationGrantReader(pool));
   const useCases = createUseCaseRegistry({
     manifest, catalog: catalogUseCase, models: new ListModelsUseCase(catalogUseCase),
     wallet: new GetWalletUseCase(wallet), economy,
     chatCompletions, responses: new ResponsesUseCase(chatCompletions),
     authenticateApiKey: createApiKeyAuthenticator(pool),
+    resolveApiKeyIdentity: new PostgresApiKeyIdentityResolver(pool), authorizePermission,
+    publishRuntime: runtimeManifest.publish, rollbackRuntime: runtimeManifest.rollback,
   });
   const streams = new RedisStreamAdapter(redis as never);
   return { pool, redis, manifest, schemas, useCases, creditOperations, providerAnalytics, sseDeps: { streams } };
+}
+
+function createCreditOperations(factory: PgEconomyUnitOfWorkFactory, clock: SystemClock) {
+  return { reserve: new ReserveCreditsUseCase(factory, clock), settle: new SettleCreditsUseCase(factory), release: new ReleaseCreditsUseCase(factory, clock) };
 }
 
 function createApiKeyAuthenticator(pool: pg.Pool) {
@@ -159,6 +167,8 @@ function createSchemas(): SchemaRegistry {
   schemas.register('economyResponse', { type: 'object', properties: { go: { type: 'object' }, windows: { type: 'object' }, contribution: { type: 'object' }, unitEconomics: { type: 'object' }, dau: { type: 'number' } } });
   schemas.register('healthResponse', { type: 'object', properties: { status: { type: 'string' } } });
   schemas.register('manifestResponse', { type: 'object' });
+  schemas.register('runtimeManifestResponse', { type: 'object', required: ['version', 'contentHash', 'manifest'], properties: { version: { type: 'number' }, contentHash: { type: 'string' }, manifest: { type: 'object' } } });
+  schemas.register('runtimeRollbackRequest', { type: 'object', required: ['targetVersion'], properties: { targetVersion: { type: 'integer', minimum: 1 } }, additionalProperties: false });
   schemas.register('catalogResponse', { type: 'object', properties: { models: { type: 'array', items: { type: 'object', properties: { logicalId: { type: 'string' }, tier: { type: 'string' }, creditPrice: { type: 'string' }, enabled: { type: 'boolean' } } } } } });
   schemas.register('modelsResponse', { type: 'object', required: ['object', 'data'], properties: { object: { const: 'list' }, data: { type: 'array', items: { type: 'object', required: ['id', 'object', 'created', 'owned_by'], properties: { id: { type: 'string' }, object: { const: 'model' }, created: { type: 'number' }, owned_by: { type: 'string' } } } } } });
   schemas.register('chatCompletionsRequest', { type: 'object', required: ['model', 'messages'], properties: { model: { type: 'string' }, messages: { type: 'array', minItems: 1, items: { type: 'object', required: ['role', 'content'], properties: { role: { enum: ['system', 'user', 'assistant'] }, content: { type: 'string' } }, additionalProperties: false } }, max_tokens: { type: 'integer', minimum: 1 }, temperature: { type: 'number' }, stream: { type: 'boolean' } }, additionalProperties: false });

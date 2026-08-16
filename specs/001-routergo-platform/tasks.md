@@ -41,7 +41,7 @@ Format: `[ID] [P?] [Story] task`. `[P]` means safe parallel ownership in differe
 ## Phase 4 — RouterGo Studio + CMS
 - [x] T040 [US3] Create `apps/admin` composition and shared accessible UI primitives.
 - [x] T041 [P] [US3] CMS content/version/publication/media domain.
-- [ ] T042 [P] [US3] Admin model/provider/runtime-config views with audited publish.
+- [x] T042 [P] [US3] Admin model/provider/runtime-config views with audited publish.
 - [ ] T043 [P] [US3] Admin wallet/economy/read-only ledger views with privilege separation.
 - [ ] T044 [US3] Responsive/a11y E2E for admin critical flows.
 

@@ -37,6 +37,12 @@ newer snapshot. Both operations accept `expectedActiveVersion` and fail with
 `VERSION_CONFLICT` when the caller is stale. The operation ID is shared by the
 audit and outbox records, so retries cannot create another version.
 
+Studio calls these operations through `/admin/runtime/publish` and
+`/admin/runtime/rollback`. The API key authenticates the transport, while the
+resolved `IdentityContext` and `AuthorizePermission` enforce `runtime.publish`
+before the audited mutation. The browser host must inject the short-lived
+operator token; the app never persists it.
+
 ## Persistence and cache
 
 `runtime_manifest_snapshots` is append-only and protected by a database trigger.
