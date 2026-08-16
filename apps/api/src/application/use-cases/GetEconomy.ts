@@ -1,5 +1,6 @@
 import type { GetEconomyInput, GetEconomyOutput, WindowUsageDto } from '../ports/inbound/GetEconomyPort.js';
 import type { GetEconomyPort } from '../ports/inbound/GetEconomyPort.js';
+import { calculateUnitEconomics } from '../../domain/economy/UnitEconomics.js';
 
 export const GO_PROMO_USD = 5;
 export const GO_RENEWAL_USD = 10;
@@ -45,6 +46,8 @@ export interface EconomyDeps {
   getWindows?: () => Promise<Array<{ quotaScopeId: string; windowType: string; usedMicro: number }>>;
   getOperatorRevenueMicro?: () => Promise<number>;
   getInfraMicro?: () => Promise<number>;
+  getProviderCostMicro?: () => Promise<number>;
+  getRewardLiabilityCredits?: () => Promise<number>;
 }
 
 export class GetEconomyUseCase implements GetEconomyPort {
@@ -56,15 +59,18 @@ export class GetEconomyUseCase implements GetEconomyPort {
     const promoMonthlyUsd = (m * GO_PROMO_USD);
     const renewalMonthlyUsd = (m * GO_RENEWAL_USD);
     const effectiveMonthlyUsd = isPromo ? promoMonthlyUsd : renewalMonthlyUsd;
-    const providerCostMicro = goMonthlyCostMicro(m, isPromo);
+    const providerCostMicro = this.deps.getProviderCostMicro ? await this.deps.getProviderCostMicro() : goMonthlyCostMicro(m, isPromo);
     const operatorRevenueMicro = input.operatorRevenueUsdMicro ?? await this.resolveRevenue();
     const infraMicro = input.infraUsdMicro ?? await this.resolveInfra();
+    const rewardLiabilityCredits = await this.resolveRewardLiability();
     const contrib = contributionMicro(operatorRevenueMicro, providerCostMicro, infraMicro);
+    const unitEconomics = calculateUnitEconomics({ revenueMicro: operatorRevenueMicro, providerCostMicro, infraCostMicro: infraMicro, rewardLiabilityCredits });
     const scopes = await this.resolveScopes();
     return {
       go: { m, promoMonthlyUsd, renewalMonthlyUsd, effectiveMonthlyUsd },
       windows: { limitsMicro: { ...WINDOW_LIMITS_MICRO }, thresholds: { cutPct: CUT_PCT, warnPct: WARN_PCT }, scopes },
       contribution: { operatorRevenueMicro, providerCostMicro, infraMicro, contributionMicro: contrib },
+      unitEconomics,
       dau: input.dau ?? 0,
     };
   }
@@ -79,6 +85,10 @@ export class GetEconomyUseCase implements GetEconomyPort {
   }
   private async resolveInfra(): Promise<number> {
     if (this.deps.getInfraMicro) return this.deps.getInfraMicro();
+    return 0;
+  }
+  private async resolveRewardLiability(): Promise<number> {
+    if (this.deps.getRewardLiabilityCredits) return this.deps.getRewardLiabilityCredits();
     return 0;
   }
   private async resolveScopes(): Promise<WindowUsageDto[]> {

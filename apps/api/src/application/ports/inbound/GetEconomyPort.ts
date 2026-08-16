@@ -19,6 +19,7 @@ export interface GetEconomyOutput {
   go: { m: number; promoMonthlyUsd: number; renewalMonthlyUsd: number; effectiveMonthlyUsd: number };
   windows: { limitsMicro: Record<string, number>; thresholds: { cutPct: number; warnPct: number }; scopes: WindowUsageDto[] };
   contribution: { operatorRevenueMicro: number; providerCostMicro: number; infraMicro: number; contributionMicro: number };
+  unitEconomics: { revenueMicro: number; providerCostMicro: number; infraCostMicro: number; contributionMicro: number; rewardLiabilityCredits: number };
   dau: number;
 }
 

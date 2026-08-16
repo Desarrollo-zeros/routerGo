@@ -112,6 +112,9 @@ function createEconomy(pool: pg.Pool): GetEconomyUseCase {
   return new GetEconomyUseCase({
     getGoCount: async () => queryGoCount(pool),
     getWindows: async () => queryWindows(pool),
+    getOperatorRevenueMicro: async () => queryRevenue(pool),
+    getProviderCostMicro: async () => queryProviderCost(pool),
+    getRewardLiabilityCredits: async () => queryRewardLiability(pool),
   });
 }
 
@@ -125,12 +128,27 @@ async function queryWindows(pool: pg.Pool): Promise<Array<{ quotaScopeId: string
   return result.rows;
 }
 
+async function queryRevenue(pool: pg.Pool): Promise<number> {
+  const result = await pool.query<{ total: string }>("SELECT COALESCE(SUM(net_revenue_microusd), 0)::text AS total FROM revenue_entries WHERE status='FINALIZED'");
+  return Number(result.rows[0]?.total ?? 0);
+}
+
+async function queryProviderCost(pool: pg.Pool): Promise<number> {
+  const result = await pool.query<{ total: string }>("SELECT COALESCE(SUM(cost_microusd), 0)::text AS total FROM provider_cost_entries WHERE source <> 'REVERSAL'");
+  return Number(result.rows[0]?.total ?? 0);
+}
+
+async function queryRewardLiability(pool: pg.Pool): Promise<number> {
+  const result = await pool.query<{ total: string }>('SELECT COALESCE(SUM(balance), 0)::text AS total FROM wallets');
+  return Number(result.rows[0]?.total ?? 0);
+}
+
 function createSchemas(): SchemaRegistry {
   const schemas = new SchemaRegistry();
   schemas.registerZod('verifyActivityRequest', z.object({ reps: z.number(), sessionId: z.string() }));
   schemas.registerZod('createQuoteRequest', z.object({ logicalModelId: z.string(), maxOutputTokens: z.number().optional() }));
   schemas.registerZod('createRunRequest', z.object({ quoteId: z.string() }));
-  schemas.register('economyResponse', { type: 'object', properties: { go: { type: 'object' }, windows: { type: 'object' }, contribution: { type: 'object' }, dau: { type: 'number' } } });
+  schemas.register('economyResponse', { type: 'object', properties: { go: { type: 'object' }, windows: { type: 'object' }, contribution: { type: 'object' }, unitEconomics: { type: 'object' }, dau: { type: 'number' } } });
   schemas.register('healthResponse', { type: 'object', properties: { status: { type: 'string' } } });
   schemas.register('manifestResponse', { type: 'object' });
   schemas.register('catalogResponse', { type: 'object', properties: { models: { type: 'array', items: { type: 'object', properties: { logicalId: { type: 'string' }, tier: { type: 'string' }, creditPrice: { type: 'string' }, enabled: { type: 'boolean' } } } } } });

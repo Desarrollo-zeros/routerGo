@@ -24,8 +24,10 @@ button,a{font:inherit}
 .admin-stack{display:grid;gap:1rem;margin-top:1rem}
 .admin-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem;margin:0 0 1rem}
 .admin-summary div{border:1px solid var(--rg-color-surface-muted,ButtonFace);border-radius:.5rem;padding:.75rem}
+.admin-summary-five{grid-template-columns:repeat(5,minmax(0,1fr))}
 .admin-summary dt{color:var(--rg-color-text-secondary,CanvasText);font-size:.8rem}
 .admin-summary dd{margin:.25rem 0 0;font-weight:700}
+.admin-summary small{display:block;margin-top:.25rem;color:var(--rg-color-text-secondary,CanvasText);font-size:.72rem}
 .admin-mono{overflow-wrap:anywhere;font-family:ui-monospace,monospace;font-size:.75rem}
 .admin-table-wrap{overflow-x:auto}
 .admin-table{border-collapse:collapse;width:100%;min-width:32rem}
@@ -36,4 +38,5 @@ button,a{font:inherit}
 .admin-list li span:last-child{color:var(--rg-color-text-secondary,CanvasText);font-size:.9rem}
 @media(max-width:640px){.admin-layout{display:block;padding:.75rem}.admin-navigation:empty{display:none}.admin-main{padding:.25rem 0}}
 @media(max-width:640px){.admin-summary{grid-template-columns:1fr}}
+@media(min-width:641px) and (max-width:900px){.admin-summary-five{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}

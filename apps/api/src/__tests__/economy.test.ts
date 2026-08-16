@@ -27,6 +27,16 @@ describe('economy', () => {
     expect(out.contribution.contributionMicro).toBe(60_000_000);
   });
 
+  it('exposes persisted unit-economics measures and reward liability', async () => {
+    const sut = new GetEconomyUseCase({
+      getGoCount: async () => 0,
+      getProviderCostMicro: async () => 30,
+      getOperatorRevenueMicro: async () => 100,
+      getRewardLiabilityCredits: async () => 75,
+    });
+    await expect(sut.execute()).resolves.toMatchObject({ unitEconomics: { revenueMicro: 100, providerCostMicro: 30, contributionMicro: 70, rewardLiabilityCredits: 75 } });
+  });
+
   it('corte 80% y alerta 75% por quota_scope_id', async () => {
     expect(CUT_PCT).toBe(80);
     expect(WARN_PCT).toBe(75);

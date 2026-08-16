@@ -28,6 +28,7 @@
 - `api_keys(client_id,key_hash,prefix,scopes_json,status,expires_at,last_used_at)`
 - `api_usage(client_id,key_id,run_id,model,input_tokens,output_tokens,credits,cost_microusd)` where `credits` are GoCredits and `cost_microusd` is fixed-precision USD micro-units.
 - `api_quota_policies(scope_type,scope_id,model_pattern,requests_per_minute,tokens_per_minute,credits_per_minute)` stores enabled client/key/model quota limits; Redis consumes all configured dimensions atomically in a one-minute window.
+- Unit economics reads finalized `revenue_entries`, non-reversal `provider_cost_entries`, and current `wallets.balance` as separate measures. USD values remain micro-units; reward liability remains GoCredits and is never mixed into the USD contribution calculation.
 
 ### Skills
 - `skill_definitions(id,key,status,owner_context)`
