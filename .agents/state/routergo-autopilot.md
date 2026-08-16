@@ -1,7 +1,7 @@
 phase: 3
 current_objective: T042
 status: executing
-last_green_commit: 831042f
+last_green_commit: b3cfe99
 last_completed_tasks:
   - T020
   - T021
@@ -23,4 +23,4 @@ next_candidates:
   - T042
   - T043
 blocked_tasks: []
-last_validation: T041 CMS aggregate and repository port pass API typecheck, CMS unit tests, 42 API suites/225 tests, web tests, root build, lint, line, architecture, and secrets gates against routergo_t035. T042 and T043 are next parallel-safe Studio candidates.
+last_validation: T042 partial Studio views pass admin typecheck/build, root line, architecture, and lint gates. The manifest-backed catalog/provider/runtime views are committed; audited publish transport is still required before T042 can close. T043 remains parallel-safe.
