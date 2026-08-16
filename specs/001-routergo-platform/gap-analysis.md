@@ -40,6 +40,7 @@
 - T034 is implemented: the runtime manifest seeds `/v1/chat/completions`; the non-streaming application flow composes quote, reserve, configured provider execution, usage propagation, and settlement/release. Provider HTTP calls consume the shared reliability boundary, and unauthenticated requests fail with 401.
 - T035 is implemented: the runtime manifest seeds `/v1/responses`; Responses input/output maps through the same economic execution boundary, provider SSE is parsed through protocol strategies, and stream chunks are delivered as SSE with a terminal event.
 - T036 is implemented: `/v1/models`, `/v1/chat/completions`, and `/v1/responses` resolve bearer keys through the persisted hash/lifecycle boundary, enforce scopes and active client membership, map failures to stable HTTP errors, and run layered quotas before provider execution. Existing reliability tests verify that a stream is not retried after its first visible chunk; quota persistence and typed application tests cover rate limits and budget denial.
+- T040 is implemented: `apps/admin` has an independent Vite/React composition, a semantic shell with skip-link/main/navigation landmarks, reusable Button/Panel/Status primitives, responsive layout, focus-visible states, and token-backed styling. Business navigation and CMS/admin workflows remain T042-T044.
 
 ### P0 — Foundation blockers
 
@@ -63,7 +64,7 @@
 
 ### P2 — Medium priority product/quality gaps
 
-- Admin/Studio and advertiser applications are not present.
+- Admin/Studio foundation is present through T040; authenticated modules, CMS workflows, audited configuration views, and critical-flow E2E remain T041-T044. The advertiser application is not present.
 - Generic challenge engine, exercise safety workflow, battles, treasure, risk, analytics, and audit query/reporting workflows are not implemented; T013 covers only the privileged mutation/audit/outbox write boundary.
 - Web unit and Playwright coverage is green for the runtime projection, responsive widths, offline fallback, and manifest-driven navigation. Full WCAG auditing remains a later hardening task.
 - Runtime manifest versioning/cache invalidation/rollback is resolved by T014/T015: `runtime_manifest_snapshots`, `runtime_manifest_state`, `runtime_ui_routes`, typed publish/rollback use cases, canonical API/UI projection, PostgreSQL contract tests, and cache miss/failure coverage are present. HTTP authentication/Studio transport remains future work.

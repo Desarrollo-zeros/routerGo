@@ -39,7 +39,7 @@ Format: `[ID] [P?] [Story] task`. `[P]` means safe parallel ownership in differe
 - [x] T036 [US2] Contract-test errors, revocation, rate limits, budget exhaustion, stream disconnect.
 
 ## Phase 4 — RouterGo Studio + CMS
-- [ ] T040 [US3] Create `apps/admin` composition and shared accessible UI primitives.
+- [x] T040 [US3] Create `apps/admin` composition and shared accessible UI primitives.
 - [ ] T041 [P] [US3] CMS content/version/publication/media domain.
 - [ ] T042 [P] [US3] Admin model/provider/runtime-config views with audited publish.
 - [ ] T043 [P] [US3] Admin wallet/economy/read-only ledger views with privilege separation.
