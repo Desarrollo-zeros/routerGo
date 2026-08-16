@@ -12,6 +12,8 @@ export type ExerciseDefinition = {
   animationUrl?: string;
 };
 
+import { mapExerciseDbExercise, type ExerciseDbExercise } from "./exerciseDbCatalog";
+
 type DatasetExercise = {
   id?: string;
   name?: string;
@@ -48,9 +50,11 @@ type FreeExercise = {
   images?: string[];
 };
 
+
 export const EXERCISE_DATASET_URL = "https://raw.githubusercontent.com/hasaneyldrm/exercises-dataset/main/data/exercises.json";
 export const GYM_GIFS_URL = "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/api/es/equipment/bodyweight.json";
 export const FREE_EXERCISE_DB_URL = "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json";
+export const EXERCISEDB_API_URL = "https://oss.exercisedb.dev/api/v1/exercises";
 
 export const EXERCISES: ExerciseDefinition[] = [
   {
@@ -174,14 +178,17 @@ export async function loadExerciseDataset(signal?: AbortSignal): Promise<Exercis
     fetchJson(EXERCISE_DATASET_URL, signal),
     fetchJson(GYM_GIFS_URL, signal),
     fetchJson(FREE_EXERCISE_DB_URL, signal),
+    fetchJson(EXERCISEDB_API_URL, signal),
   ]);
   const first = payloads[0].status === "fulfilled" && Array.isArray(payloads[0].value) ? payloads[0].value : [];
   const second = payloads[1].status === "fulfilled" && !Array.isArray(payloads[1].value) ? (payloads[1].value as { exercises?: unknown[] }).exercises ?? [] : [];
   const third = payloads[2].status === "fulfilled" && Array.isArray(payloads[2].value) ? payloads[2].value : [];
+  const fourth = payloads[3].status === "fulfilled" && Array.isArray(payloads[3].value) ? payloads[3].value : [];
   const mapped = uniqueExercises([
     ...first.map((item) => mapDatasetExercise(item as DatasetExercise)).filter((item): item is ExerciseDefinition => Boolean(item)),
     ...second.map((item) => mapGymGifExercise(item as GymGifExercise)).filter((item): item is ExerciseDefinition => Boolean(item)),
     ...third.map((item) => mapFreeExercise(item as FreeExercise)).filter((item): item is ExerciseDefinition => Boolean(item)),
+    ...fourth.map((item) => mapExerciseDbExercise(item as ExerciseDbExercise)).filter((item): item is ExerciseDefinition => Boolean(item)),
   ]);
   return mapped.length > 0 ? mapped : EXERCISES;
 }
