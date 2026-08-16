@@ -1,31 +1,27 @@
 import React from "react";
 
-const SESSION_KEY = "routergo.local.session";
-
 type Props = { onAuthenticated: (email: string) => void };
-
-export function hasLocalSession(): boolean {
-  return typeof window !== "undefined" && Boolean(window.localStorage.getItem(SESSION_KEY));
-}
-
-export function clearLocalSession(): void {
-  window.localStorage.removeItem(SESSION_KEY);
-}
 
 export function AuthView({ onAuthenticated }: Props): React.ReactElement {
   const [mode, setMode] = React.useState<"login" | "register">("login");
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [error, setError] = React.useState<string | undefined>();
+  const [submitting, setSubmitting] = React.useState(false);
 
-  function submit(event: React.FormEvent<HTMLFormElement>): void {
+  async function submit(event: React.FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
-    if (!email.includes("@") || password.length < 6) {
-      setError("Escribe un correo válido y una contraseña de al menos 6 caracteres.");
+    if (!email.includes("@") || password.length < 8) {
+      setError("Escribe un correo válido y una contraseña de al menos 8 caracteres.");
       return;
     }
-    window.localStorage.setItem(SESSION_KEY, email.trim().toLowerCase());
-    onAuthenticated(email.trim().toLowerCase());
+    setSubmitting(true); setError(undefined);
+    try {
+      const response = await fetch(`/api/auth/${mode === "login" ? "login" : "register"}`, { method: "POST", credentials: "include", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, password }) });
+      if (!response.ok) { const body = await response.json().catch(() => ({})) as { error?: string }; throw new Error(authMessage(body.error)); }
+      onAuthenticated(email.trim().toLowerCase());
+    } catch (reason) { setError(reason instanceof Error ? reason.message : "No se pudo iniciar la sesión."); }
+    finally { setSubmitting(false); }
   }
 
   return (
@@ -48,13 +44,20 @@ export function AuthView({ onAuthenticated }: Props): React.ReactElement {
           <label htmlFor="auth-email">Correo electrónico</label>
           <input id="auth-email" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
           <label htmlFor="auth-password">Contraseña</label>
-          <input id="auth-password" type="password" autoComplete={mode === "login" ? "current-password" : "new-password"} value={password} onChange={(event) => setPassword(event.target.value)} minLength={6} required />
+            <input id="auth-password" type="password" autoComplete={mode === "login" ? "current-password" : "new-password"} value={password} onChange={(event) => setPassword(event.target.value)} minLength={8} required />
           {error ? <p className="rg-auth-error" role="alert">{error}</p> : null}
-          <button className="rg-auth-submit" type="submit">{mode === "login" ? "Entrar a RouterGo" : "Crear mi cuenta"}</button>
+          <button className="rg-auth-submit" type="submit" disabled={submitting}>{submitting ? "Conectando…" : mode === "login" ? "Entrar a RouterGo" : "Crear mi cuenta"}</button>
           <p className="rg-auth-legal">Al continuar aceptas las reglas de uso y el tratamiento mínimo necesario para tu cuenta.</p>
         </form>
       </section>
       <p className="rg-auth-footer">GoCredits no son dinero ni tokens del proveedor. Son el saldo interno de RouterGo.</p>
     </main>
   );
+}
+
+function authMessage(code: string | undefined): string {
+  if (code === "invalid_credentials") return "Correo o contraseña incorrectos.";
+  if (code === "email_already_registered") return "Este correo ya tiene una cuenta. Inicia sesión.";
+  if (code === "WeakPassword") return "La contraseña debe tener al menos 8 caracteres.";
+  return "No se pudo completar el acceso. Inténtalo de nuevo.";
 }

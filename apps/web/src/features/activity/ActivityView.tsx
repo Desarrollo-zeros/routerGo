@@ -6,10 +6,6 @@ import { DEFAULT_EXERCISE, EXERCISES, loadExerciseDataset } from "./exerciseCata
 
 type ActivityMachine = ReturnType<typeof useActivityMachine>;
 
-function buildVerifyBody(count: number): Record<string, unknown> {
-  return { claimed_reps: count, challenge_nonce: crypto.randomUUID(), evidence_hash: String(count) };
-}
-
 function primaryAction(state: string, machine: ActivityMachine, submit: () => void): (() => void) | undefined {
   if (["idle", "rejected", "unavailable", "permission"].includes(state)) return machine.startPermission;
   if (state === "ready") return machine.startActive;
@@ -53,8 +49,10 @@ export function ActivityView({ api }: { api: HttpApiPort }): React.ReactElement 
     machine.submit();
     machine.verifying();
     try {
-      const result = await api.request<{ verified_reps: number; credits: number }>({ routeKey: "activity-verify", params: { id: "current" }, body: buildVerifyBody(machine.count) });
-      setVerified(result.verified_reps);
+      const nonce = crypto.randomUUID();
+      const result = await api.request<{ credits: string; newBalance: string }>({ routeKey: "activity-verify", params: { id: "current" }, body: { reps: machine.count, sessionId: "current", challenge_nonce: nonce, evidence_hash: String(machine.count) }, headers: { "idempotency-key": nonce } });
+      setVerified(machine.count);
+      setBalance(Number(result.newBalance));
       machine.setVerified();
     } catch (error) {
       machine.setRejected(error instanceof Error ? error.message : "No se pudo verificar la sesión.");
@@ -71,7 +69,7 @@ export function ActivityView({ api }: { api: HttpApiPort }): React.ReactElement 
       <div className="rg-exercise-meta"><div><span className="rg-exercise-tag">♟ {exercise.category} · {exercise.level}</span><h2>{exercise.name}</h2><p>{exercise.target} · {exercise.equipment}</p></div><div className="rg-rep-ring">{shownReps}<small>reps</small></div></div>
       <div className="rg-exercise-visual"><img src={exercise.animationUrl ?? exercise.imageUrl ?? "/exercise-pushup.png"} onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = exercise.imageUrl ?? "/exercise-pushup.png"; }} alt={`Demostración de ${exercise.name.toLowerCase()}`} /></div>
       <div className="rg-exercise-details"><p>{exercise.instruction}</p><small>{exercise.muscles} · Catálogo: {exercise.source}</small></div>
-      <div className="rg-credit-strip"><div className="rg-credit-token"><span>G</span></div><p>Cada repetición equivale a<strong>1 GoCredit</strong></p><span className="rg-credit-arrow">→</span><p>Úsalos al instante<br />sin esperar.</p></div>
+      <div className="rg-credit-strip"><div className="rg-credit-token"><span>G</span></div><p>Cada repetición equivale a<strong>1 GoCredit</strong></p><span className="rg-credit-arrow">→</span><p>Úsalos al instante<span>sin esperar.</span></p></div>
       {machine.error ? <p className="rg-error-copy" role="alert">{machine.error}</p> : null}
     </section>
     <SponsorPlacement placement="activity-inline"><div className="rg-sponsor-content"><span>Patrocinado</span><strong>Tu esfuerzo merece impulso.</strong><small>Descubre una oferta que acompaña tu entrenamiento.</small></div></SponsorPlacement>
