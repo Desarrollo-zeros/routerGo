@@ -68,16 +68,16 @@
 - T093 is implemented: `PublicLocationReview` requires explicit submission before approval, rejects unsafe state transitions, and returns a non-location alternative or unavailable result when permission is denied. Responsive map/list UX and browser integration remain T094.
 - T094 is implemented: the web runtime includes an accessible responsive treasure map/list screen with coarse-zone privacy copy, empty state, permission-denied alternative, and no coordinate rendering. Activation remains manifest-driven; backend hunt listing and browser geolocation wiring remain outside this UI task.
 - T100 is implemented: migration `017_risk_events.sql` adds idempotent cross-context abuse events, bounded user scores, and review cases; `RiskSignalPolicy` maps duplicate/replay/velocity/severity signals to normal/review/blocked actions without role-name or raw-payload decisions. Risk ingestion orchestration, dashboards, and analyst workflows remain T102-T106.
-- T101 is implemented: the economy read model now derives finalized revenue, provider cost, infrastructure cost, contribution, and current wallet-based reward liability; the admin UI exposes the measures with explicit USD micro-unit versus GoCredit labels. Risk/analytics dashboards beyond unit economics remain T103-T106.
-- T102 is implemented: `ProviderAnalyticsSource` supplies explicit health, quota usage, and cost signals; `GetProviderAnalyticsUseCase` evaluates bounded quota alerts with health-failure precedence. No fake health is inferred from gateway configuration; concrete probes and operator alert delivery remain follow-up hardening.
-- T103 is implemented: a deterministic API smoke load and pure latency/error evaluator enforce a p95/error budget through `pnpm test:performance`; realtime soak testing and production-scale load remain T105 hardening work.
+- T101 foundation only: the economy read model and admin presentation types derive finalized revenue, provider cost, infrastructure cost, contribution, and wallet-based reward liability, but the authenticated dashboard data fetch and operator route are not yet connected.
+- T102 foundation only: `ProviderAnalyticsSource` and `GetProviderAnalyticsUseCase` evaluate explicit health/quota/cost signals, but no concrete probe adapter or alert delivery path is wired.
+- T103 foundation only: a deterministic API smoke load and pure latency/error evaluator exist through `pnpm test:performance`; critical route load, realtime soak, and production-scale budgets remain open.
 - T104 is implemented: provider-contract tests (11), secrets scan, responsive/offline/camera/screenshot E2E (7) and performance smoke pass. Production security review and staged beta operations remain T105-T106.
 - T105 local gate is implemented: `BetaReleaseGate` requires runtime flags, a closed economy circuit, verified rollback, and a passing regression suite. The actual staged beta deployment and rollback drill remain blocked until a staging controller/environment is available; no production readiness is claimed.
 
 ### T106 convergence record — 2026-08-16
 
 - Local foundation gates are reproducible through clean PostgreSQL migration/seed runs, Docker health checks, typecheck, lint, line and architecture checks, secrets scan, API/web tests, build, performance smoke, provider contracts, and E2E.
-- Completed phase-10 work is limited to risk foundations (T100), unit economics (T101), provider analytics policy (T102), performance budgets (T103), and regression evidence (T104). T105 is intentionally not marked complete because staging and rollback evidence are external.
+- Completed phase-10 work is limited to risk foundations (T100) and regression evidence (T104). T101-T103 have tested foundations but remain open until their integration requirements are met; T105 is intentionally not marked complete because staging and rollback evidence are external.
 - Remaining product and operational gaps are explicit in `tasks.md`: admin publish/auth transport (T042-T044), advertiser flows (T054), challenge/battle completion (T065, T081, T083-T084), and staged beta operations (T105). Rev.7 is not declared complete.
 
 ### P0 — Foundation blockers
