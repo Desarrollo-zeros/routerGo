@@ -82,7 +82,7 @@
 
 ### P2 — Medium priority product/quality gaps
 
-- Admin/Studio foundation and CMS domain are present through T041; T042 now has manifest-driven navigation plus runtime/catalog/provider read views, while authenticated transport, audited publish actions, and critical-flow E2E remain T042-T044. The advertiser application is not present.
+- Admin/Studio foundation and CMS domain are present through T041; T042 now has manifest-driven navigation, runtime/catalog/provider read views, and a fail-closed guard for `admin` routes, while authenticated identity transport, audited publish actions, and critical-flow E2E remain T042-T044. The advertiser application is not present.
 - Generic challenge engine, exercise safety workflow, battles, treasure, risk, analytics, and audit query/reporting workflows are not implemented; T013 covers only the privileged mutation/audit/outbox write boundary.
 - Web unit and Playwright coverage is green for the runtime projection, responsive widths, offline fallback, and manifest-driven navigation. Full WCAG auditing remains a later hardening task.
 - Runtime manifest versioning/cache invalidation/rollback is resolved by T014/T015: `runtime_manifest_snapshots`, `runtime_manifest_state`, `runtime_ui_routes`, typed publish/rollback use cases, canonical API/UI projection, PostgreSQL contract tests, and cache miss/failure coverage are present. HTTP authentication/Studio transport remains future work.

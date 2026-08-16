@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import type { RuntimeManifest } from '../../config/RuntimeManifest.js';
 type ApiRouteConfig = RuntimeManifest['apiRoutes'][number];
 import type { SchemaRegistry } from './schema-registry.js';
+import { AuthenticationRequiredError } from './http-errors.js';
 
 export type UseCaseHandler = (req: unknown, reply: unknown) => Promise<unknown>;
 
@@ -34,7 +35,7 @@ export class DynamicRouteRegistry {
         method: r.method,
         url: r.path_template,
         schema: schema ?? undefined,
-        handler: handler as never,
+        handler: guardedHandler(handler, r.auth_policy_key) as never,
       });
     }
   }
@@ -52,6 +53,13 @@ export class DynamicRouteRegistry {
   static assertNoEval(key: string): void {
     if (/[;(){}]/.test(key)) throw new RouteValidationError(`Invalid key contains code: ${key}`);
   }
+}
+
+function guardedHandler(handler: UseCaseHandler, policy: string): UseCaseHandler {
+  if (policy !== 'admin') return handler;
+  return async () => {
+    throw new AuthenticationRequiredError();
+  };
 }
 
 function requireHandler(registry: UseCaseRegistry, key: string): UseCaseHandler {
