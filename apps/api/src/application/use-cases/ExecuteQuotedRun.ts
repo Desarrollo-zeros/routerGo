@@ -47,6 +47,7 @@ export class ExecuteQuotedRunUseCase implements ExecuteQuotedRunPort {
     const decision = await this.budget.evaluate({ modelId: quote.modelId, gatewayId: model.gatewayId, estimatedPlatformCostMicrousd: quote.estimatedPlatformCostMicrousd, now: this.clock.now() });
     if (!decision.allowed) throw new ExecuteQuotedRunError('BUDGET_DENIED', `Budget denied: ${decision.reason}`);
     const claimed = await this.claimRun(input, quote);
+    input.onRunCreated?.(claimed.run.id);
     if (!claimed.created) return this.reused(claimed.run);
     let reservation: CreditReservationResult;
     try {

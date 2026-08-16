@@ -67,18 +67,18 @@ describe('composition root contracts', () => {
     expect(response.json()).toEqual({ error: 'authentication_required' });
   });
 
-  it('does not report synthetic success for an unimplemented quote route', async () => {
+  it('does not allow unauthenticated quote creation', async () => {
     const composition = await compositionPromise;
 
-    await expect(composition.useCases.createQuote({}, {})).rejects.toThrow('RouteNotReady');
+    await expect(composition.useCases.createQuote({}, {})).rejects.toThrow('AuthenticationRequired');
   });
 
-  it('returns an explicit 501 for an unimplemented quote route over HTTP', async () => {
+  it('protects the quote route with the session boundary', async () => {
     const app = await appPromise;
-    const response = await app.inject({ method: 'POST', url: '/quotes', payload: { logicalModelId: 'deepseek-v4-flash-free' } });
+    const response = await app.inject({ method: 'POST', url: '/quotes', payload: { logicalModelId: 'deepseek-v4-flash-free', idempotencyKey: 'unauthenticated-quote' } });
 
-    expect(response.statusCode).toBe(501);
-    expect(response.json()).toEqual({ error: 'route_not_ready' });
+    expect(response.statusCode).toBe(401);
+    expect(response.json()).toEqual({ error: 'authentication_required' });
   });
 
   it('fails composition when the runtime manifest cannot be loaded', async () => {

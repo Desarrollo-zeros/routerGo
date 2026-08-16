@@ -13,14 +13,16 @@ export function useChat(modelId: string, api: HttpApiPort) {
 
   const send = useCallback(async (prompt: string) => {
     setError(null);
-    setMessages((m) => [...m, { role: "user", content: prompt }]);
+    const nextMessages = [...messages, { role: "user" as const, content: prompt }];
+    setMessages(nextMessages);
     try {
-      const quote = await api.request<{ id: string; credit_cost: number }>({ routeKey: "quote-create", body: { logical_model_id: modelId, prompt } });
-      const run = await api.request<{ id: string }>({ routeKey: "run-create", body: { quote_id: quote.id, idempotency_key: crypto.randomUUID() } });
+      const quote = await api.request<{ quoteId: string }>({ routeKey: "quote-create", body: { logicalModelId: modelId, idempotencyKey: crypto.randomUUID() } });
+      const run = await api.request<{ runId: string }>({ routeKey: "run-create", body: { quoteId: quote.quoteId, idempotencyKey: crypto.randomUUID(), messages: nextMessages, stream: true } });
       setStreaming(true);
+      lastIdRef.current = undefined;
       let acc = "";
       setMessages((m) => [...m, { role: "assistant", content: "" }]);
-      const url = api.pathFor("run-events", { id: run.id });
+      const url = api.pathFor("run-events", { id: run.runId });
       esRef.current?.close();
       esRef.current = connectSse(url, {
         onEvent(ev) {
@@ -32,7 +34,7 @@ export function useChat(modelId: string, api: HttpApiPort) {
         onError() { setError("Conexión SSE perdida"); setStreaming(false); },
       }, lastIdRef.current);
     } catch (e) { setError(e instanceof Error ? e.message : String(e)); setStreaming(false); }
-  }, [api, modelId]);
+  }, [api, messages, modelId]);
 
   const stop = useCallback(() => { esRef.current?.close(); setStreaming(false); }, []);
   return { messages, streaming, error, send, stop };

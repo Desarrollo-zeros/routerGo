@@ -35,8 +35,8 @@ async function mockApi(page: any, balance=12){
   await page.route("**/api/wallet", (r:any)=>r.fulfill({status:200,contentType:"application/json",body:JSON.stringify({balance,lifetime_earned:30,currency:"CREDITS"})}));
   await page.route("**/api/wallet/ledger", (r:any)=>r.fulfill({status:200,contentType:"application/json",body:JSON.stringify({entries:[]})}));
   await page.route("**/api/activities/current/verify", (r:any)=>r.fulfill({status:200,contentType:"application/json",body:JSON.stringify({verified_reps:10,credits:5})}));
-  await page.route("**/api/quotes", (r:any)=>r.fulfill({status:200,contentType:"application/json",body:JSON.stringify({id:"q1",credit_cost:5})}));
-  await page.route("**/api/runs", (r:any)=>r.fulfill({status:200,contentType:"application/json",body:JSON.stringify({id:"run1"})}));
+  await page.route("**/api/quotes", (r:any)=>r.fulfill({status:200,contentType:"application/json",body:JSON.stringify({quoteId:"q1",creditPrice:"5"})}));
+  await page.route("**/api/runs", (r:any)=>r.fulfill({status:200,contentType:"application/json",body:JSON.stringify({runId:"run1",status:"COMPLETED"})}));
   await page.route("**/api/runs/**/refund", (r:any)=>r.fulfill({status:200,contentType:"application/json",body:JSON.stringify({refunded:true,refundId:"ref1"})}));
   await page.route("**/api/wallet/history", (r:any)=>r.fulfill({status:200,contentType:"application/json",body:JSON.stringify([])}));
 }
@@ -79,11 +79,11 @@ test.describe("RouterGo E2E",()=>{
     const earn=await page.evaluate(async()=>{const r=await fetch("/api/activities/current/verify",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({claimed_reps:10})});return r.json()});
     expect(earn.credits).toBe(5);
     // quote
-    const quote=await page.evaluate(async()=>{const r=await fetch("/api/quotes",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({logical_model_id:"zen-free",prompt:"hola"})});return r.json()});
-    expect(quote.id).toBe("q1");
+    const quote=await page.evaluate(async()=>{const r=await fetch("/api/quotes",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({logicalModelId:"zen-free",idempotencyKey:"quote-e2e"})});return r.json()});
+    expect(quote.quoteId).toBe("q1");
     // run
-    const run=await page.evaluate(async()=>{const r=await fetch("/api/runs",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({quote_id:"q1",idempotency_key:"k1"})});return r.json()});
-    expect(run.id).toBe("run1");
+    const run=await page.evaluate(async()=>{const r=await fetch("/api/runs",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({quoteId:"q1",idempotencyKey:"k1",messages:[{role:"user",content:"hola"}],stream:true})});return r.json()});
+    expect(run.runId).toBe("run1");
     // chat stream via UI
     await page.goto("/chat");
     await expect(page.locator("#modelSel")).toBeVisible();

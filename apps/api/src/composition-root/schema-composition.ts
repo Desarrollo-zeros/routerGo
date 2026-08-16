@@ -4,8 +4,8 @@ import { SchemaRegistry } from '../infrastructure/http/schema-registry.js';
 export function createSchemas(): SchemaRegistry {
   const schemas = new SchemaRegistry();
   schemas.registerZod('verifyActivityRequest', z.object({ reps: z.number(), sessionId: z.string() }));
-  schemas.registerZod('createQuoteRequest', z.object({ logicalModelId: z.string(), maxOutputTokens: z.number().optional() }));
-  schemas.registerZod('createRunRequest', z.object({ quoteId: z.string() }));
+  schemas.registerZod('createQuoteRequest', z.object({ logicalModelId: z.string(), idempotencyKey: z.string(), maxOutputTokens: z.number().optional() }));
+  schemas.register('createRunRequest', { type: 'object', required: ['quoteId', 'idempotencyKey', 'messages'], properties: { quoteId: { type: 'string' }, idempotencyKey: { type: 'string' }, stream: { type: 'boolean' }, messages: { type: 'array', minItems: 1, items: { type: 'object', required: ['role', 'content'], properties: { role: { enum: ['system', 'user', 'assistant'] }, content: { type: 'string' } }, additionalProperties: false } } }, additionalProperties: false });
   schemas.register('economyResponse', { type: 'object', properties: { go: { type: 'object' }, windows: { type: 'object' }, contribution: { type: 'object' }, unitEconomics: { type: 'object' }, dau: { type: 'number' } } });
   schemas.register('providerAnalyticsResponse', { type: 'array', items: { type: 'object', required: ['gatewayId', 'health', 'quotaUsagePct', 'costMicro', 'alert'], properties: { gatewayId: { type: 'string' }, health: { type: 'string' }, quotaUsagePct: { type: 'number' }, costMicro: { type: 'number' }, alert: { type: 'string' } } } });
   schemas.register('healthResponse', { type: 'object', properties: { status: { type: 'string' } } });

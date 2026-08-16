@@ -64,6 +64,7 @@ export function buildApp(deps: BootstrapDeps): ReturnType<typeof Fastify> {
   registerAuthRoutes(app, deps.session);
 
   app.get('/runs/:id/events', async (req, reply) => {
+    if (!(req as SessionRequest).user) return reply.code(401).send({ error: 'authentication_required' });
     await sseHandler(req as never, reply as never, deps.sseDeps);
   });
 

@@ -12,6 +12,7 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@mediapipe/tasks-vision": "0.10.14",
     "@routergo/shared": "workspace:*",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

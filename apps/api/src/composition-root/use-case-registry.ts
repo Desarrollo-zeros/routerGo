@@ -20,6 +20,10 @@ import type { ChallengeHandlers } from './challenge-handlers.js'; import { listC
 import { providerAnalyticsRead } from './provider-handlers.js';
 import type { VerifyActivityPort } from '../application/ports/inbound/VerifyActivityPort.js';
 import type { WalletLedgerReader } from '../application/ports/outbound/WalletLedgerReader.js';
+import type { CreateQuotePort } from '../application/ports/inbound/CreateQuotePort.js';
+import type { ExecuteQuotedRunPort } from '../application/ports/inbound/ExecuteQuotedRunPort.js';
+import type { RedisStreamAdapter } from '../infrastructure/adapters/redis/RedisStreamAdapter.js';
+import { createQuoteHandler, createRunHandler } from './chat-session-handlers.js';
 interface RegistryDeps {
   manifest: RuntimeManifest;
   catalog: GetCatalogPort;
@@ -39,6 +43,9 @@ interface RegistryDeps {
   providerAnalytics: GetProviderAnalyticsPort;
   verifyActivity: VerifyActivityPort;
   walletLedger: WalletLedgerReader;
+  createQuote: CreateQuotePort;
+  executeRun: ExecuteQuotedRunPort;
+  streams: RedisStreamAdapter;
 }
 export function createUseCaseRegistry(deps: RegistryDeps): UseCaseRegistry {
   return {
@@ -50,8 +57,8 @@ export function createUseCaseRegistry(deps: RegistryDeps): UseCaseRegistry {
     getWallet: async (req) => deps.wallet.execute(readWalletInput(req)),
     getWalletLedger: async (req) => executeWalletLedger(req, deps),
     verifyActivity: async (req) => executeVerifyActivity(req, deps),
-    createQuote: notReady,
-    createRun: notReady,
+    createQuote: createQuoteHandler(deps.createQuote),
+    createRun: createRunHandler(deps.executeRun, deps.streams),
     streamRun: notReady,
     getEconomy: async (req) => executeEconomy(req, deps),
     getProviderAnalytics: async (req) => providerAnalyticsRead(req, { analytics: deps.providerAnalytics, authenticateApiKey: deps.authenticateApiKey, identity: deps.resolveApiKeyIdentity, authorize: deps.authorizePermission }),

@@ -19,6 +19,7 @@ export class HmacQrProofSigner implements QrProofSigner {
     if (parts.length !== 2 || !parts[0] || !parts[1]) return null;
     const expected = sign(this.secret, parts[0]);
     const actual = Buffer.from(parts[1], 'base64url');
+    if (encode(actual) !== parts[1]) return null;
     if (actual.length !== expected.length || !timingSafeEqual(actual, expected)) return null;
     return decodePayload(parts[0], this.config);
   }
