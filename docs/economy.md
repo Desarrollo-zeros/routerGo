@@ -115,6 +115,18 @@ provider-cost history, but does not create a durable platform-cost commitment;
 that reservation/reconciliation job belongs to T026. Caller authentication
 and wallet ownership remain API-boundary concerns.
 
+## T026 reconciliation boundary
+
+`ReconcileEconomyUseCase` is the idempotent batch boundary for known provider
+costs and finalized ad revenue. Its PostgreSQL adapter selects only runs with
+known provider request/cost metadata and only `FINALIZED` ad events, writes to
+the separate `provider_cost_entries` and `revenue_entries` ledgers with stable
+operation IDs, and uses conflict-safe inserts so retries have no second
+accounting effect. The batch reports unresolved run count and emits counters
+for runs, provider-cost entries, revenue entries, and failures. A BullMQ-ready
+handler invokes the same use case; scheduling remains an operational concern,
+not a second accounting implementation.
+
 ## Concurrency & Idempotency Guarantees
 
 PostgreSQL is the authority for economic correctness. Reserve locks the wallet;

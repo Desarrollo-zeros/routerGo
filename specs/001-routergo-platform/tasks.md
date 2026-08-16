@@ -27,7 +27,7 @@ Format: `[ID] [P?] [Story] task`. `[P]` means safe parallel ownership in differe
 - [x] T023 [US1] Implement `ReserveCredits`, `SettleCredits`, `ReleaseCredits` use cases using UnitOfWork.
 - [x] T024 [US1] Add concurrency/idempotency tests for reserve+settle+duplicate callbacks.
 - [x] T025 [US1] Integrate quote/run flow with reserve before provider execution.
-- [ ] T026 [US1] Add reconciliation jobs/metrics for provider costs and ad revenue.
+- [x] T026 [US1] Add reconciliation jobs/metrics for provider costs and ad revenue.
 
 ## Phase 3 — RouterGo Developer API
 - [ ] T030 [US2] Add api-client/key/usage schema; raw keys never persisted.

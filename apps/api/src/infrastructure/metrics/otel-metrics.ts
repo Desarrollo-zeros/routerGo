@@ -21,9 +21,16 @@ export const llmRequestsTotal = createCounter('llm_requests_total');
 export const ttftHistogram = createHistogram('llm_ttft_seconds');
 export const credentialWindowUsagePct = createGauge('credential_window_usage_pct');
 export const provider429Total = createCounter('provider_429_total');
+export const reconciliationRunsTotal = createCounter('economy_reconciliation_runs_total');
+export const providerCostsReconciledTotal = createCounter('provider_cost_entries_reconciled_total');
+export const revenueEntriesReconciledTotal = createCounter('revenue_entries_reconciled_total');
+export const reconciliationFailuresTotal = createCounter('economy_reconciliation_failures_total');
+export const reconciliationRequiredRuns = createGauge('economy_reconciliation_required_runs');
 
 export const metrics = {
   llmRequestsTotal, ttftHistogram, credentialWindowUsagePct, provider429Total,
+  reconciliationRunsTotal, providerCostsReconciledTotal, revenueEntriesReconciledTotal,
+  reconciliationFailuresTotal, reconciliationRequiredRuns,
   recordLlmRequest(labels: Labels & { status: string; model: string }): void {
     llmRequestsTotal.add(1, labels);
   },
@@ -36,4 +43,9 @@ export const metrics = {
   inc429(labels: Labels & { gateway: string; quota_scope_id?: string }): void {
     provider429Total.add(1, labels);
   },
+  recordReconciliationRun(): void { reconciliationRunsTotal.add(1); },
+  recordProviderCostsReconciled(count: number): void { providerCostsReconciledTotal.add(count); },
+  recordRevenueReconciled(count: number): void { revenueEntriesReconciledTotal.add(count); },
+  setReconciliationRequiredRuns(count: number): void { reconciliationRequiredRuns.set(count); },
+  recordReconciliationFailure(): void { reconciliationFailuresTotal.add(1); },
 };
