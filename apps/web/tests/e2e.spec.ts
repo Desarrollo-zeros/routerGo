@@ -1,7 +1,8 @@
 import { test, expect } from "@playwright/test";
 const manifest = {
-  manifest_version: 1,
-  routes: [
+  version: 1,
+  contentHash: "a".repeat(64),
+  apiRoutes: [
     { route_key: "activity-verify", method: "POST", path_template: "/activities/:id/verify", version: "v1", use_case_key: "verifyActivity", auth_policy_key: "session", request_schema_key: null, response_schema_key: null, enabled: true },
     { route_key: "quote-create", method: "POST", path_template: "/quotes", version: "v1", use_case_key: "createQuote", auth_policy_key: "session", request_schema_key: null, response_schema_key: null, enabled: true },
     { route_key: "run-create", method: "POST", path_template: "/runs", version: "v1", use_case_key: "createRun", auth_policy_key: "session", request_schema_key: null, response_schema_key: null, enabled: true },
@@ -9,12 +10,19 @@ const manifest = {
     { route_key: "wallet-get", method: "GET", path_template: "/wallet", version: "v1", use_case_key: "getWallet", auth_policy_key: "session", request_schema_key: null, response_schema_key: null, enabled: true },
     { route_key: "wallet-ledger", method: "GET", path_template: "/wallet/ledger", version: "v1", use_case_key: "getWalletLedger", auth_policy_key: "session", request_schema_key: null, response_schema_key: null, enabled: true },
   ],
-  navigation: [
+  ui: {
+    routes: [
+      { route_key: "activity-verify", path: "/", screen_key: "activity", enabled: true },
+      { route_key: "quote-create", path: "/chat", screen_key: "chat", enabled: true },
+      { route_key: "wallet-get", path: "/wallet", screen_key: "wallet", enabled: true },
+    ],
+    navigation: [
     { route_key: "activity-verify", screen_key: "activity", label_key: "nav.activity", icon_key: "activity", order_index: 1, required_capability: null, feature_flag: null, enabled: true },
     { route_key: "quote-create", screen_key: "chat", label_key: "nav.chat", icon_key: "message", order_index: 2, required_capability: null, feature_flag: null, enabled: true },
     { route_key: "wallet-get", screen_key: "wallet", label_key: "nav.wallet", icon_key: "wallet", order_index: 3, required_capability: null, feature_flag: null, enabled: true },
-  ],
-  feature_flags: {},
+    ],
+  },
+  featureFlags: {},
   tokens: [],
   catalog: [
     { logical_id: "zen-free", provider_model_id: "z", gateway_id: "zen", tier: "FREE", credit_price: 1, enabled: true, capabilities: {}, limits: {} },

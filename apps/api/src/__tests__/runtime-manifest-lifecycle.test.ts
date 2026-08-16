@@ -39,7 +39,6 @@ afterEach(async () => {
 });
 
 afterAll(async () => pool.end());
-
 describe.sequential('runtime manifest lifecycle', () => {
   it('publishes a separated API/UI public contract', async () => {
     const web = toWebManifest(await loadRuntimeManifest(pool));
@@ -49,11 +48,13 @@ describe.sequential('runtime manifest lifecycle', () => {
     expect(ui.routes[0]).toHaveProperty('path');
     expect(ui.routes[0]).not.toHaveProperty('method');
     expect((web.apiRoutes as Array<Record<string, unknown>>)[0]).toHaveProperty('method');
-    expect(web.feature_flags).toBeDefined();
+    expect(web.featureFlags).toBeDefined();
     expect(web.catalog).toBeDefined();
     expect(ui.navigation.length).toBeGreaterThan(0);
+    expect(web).not.toHaveProperty('routes');
+    expect(web).not.toHaveProperty('navigation');
+    expect(web).not.toHaveProperty('feature_flags');
   });
-
   it('loads a cache miss from PostgreSQL and refreshes the versioned cache', async () => {
     let cached: PublishedRuntimeManifest | null = null;
     let writes = 0;
@@ -68,7 +69,6 @@ describe.sequential('runtime manifest lifecycle', () => {
     expect(second.contentHash).toBe(first.contentHash);
     expect(writes).toBe(1);
   });
-
   it('round-trips the versioned Redis cache when local Redis is available', async () => {
     const redis = new Redis(process.env.ROUTERGO_REDIS_URL ?? 'redis://localhost:6380');
     const adapter = new RedisManifestCacheAdapter(redis, 30);
@@ -80,7 +80,6 @@ describe.sequential('runtime manifest lifecycle', () => {
     await redis.quit();
     expect(cached?.contentHash).toBe(snapshot.contentHash);
   });
-
   it('publishes the next immutable version and moves the active pointer', async () => {
     const before = await latestVersion();
     const result = await publish();
@@ -88,7 +87,18 @@ describe.sequential('runtime manifest lifecycle', () => {
     expect(await activeVersion()).toBe(result.version);
     expect(await snapshotExists(before)).toBe(true);
   });
-
+  it('feeds real publish and rollback snapshots through the web projection', async () => {
+    const initial = toWebManifest(await loadRuntimeManifest(pool));
+    const published = await publish(baseline);
+    const next = toWebManifest(await loadRuntimeManifest(pool));
+    expect(next.version).toBe(published.version);
+    expect(next.contentHash).toBe(published.contentHash);
+    const rolledBack = await rollback(baseline, published.version);
+    const restored = toWebManifest(await loadRuntimeManifest(pool));
+    expect(initial.version).toBe(baseline);
+    expect(restored.version).toBe(rolledBack.version);
+    expect(restored.contentHash).toBe(initial.contentHash);
+  });
   it('rejects a stale expected version before changing state', async () => {
     await expect(publish(999999)).rejects.toMatchObject({ code: 'VERSION_CONFLICT' });
     expect(await activeVersion()).toBe(baseline);

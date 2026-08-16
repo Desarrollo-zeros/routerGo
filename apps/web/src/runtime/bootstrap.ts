@@ -30,7 +30,7 @@ export async function bootstrapRuntime(api?: HttpApiPort): Promise<RuntimeBundle
   const routes = new RouteResolver(manifest);
   const flags = new FeatureFlagRegistry(manifest);
   const screens = new RouteRegistry();
-  const navigation = new NavigationRegistry(manifest, routes, flags);
+  const navigation = new NavigationRegistry(manifest, flags);
   const catalog = new CatalogRegistry(manifest);
   const tokens = new DesignTokenRegistry(manifest);
   tokens.applyToRoot();

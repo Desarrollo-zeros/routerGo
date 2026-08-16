@@ -6,8 +6,8 @@ the source of truth; Redis only accelerates publication propagation.
 ## Public contract
 
 `GET /runtime-manifest` returns the active snapshot with `version` and
-`contentHash`. API operations remain under `apiRoutes` (and the temporary
-backward-compatible `routes` alias). Product navigation is separate under:
+`contentHash`. API operations are under `apiRoutes`. Product navigation is
+separate under:
 
 ```json
 {
@@ -18,10 +18,10 @@ backward-compatible `routes` alias). Product navigation is separate under:
 }
 ```
 
-The top-level `navigation` alias remains for T014 compatibility. UI routes do
-not contain HTTP methods, use cases, or request/response schemas. The backend
-publishes screen keys only; React components remain a compiled frontend
-allow-list.
+UI routes do not contain HTTP methods, use cases, or request/response schemas.
+The backend publishes screen keys and configured paths; React components remain
+a compiled frontend allow-list. Internal snapshot aliases are retained only for
+backend compatibility and are not part of this public response.
 
 ## Publication and rollback
 
@@ -51,8 +51,7 @@ data cannot produce an empty manifest.
 
 ## T014 convergence
 
-T014 already consumes the compatibility aliases (`routes`, `navigation`,
-`feature_flags`, `catalog`, and `tokens`). The next convergence may switch the
-web client to `apiRoutes` and `ui.routes` explicitly, then remove aliases after
-all clients migrate. No remote code or frontend capability adapter is part of
-T015.
+The web client consumes only the canonical public projection. Runtime tokens are
+accepted through a fixed CSS-variable registry, labels through a fixed local
+copy registry, and capabilities remain deny-by-default. No remote code or
+frontend capability adapter is part of this phase.

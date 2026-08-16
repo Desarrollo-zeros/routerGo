@@ -34,6 +34,7 @@
 - T011/T012 are converged: `ResolveIdentityContextUseCase` supplies the small verified `IdentityContext` consumed by `AuthorizePermissionUseCase`; scoped/global permission decisions are fail-closed and covered by six integration scenarios. Authentication transport, HTTP enforcement, and RBAC persistence adapters remain future work.
 - T013 is implemented: `PrivilegedChangeService` requires an allowed `AccessDecision`, runs the typed mutation/audit/outbox scope through one PostgreSQL transaction, sanitizes metadata and event payloads, and uses deterministic operation IDs for idempotency. Unit tests plus PostgreSQL commit, rollback, and duplicate-operation tests cover the boundary.
 - T015 is implemented: published runtime snapshots are validated, hashed, immutable, selected through an explicit active pointer, and exposed with separate API/UI projections. Publish and rollback reuse T013, enforce expected-version/idempotency/concurrency boundaries, and synchronize a versioned Redis cache after commit.
+- T014 is implemented: the PWA consumes the canonical `version`/`contentHash`, `apiRoutes`, nested UI routes/navigation, feature flags, catalog, and design-token projection. Labels resolve through a local registry, screen paths come from `ui.routes`, unknown screens/labels/capabilities fail closed, and the shared contract parser is covered by web tests.
 
 ### P0 — Foundation blockers
 
@@ -59,8 +60,8 @@
 
 - Admin/Studio and advertiser applications are not present.
 - Generic challenge engine, exercise safety workflow, battles, treasure, risk, analytics, and audit query/reporting workflows are not implemented; T013 covers only the privileged mutation/audit/outbox write boundary.
-- Web unit tests are absent; Playwright specs exist but the web Vite build/test execution is not yet part of a green full gate.
-- Runtime manifest versioning/cache invalidation/rollback is resolved by T015: `runtime_manifest_snapshots`, `runtime_manifest_state`, `runtime_ui_routes`, typed publish/rollback use cases, PostgreSQL contract tests, and cache miss/failure coverage are present. HTTP authentication/Studio transport remains future work.
+- Web unit and Playwright coverage is green for the runtime projection, responsive widths, offline fallback, and manifest-driven navigation. Full WCAG auditing remains a later hardening task.
+- Runtime manifest versioning/cache invalidation/rollback is resolved by T014/T015: `runtime_manifest_snapshots`, `runtime_manifest_state`, `runtime_ui_routes`, typed publish/rollback use cases, canonical API/UI projection, PostgreSQL contract tests, and cache miss/failure coverage are present. HTTP authentication/Studio transport remains future work.
 - Observability is partial; there is no end-to-end correlation/cost/revenue/reward reconciliation evidence.
 - Accessibility/responsive checks are represented by source/spec intent, not a passing browser/a11y evidence set.
 
@@ -73,4 +74,4 @@
 
 ## Foundation decision
 
-Do not begin Phases 3–10. T003, T004, T005, T006, T007, T008, T010, T011, T012, and T013 are now closed locally. T014 and T015 are the next dependency-unlocked slices and can proceed in parallel in their separate runtime-manifest surfaces; both must consume the T013 boundary for privileged publication. Authentication transport and HTTP authorization enforcement remain later integration work.
+Do not begin Phases 3–10. T003, T004, T005, T006, T007, T008, T010, T011, T012, T013, T014, and T015 are now closed locally. T020 is the next dependency-unlocked slice. Authentication transport and HTTP authorization enforcement remain later integration work.

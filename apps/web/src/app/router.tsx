@@ -4,7 +4,7 @@ import { AppShell } from "../design-system/AppShell";
 import { CreditBalance } from "../design-system/CreditBalance";
 import type { RuntimeBundle } from "../runtime/bootstrap";
 import { useRuntime } from "../runtime/RuntimeProvider";
-import type { NavItem } from "../runtime/types";
+import type { NavigationItem } from "../runtime/NavigationRegistry";
 
 function Layout({ bundle }: { bundle: RuntimeBundle }): React.ReactElement {
   const [balance, setBalance] = React.useState(0);
@@ -12,27 +12,25 @@ function Layout({ bundle }: { bundle: RuntimeBundle }): React.ReactElement {
   React.useEffect(() => {
     void bundle.api.request<{ balance: number }>({ routeKey: "wallet-get" }).then((wallet) => setBalance(wallet.balance)).catch(() => undefined);
   }, [bundle]);
-  const nav = <RuntimeNavigation items={items} bundle={bundle} />;
+  const nav = <RuntimeNavigation items={items} />;
   return <AppShell header={<CreditBalance balance={balance} />} nav={nav}><Outlet /></AppShell>;
 }
 
-function RuntimeNavigation({ items, bundle }: { items: NavItem[]; bundle: RuntimeBundle }): React.ReactElement {
+function RuntimeNavigation({ items }: { items: NavigationItem[] }): React.ReactElement {
   const location = useLocation();
   return (
     <div className="rg-nav-list">
       <Link className="rg-brand" to="/">RouterGo</Link>
       {items.map((item) => {
-        const screen = bundle.screens.resolve(item.screen_key);
-        if (!screen.available) return null;
-        const current = location.pathname === screen.path;
-        return <Link key={item.route_key} className="rg-nav-link" to={screen.path} aria-current={current ? "page" : undefined} data-route-key={item.route_key}>{item.label_key}</Link>;
+        const current = location.pathname === item.path;
+        return <Link key={item.route_key} className="rg-nav-link" to={item.path} aria-current={current ? "page" : undefined} data-route-key={item.route_key}>{item.label}</Link>;
       })}
     </div>
   );
 }
 
-function visibleItems(bundle: RuntimeBundle): NavItem[] {
-  return bundle.navigation.list().filter((item) => bundle.screens.resolve(item.screen_key).available);
+function visibleItems(bundle: RuntimeBundle): NavigationItem[] {
+  return bundle.navigation.list().filter((item) => bundle.screens.resolve(item.screen_key, item.path).available);
 }
 
 export function createAppRouter(bundle: RuntimeBundle): ReturnType<typeof createBrowserRouter> {

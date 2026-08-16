@@ -5,7 +5,7 @@ import { EconomySimulator } from "../features/economy/EconomySimulator";
 import { WalletView } from "../features/wallet/WalletView";
 import type { CatalogRegistry } from "./CatalogRegistry";
 import type { HttpApiPort } from "./ApiPort";
-import type { NavItem } from "./types";
+import type { NavigationItem } from "./NavigationRegistry";
 
 export type ScreenContext = { catalog: CatalogRegistry; api: HttpApiPort };
 export type ScreenDefinition = {
@@ -15,31 +15,29 @@ export type ScreenDefinition = {
   render: (context: ScreenContext) => React.ReactElement;
 };
 
-const NOT_AVAILABLE: ScreenDefinition = {
-  screenKey: "not-available",
-  path: "/not-available",
-  available: false,
-  render: () => <NotAvailableScreen />,
-};
-
 const SCREEN_REGISTRY = new Map<string, ScreenDefinition>([
-  ["activity", { screenKey: "activity", path: "/", available: true, render: ({ api }) => <ActivityView api={api} /> }],
-  ["chat", { screenKey: "chat", path: "/chat", available: true, render: ({ catalog, api }) => <ChatView catalog={catalog.list()} balance={0} api={api} /> }],
-  ["wallet", { screenKey: "wallet", path: "/wallet", available: true, render: ({ api }) => <WalletView api={api} /> }],
-  ["admin-economy", { screenKey: "admin-economy", path: "/economy", available: true, render: () => <EconomySimulator /> }],
+  ["activity", { screenKey: "activity", path: "", available: true, render: ({ api }) => <ActivityView api={api} /> }],
+  ["chat", { screenKey: "chat", path: "", available: true, render: ({ catalog, api }) => <ChatView catalog={catalog.list()} balance={0} api={api} /> }],
+  ["wallet", { screenKey: "wallet", path: "", available: true, render: ({ api }) => <WalletView api={api} /> }],
+  ["admin-economy", { screenKey: "admin-economy", path: "", available: true, render: () => <EconomySimulator /> }],
 ]);
 
 export class RouteRegistry {
-  resolve(screenKey: string): ScreenDefinition {
-    return SCREEN_REGISTRY.get(screenKey) ?? NOT_AVAILABLE;
+  resolve(screenKey: string, path = "/not-available"): ScreenDefinition {
+    const screen = SCREEN_REGISTRY.get(screenKey);
+    return screen ? { ...screen, path } : notAvailable(screenKey);
   }
 
-  uiRoutes(items: NavItem[], context: ScreenContext): Array<{ path: string; element: React.ReactElement }> {
+  uiRoutes(items: NavigationItem[], context: ScreenContext): Array<{ path: string; element: React.ReactElement }> {
     return items.flatMap((item) => {
-      const screen = this.resolve(item.screen_key);
+      const screen = this.resolve(item.screen_key, item.path);
       return screen.available ? [{ path: screen.path, element: screen.render(context) }] : [];
     });
   }
+}
+
+function notAvailable(screenKey: string): ScreenDefinition {
+  return { screenKey, path: "/not-available", available: false, render: () => <NotAvailableScreen /> };
 }
 
 function NotAvailableScreen(): React.ReactElement {

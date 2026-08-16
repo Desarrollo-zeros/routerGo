@@ -4,7 +4,7 @@ export class RouteResolver {
   private map = new Map<string, ManifestRoute>();
 
   constructor(manifest: RuntimeManifest) {
-    for (const r of (manifest.routes ?? [])) if (r.enabled) this.map.set(r.route_key, r);
+    for (const r of manifest.apiRoutes) if (r.enabled) this.map.set(r.route_key, r);
   }
 
   resolve(key: string): ManifestRoute {

@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import type { RuntimeManifest } from '../../config/RuntimeManifest.js';
-type ApiRouteConfig = RuntimeManifest['routes'][number];
+type ApiRouteConfig = RuntimeManifest['apiRoutes'][number];
 import type { SchemaRegistry } from './schema-registry.js';
 
 export type UseCaseHandler = (req: unknown, reply: unknown) => Promise<unknown>;

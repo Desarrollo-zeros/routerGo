@@ -27,7 +27,7 @@ export class DesignTokenRegistry {
 
   constructor(manifest: RuntimeManifest) {
     this.accepted = manifest.tokens.filter(isSafeToken);
-    this.version = manifest.manifest_version;
+    this.version = manifest.version;
   }
 
   toCssVariables(): Record<string, string> {

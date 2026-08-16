@@ -4,7 +4,7 @@ export class FeatureFlagRegistry {
   private readonly flags: ReadonlyMap<string, boolean>;
 
   constructor(manifest: RuntimeManifest) {
-    this.flags = new Map(Object.entries(manifest.feature_flags));
+    this.flags = new Map(Object.entries(manifest.featureFlags));
   }
 
   isEnabled(key: string | null | undefined): boolean {

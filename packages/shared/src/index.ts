@@ -7,3 +7,4 @@ export function getModelMeta(id: string): { tier: Tier; gateway: Gateway; provid
   return undefined;
 }
 export const ALLOWLIST: string[] = [];
+export * from "./runtime-manifest.js";

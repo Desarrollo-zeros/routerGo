@@ -26,22 +26,13 @@ export function toWebManifest(m: RuntimeManifest): Record<string, unknown> {
   const featureFlags: Record<string, boolean> = {};
   for (const f of (m.flags ?? []) as Array<{ key: string; default_value: boolean }>) featureFlags[f.key] = f.default_value;
   return {
-    manifest_version: (m as unknown as { version: number }).version ?? 1,
-    version: (m as unknown as { version: number }).version ?? 1,
+    version: m.version,
     contentHash: m.contentHash,
     apiRoutes: m.apiRoutes,
-    uiRoutes: m.uiRoutes,
     ui: { routes: m.uiRoutes, navigation: m.uiNavigation },
-    routes: m.routes ?? [],
     catalog,
-    models: m.models ?? [],
-    gateways: m.gateways ?? [],
-    endpoints: m.endpoints ?? [],
-    tokens: m.tokens ?? [],
-    navigation: m.uiNavigation ?? [],
-    feature_flags: featureFlags,
-    flags: m.flags ?? [],
-    poolPolicies: (m as unknown as { poolPolicies: unknown[] }).poolPolicies ?? [],
+    tokens: m.tokens,
+    featureFlags,
   };
 }
 
@@ -61,7 +52,7 @@ export function buildApp(deps: BootstrapDeps): ReturnType<typeof Fastify> {
 
   const registry = new DynamicRouteRegistry(deps.useCases, deps.schemas);
   const reserved = ['/health', '/readiness', '/runtime-manifest', '/runs/:id/events'];
-  const filtered = deps.manifest.routes
+  const filtered = deps.manifest.apiRoutes
     .filter((r) => r.enabled)
     .filter((r) => !reserved.some((p) => r.path_template === p));
   if (filtered.length > 0) registry.register(app, filtered);
