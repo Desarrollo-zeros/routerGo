@@ -79,12 +79,7 @@ button{font:inherit;cursor:pointer;border:none;background:none}
 .rg-exercise-meta p{color:var(--rg-color-text-secondary,#a0a0b8);margin-top:4px}
 .rg-rep-ring{width:68px;height:68px;border:3px solid var(--rg-color-brand,#6c5ce7);border-radius:50%;display:grid;place-items:center;font-size:25px;font-weight:800;flex:none}
 .rg-rep-ring small{display:block;font-size:10px;color:var(--rg-color-text-secondary,#a0a0b8);font-weight:400;margin-top:-18px;transform:translateY(28px)}
-.rg-exercise-visual{min-height:240px;margin:0 14px;position:relative;overflow:hidden;border-radius:10px;background:linear-gradient(150deg,#292836 0%,#12121a 64%);isolation:isolate}
-.rg-exercise-visual::before{content:"";position:absolute;inset:36% -10% -18%;background:linear-gradient(170deg,transparent 42%,rgba(162,155,254,.28) 43%,transparent 47%);transform:rotate(-4deg)}
-.rg-exercise-visual::after{content:"";position:absolute;left:9%;right:9%;bottom:18%;height:10px;background:#09090d;border-radius:50%;box-shadow:0 12px 18px rgba(0,0,0,.5)}
-.rg-athlete{position:absolute;left:24%;right:18%;bottom:25%;height:80px;background:linear-gradient(160deg,#20202b,#050507);border-radius:48% 42% 35% 32%;transform:rotate(-8deg);box-shadow:0 20px 24px rgba(0,0,0,.36)}
-.rg-athlete::before{content:"";position:absolute;width:52px;height:52px;right:-28px;top:-18px;border-radius:50%;background:#171720;box-shadow:-66px 50px 0 -18px #c7a27f, -164px 70px 0 -20px #c7a27f}
-.rg-athlete::after{content:"";position:absolute;width:100px;height:16px;left:-68px;bottom:-18px;background:#111119;border-radius:50%;transform:rotate(8deg);box-shadow:210px 2px 0 #111119}
+.rg-exercise-visual{min-height:240px;margin:0 14px;position:relative;overflow:hidden;border-radius:10px;background:#14131d;isolation:isolate}.rg-exercise-visual::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(9,8,15,.28));pointer-events:none}.rg-exercise-visual img{width:100%;height:100%;min-height:240px;object-fit:cover;object-position:center;filter:saturate(.92) contrast(1.04)}
 .rg-credit-strip{display:flex;align-items:center;gap:16px;margin:14px;padding:16px;border:1px solid rgba(162,155,254,.35);border-radius:10px;background:rgba(108,92,231,.08)}
 .rg-credit-token{display:grid;place-items:center;width:46px;height:46px;border:2px solid var(--rg-color-brand-soft,#a29bfe);border-radius:14px;color:var(--rg-color-brand-soft,#a29bfe);font-size:22px;font-weight:800;transform:rotate(45deg);flex:none}
 .rg-credit-token span{transform:rotate(-45deg)}
@@ -96,7 +91,7 @@ button{font:inherit;cursor:pointer;border:none;background:none}
 .rg-reward-action{padding:11px 16px;border:1px solid var(--rg-color-brand,#6c5ce7);border-radius:8px;color:var(--rg-color-brand-soft,#a29bfe);white-space:nowrap}
 .rg-workout-cta{min-height:54px;border-radius:9px;background:var(--rg-color-brand,#6c5ce7);color:#fff;font-size:17px;font-weight:800}
 .rg-activity-page .rg-privacy-note{text-align:center}
-@media(max-width:760px){.rg-auth-layout{grid-template-columns:1fr;padding:40px 0}.rg-auth-intro h1{font-size:42px}.rg-auth-intro{order:0}.rg-auth-card{order:1}.rg-auth-points{display:none}.rg-layout{padding:16px 12px 88px}.rg-nav{position:fixed;z-index:9;bottom:0;left:0;right:0;padding:8px 12px;background:var(--rg-color-surface,#14141c);border-top:1px solid var(--rg-color-surface-muted,#1e1e2a)}.rg-nav-list{flex-direction:row;justify-content:space-around;gap:4px}.rg-nav-title{display:none}.rg-nav-link{flex:1;justify-content:center;padding:8px 6px;font-size:13px}.rg-exercise-meta{padding:18px 16px 12px}.rg-exercise-meta h2{font-size:24px}.rg-exercise-visual{min-height:200px;margin:0 10px}.rg-credit-strip{margin:10px;padding:13px;gap:11px}.rg-credit-strip strong{font-size:18px}.rg-reward-card{padding:16px}.rg-reward-action{font-size:12px;padding:10px}.rg-logout{display:none}}
+@media(max-width:760px){html{scroll-padding-bottom:96px}.rg-auth-layout{grid-template-columns:1fr;padding:40px 0}.rg-auth-intro h1{font-size:42px}.rg-auth-intro{order:0}.rg-auth-card{order:1}.rg-auth-points{display:none}.rg-layout{padding:16px 12px 88px}.rg-main{padding-bottom:96px}.rg-nav{position:fixed;z-index:9;bottom:0;left:0;right:0;padding:8px 12px;background:var(--rg-color-surface,#14141c);border-top:1px solid var(--rg-color-surface-muted,#1e1e2a)}.rg-nav-list{flex-direction:row;justify-content:space-around;gap:4px}.rg-nav-title{display:none}.rg-nav-link{flex:1;justify-content:center;padding:8px 6px;font-size:13px}.rg-exercise-meta{padding:18px 16px 12px}.rg-exercise-meta h2{font-size:24px}.rg-exercise-visual{min-height:200px;margin:0 10px}.rg-exercise-visual img{min-height:200px}.rg-credit-strip{margin:10px;padding:13px;gap:11px}.rg-credit-strip strong{font-size:18px}.rg-reward-card{padding:16px}.rg-reward-action{font-size:12px;padding:10px}.rg-logout{display:none}}
 
 .rg-nav-list{display:flex;flex-direction:column;gap:8px}
 .rg-brand{font-weight:700;color:var(--rg-color-brand-soft,LinkText);padding:8px 12px}
@@ -122,6 +117,7 @@ button{font:inherit;cursor:pointer;border:none;background:none}
 .rg-positive{color:var(--rg-color-success,CanvasText);font-weight:700}
 .rg-negative{color:var(--rg-color-danger,CanvasText);font-weight:700}
 .rg-camera{position:relative;background:var(--rg-color-bg,Canvas);border-radius:var(--rg-radius-md,12px);overflow:hidden;min-height:220px}
+.rg-camera-idle{display:none}
 .rg-camera video{width:100%;height:320px;object-fit:cover;object-position:center}
 .rg-privacy-note{font-size:12px;color:var(--rg-color-text-disabled,CanvasText);margin:0}
 .rg-treasure{display:grid;gap:16px}

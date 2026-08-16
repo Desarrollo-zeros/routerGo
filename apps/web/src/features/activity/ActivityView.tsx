@@ -53,13 +53,13 @@ export function ActivityView({ api }: { api: HttpApiPort }): React.ReactElement 
     <section className="rg-activity-hero"><p>Una forma distinta de acceder</p><h1>Recupera GoCredits<br /><span>con tu esfuerzo 💪</span></h1><p>Entrena, verifica tu esfuerzo y usa tus créditos al instante.</p></section>
     <section className="rg-exercise-card" aria-live="polite">
       <div className="rg-exercise-meta"><div><span className="rg-exercise-tag">♟ Ejercicio actual</span><h2>Flexiones</h2><p>Ejercicio corporal</p></div><div className="rg-rep-ring">{shownReps}<small>reps</small></div></div>
-      <div className="rg-exercise-visual" role="img" aria-label="Ilustración de una persona haciendo flexiones"><div className="rg-athlete" /></div>
+      <div className="rg-exercise-visual"><img src="/exercise-pushup.png" alt="Persona haciendo flexiones sobre una colchoneta" /></div>
       <div className="rg-credit-strip"><div className="rg-credit-token"><span>G</span></div><p>Cada flexión equivale a<strong>1 GoCredit</strong></p><span className="rg-credit-arrow">→</span><p>Úsalos al instante<br />sin esperar.</p></div>
       {machine.error ? <p className="rg-error-copy" role="alert">{machine.error}</p> : null}
     </section>
     <SponsorPlacement placement="activity-inline"><div className="rg-sponsor-content"><span>Patrocinado</span><strong>Tu esfuerzo merece impulso.</strong><small>Descubre una oferta que acompaña tu entrenamiento.</small></div></SponsorPlacement>
     <section className="rg-reward-card"><div><p>GoCredits disponibles</p><strong>{balance}</strong></div><span className="rg-reward-action">Listos para usar</span></section>
-    {isCameraVisible ? <video ref={machine.videoRef} playsInline muted autoPlay className="rg-camera" aria-label="Vista de cámara" /> : null}
+    <video ref={machine.videoRef} playsInline muted autoPlay className={isCameraVisible ? "rg-camera" : "rg-camera rg-camera-idle"} aria-label="Vista de cámara" />
     {action ? <button className="rg-workout-cta" onClick={action} disabled={machine.state === "loading_model" || machine.state === "verifying"}>{actionLabel(machine.state)}</button> : null}
     {machine.state !== "idle" ? <button className="rg-secondary-button" onClick={machine.reset}>Reiniciar sesión</button> : null}
     <p className="rg-privacy-note">La cámara se activa solo al comenzar. El video no se sube; solo enviamos evidencia cuantizada.</p>
