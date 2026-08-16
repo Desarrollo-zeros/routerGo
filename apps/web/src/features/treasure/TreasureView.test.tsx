@@ -16,6 +16,6 @@ describe("TreasureView", () => {
   it("offers an alternative when location permission is denied", () => {
     const html = renderToStaticMarkup(<TreasureView hunts={[]} permission="denied" alternativeAvailable onChooseAlternative={() => undefined} />);
     expect(html).toContain("Continuar sin ubicación");
-    expect(html).toContain("No hay hunts disponibles");
+    expect(html).toContain("No hay hunts activos disponibles");
   });
 });
