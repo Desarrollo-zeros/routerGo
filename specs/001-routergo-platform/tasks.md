@@ -48,7 +48,7 @@ Format: `[ID] [P?] [Story] task`. `[P]` means safe parallel ownership in differe
 ## Phase 5 — Ads core + advertiser
 - [x] T050 [US4] Add advertiser/funding/campaign/creative/placement schema.
 - [x] T051 [P] [US4] Campaign state machine + budget policy + moderation.
-- [ ] T052 [P] [US4] AdDecisionPort and Strategy adapters for direct/third-party/house inventory.
+- [x] T052 [P] [US4] AdDecisionPort and Strategy adapters for direct/third-party/house inventory.
 - [ ] T053 [US4] Reconcile impressions/clicks/finalized revenue idempotently.
 - [ ] T054 [US4] Create `apps/advertiser` with balance/campaign/creative/analytics flows.
 - [ ] T055 [US4] Add frequency caps, consent/region policy hooks, anti-click-fraud telemetry.

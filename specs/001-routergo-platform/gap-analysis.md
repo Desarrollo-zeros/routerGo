@@ -44,6 +44,7 @@
 - T041 is implemented: the CMS domain owns validated slugs, append-only content versions, explicit editorial transitions, and media metadata; `CmsContentRepository` keeps persistence behind an application port. HTTP, binary storage, and Studio workflows remain later tasks.
 - T050 is implemented: migration `009_ads_core.sql` adds advertiser organizations, USD-micro funding accounts, campaign moderation/budget state, creatives, placements, targeting rules, and idempotent delivery events. PostgreSQL guards campaign overruns and real persistence tests cover budget and duplicate-event invariants.
 - T051 is implemented: the Ads domain campaign aggregate requires explicit review/approval before activation, supports pause/resume, and enforces fixed-precision budget exhaustion without coupling delivery to persistence.
+- T052 is implemented: `AdDecisionPort` and three typed inventory strategies select only active, approved, labeled candidates, support deterministic priority and caller allow-lists, and return explicit no-fill without mutating campaign or delivery state. Delivery/reconciliation remains T053.
 
 ### P0 — Foundation blockers
 
