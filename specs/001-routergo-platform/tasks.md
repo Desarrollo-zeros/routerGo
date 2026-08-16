@@ -78,7 +78,7 @@ Format: `[ID] [P?] [Story] task`. `[P]` means safe parallel ownership in differe
 
 ## Phase 9 — Treasure
 - [x] T090 [US7] Add hunt/step/QR/progress schema and moderation rules.
-- [ ] T091 [P] [US7] Implement coarse geofence proof adapter with no continuous history.
+- [x] T091 [P] [US7] Implement coarse geofence proof adapter with no continuous history.
 - [ ] T092 [P] [US7] Implement signed/expiring/replay-resistant QR proof.
 - [ ] T093 [US7] Add safe public-location review workflow and permission-denied alternative.
 - [ ] T094 [US7] Responsive map/list experience with privacy notices.
