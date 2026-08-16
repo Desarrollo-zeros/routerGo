@@ -19,13 +19,13 @@
 - `audit_logs(id,actor_user_id,actor_organization_id,action,resource_type,resource_id,before_state,after_state,metadata,correlation_id,created_at)`; no `updated_at`, and database trigger makes it append-only. T013 uses the privileged operation ID as `id` for deterministic duplicate detection.
 
 ### Economy/API
-- `credit_reservations(id,wallet_id,run_id,amount,status,expires_at,idempotency_key)`
-- `credit_budgets(scope,period,limit,consumed,reserved)`
-- `provider_cost_entries(run_id,provider,deployment,cost_micro,source,status)`
-- `revenue_entries(source_type,source_id,revenue_micro,status)`
+- `credit_reservations(id,wallet_id,operation_id,quote_id,run_id,reserved_credits,settled_credits,released_credits,status,expires_at,...)` stores integer GoCredits reservations. `operation_id` is unique for idempotency; the wallet foreign key is `ON DELETE RESTRICT`, while quote/run references are nullable and `ON DELETE SET NULL`. Amount checks prevent negative values and settling plus releasing more than reserved.
+- `economy_budgets(id,scope_type,scope_id,amount_unit,limit_amount,currency_code,starts_at,ends_at,...)` stores finite positive limits. `amount_unit` is `CREDITS` or `USD_MICRO`; USD budgets require `currency_code='USD'`, credit budgets have no currency, and global budgets have no scope ID.
+- `provider_cost_entries(id,operation_id,provider_request_id,run_id,provider_gateway_id,endpoint_id,model_logical_id,input_tokens,output_tokens,cached_input_tokens,cost_microusd,currency_code,pricing_version,source,reversal_of,...)` separates token counters from fixed-precision provider cost. Operation and provider request identifiers are unique; provider gateway deletion is restricted.
+- `revenue_entries(id,operation_id,source_type,ad_event_id,gross_revenue_microusd,net_revenue_microusd,currency_code,status,occurred_at,finalized_at,reversal_of,...)` records pending, finalized, or reversed USD micro-unit revenue. Net cannot exceed gross; corrections use linked adjustment/reversal rows.
 - `api_clients(organization_id,name,status)`
 - `api_keys(client_id,key_hash,prefix,scopes_json,status,expires_at,last_used_at)`
-- `api_usage(client_id,key_id,run_id,model,input_tokens,output_tokens,credits,cost_micro)`
+- `api_usage(client_id,key_id,run_id,model,input_tokens,output_tokens,credits,cost_microusd)` where `credits` are GoCredits and `cost_microusd` is fixed-precision USD micro-units.
 
 ### Skills
 - `skill_definitions(id,key,status,owner_context)`

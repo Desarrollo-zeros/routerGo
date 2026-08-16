@@ -21,7 +21,7 @@ Format: `[ID] [P?] [Story] task`. `[P]` means safe parallel ownership in differe
 - [x] T015 [US3] Add manifest publish/version/cache invalidation/rollback contract tests.
 
 ## Phase 2 — Economy v2 (blocking for public API/ads)
-- [ ] T020 [US1] Add credit reservation/budget/provider-cost/revenue migrations.
+- [x] T020 [US1] Add credit reservation/budget/provider-cost/revenue migrations.
 - [ ] T021 [P] [US1] Implement CreditReservation domain state + tests.
 - [ ] T022 [P] [US1] Implement EconomyBudgetPolicy + circuit-breaker specifications.
 - [ ] T023 [US1] Implement `ReserveCredits`, `SettleCredits`, `ReleaseCredits` use cases using UnitOfWork.
