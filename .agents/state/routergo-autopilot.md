@@ -1,7 +1,7 @@
 phase: 3
-current_objective: T073
+current_objective: T074
 status: executing
-last_green_commit: TBD_T073
+last_green_commit: 0b8f25d
 last_completed_tasks:
   - T020
   - T021
@@ -38,4 +38,4 @@ next_candidates:
   - T065
   - T074
 blocked_tasks: []
-last_validation: T073 fallback tests pass (2); typecheck, lines, architecture and secrets pass. T042/T043/T054/T055/T065 remain open; T074 is next.
+last_validation: T074 integration tests pass (2); typecheck pass. T042/T043/T054/T055/T065 remain open.

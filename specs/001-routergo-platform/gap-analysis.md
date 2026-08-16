@@ -57,6 +57,7 @@
 - T071 is implemented: `IntentClassifierPort` and a schema-constrained adapter accept only the fixed intent taxonomy, confidence range, bounded tags, and no executable extra fields. Fallback and non-blocking session integration remain T073-T074.
 - T072 is implemented: `SkillRegistry` resolves only typed, uniquely versioned skills and deep-freezes policy JSON so callers cannot mutate registered versions. Fallback and session activation remain T073-T074.
 - T073 is implemented: intent classification falls back to deterministic keyword heuristics or configured default when budget is unavailable, confidence is low, the classifier errors, or timeout elapses; the core session is never blocked.
+- T074 is implemented: session-start application resolution consumes the bounded classifier and immutable skill registry, while returning core-session availability even when the selected skill version is unavailable. HTTP transport and durable classification persistence remain separate gaps.
 
 ### P0 — Foundation blockers
 
