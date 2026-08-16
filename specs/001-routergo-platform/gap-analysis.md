@@ -60,6 +60,7 @@
 - T073 is implemented: intent classification falls back to deterministic keyword heuristics or configured default when budget is unavailable, confidence is low, the classifier errors, or timeout elapses; the core session is never blocked.
 - T074 is implemented: session-start application resolution consumes the bounded classifier and immutable skill registry, while returning core-session availability even when the selected skill version is unavailable. HTTP transport and durable classification persistence remain separate gaps.
 - T075 is implemented: schema-constrained classifier output rejects prompt-shaped unknown intent, skill, and tool fields; session resolution falls back to the configured general skill and never activates model-provided names.
+- T080 is implemented: migration `013_battles.sql` adds match/player/round/answer constraints, and `BattleMatch` owns lifecycle transitions, round expiry, duplicate-answer rejection, and server-side scoring without user stakes.
 
 ### P0 — Foundation blockers
 

@@ -70,7 +70,7 @@ Format: `[ID] [P?] [Story] task`. `[P]` means safe parallel ownership in differe
 - [x] T075 [US8] Test prompt-injection attempts cannot activate unknown tools/skills.
 
 ## Phase 8 — Battles
-- [ ] T080 [US6] Add battle schema/state machine and server-authoritative scoring.
+- [x] T080 [US6] Add battle schema/state machine and server-authoritative scoring.
 - [ ] T081 [P] [US6] Implement matchmaking/battle WebSocket gateway.
 - [ ] T082 [P] [US6] Implement Redis ephemeral match state + durable results.
 - [ ] T083 [US6] Add reconnect/timeout/idempotent result/reward tests.

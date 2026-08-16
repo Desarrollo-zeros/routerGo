@@ -64,6 +64,10 @@ hooks remain T054-T055.
 - `treasure_hunts`, `treasure_steps`, `treasure_qr_tokens`, `treasure_progress`
 - `risk_events`, `risk_scores`, `review_cases`
 
+Battle scores are server-owned integers. Answer rows store hashes and a unique
+`battle_id + round_number + user_id` key, so clients cannot submit duplicate
+answers or supply their own score. Matches have no stake or wager columns.
+
 ## Invariants
 - User GoCredit balance >=0.
 - Reservation cannot settle above reserved amount without a new authorized reservation policy.

@@ -1,7 +1,7 @@
 phase: 4
-current_objective: T065
-status: ready_to_commit
-last_green_commit: 8d45c19
+current_objective: T081
+status: executing
+last_green_commit: 6d7b8d0
 last_completed_tasks:
   - T020
   - T021
@@ -35,11 +35,12 @@ last_completed_tasks:
   - T073
   - T074
   - T075
+  - T080
 next_candidates:
   - T042
   - T043
   - T054
   - T065
-  - T074
+  - T081
 blocked_tasks: []
-last_validation: T042 admin-route guard tests pass (2); typecheck, lint, lines, architecture, and secrets pass. Full DB seed is blocked only by existing dirty local snapshot history; authenticated transport and audited publish remain open. T043/T054/T055/T065 also remain open.
+last_validation: clean temporary database migrations 001-013 and double seed pass with checksum a97a1259b6596eb4; full tests pass 64 files/280 API tests, E2E 7/7, install frozen, build, typecheck, lint, lines, architecture, secrets. Main volume retains historical snapshots and is not used for clean-seed claims.
