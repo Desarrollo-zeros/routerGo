@@ -5,6 +5,7 @@ import { EconomySimulator } from "../features/economy/EconomySimulator";
 import { WalletView } from "../features/wallet/WalletView";
 import { TreasureView } from "../features/treasure/TreasureView";
 import { BattleView } from "../features/battle/BattleView";
+import { CatalogView } from "../features/catalog/CatalogView";
 import type { CatalogRegistry } from "./CatalogRegistry";
 import type { HttpApiPort } from "./ApiPort";
 import type { NavigationItem } from "./NavigationRegistry";
@@ -21,6 +22,7 @@ const SCREEN_REGISTRY = new Map<string, ScreenDefinition>([
   ["activity", { screenKey: "activity", path: "", available: true, render: ({ api }) => <ActivityView api={api} /> }],
   ["chat", { screenKey: "chat", path: "", available: true, render: ({ catalog, api }) => <ChatView catalog={catalog.list()} balance={0} api={api} /> }],
   ["wallet", { screenKey: "wallet", path: "", available: true, render: ({ api }) => <WalletView api={api} /> }],
+  ["catalog", { screenKey: "catalog", path: "", available: true, render: ({ catalog }) => <CatalogView entries={catalog.list()} /> }],
   ["admin-economy", { screenKey: "admin-economy", path: "", available: true, render: () => <EconomySimulator /> }],
   ["treasure", { screenKey: "treasure", path: "", available: true, render: () => <TreasureView hunts={[]} permission="unknown" /> }],
   ["battle", { screenKey: "battle", path: "", available: true, render: () => <BattleView /> }],

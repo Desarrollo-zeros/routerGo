@@ -4,6 +4,7 @@ const LABELS: Record<string, string> = {
   "nav.wallet": "Billetera",
   "nav.economy": "Economía",
   "nav.catalog": "Catálogo",
+  "nav.battles": "Batallas",
 };
 
 export class LabelRegistry {
