@@ -1,7 +1,7 @@
 phase: 3
-current_objective: T062
+current_objective: T063
 status: executing
-last_green_commit: 6e646be
+last_green_commit: 416ea88
 last_completed_tasks:
   - T020
   - T021
@@ -25,11 +25,12 @@ last_completed_tasks:
   - T053
   - T060
   - T061
+  - T062
 next_candidates:
   - T042
   - T043
   - T054
   - T055
-  - T062
+  - T063
 blocked_tasks: []
-last_validation: T061 registry tests pass; typecheck, lint, lines, architecture and secrets pass. T042/T043/T054/T055 remain open; T062 is next.
+last_validation: T062 policy and budget-port tests pass (6); typecheck, lines and architecture pass. T042/T043/T054/T055 remain open; T063 is next.
