@@ -67,7 +67,7 @@ Format: `[ID] [P?] [Story] task`. `[P]` means safe parallel ownership in differe
 - [x] T072 [P] [US8] Implement typed `SkillRegistry` + immutable skill versions.
 - [x] T073 [US8] Add low-confidence/timeout/budget fallback heuristics.
 - [x] T074 [US8] Integrate session-start classification without blocking core session availability.
-- [ ] T075 [US8] Test prompt-injection attempts cannot activate unknown tools/skills.
+- [x] T075 [US8] Test prompt-injection attempts cannot activate unknown tools/skills.
 
 ## Phase 8 — Battles
 - [ ] T080 [US6] Add battle schema/state machine and server-authoritative scoring.

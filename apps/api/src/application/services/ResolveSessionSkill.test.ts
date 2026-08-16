@@ -32,4 +32,5 @@ describe('ResolveSessionSkill', () => {
     expect(result.skill).toBeNull();
     expect(result.reason).toBe('SKILL_VERSION_UNAVAILABLE');
   });
+
 });
