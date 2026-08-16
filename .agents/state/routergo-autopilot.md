@@ -1,7 +1,7 @@
 phase: 3
-current_objective: T036
+current_objective: T040
 status: executing
-last_green_commit: 1872e1a
+last_green_commit: c8f1f09
 last_completed_tasks:
   - T020
   - T021
@@ -16,7 +16,8 @@ last_completed_tasks:
   - T033
   - T034
   - T035
-next_candidates:
   - T036
+next_candidates:
+  - T040
 blocked_tasks: []
-last_validation: T035 Responses boundary and provider SSE reader pass typecheck, line, lint, architecture, clean r6 seed, 41 API suites/221 tests, build, E2E 7/7, and Docker health. T036 is next.
+last_validation: T036 Developer API authentication, scope errors, quota preflight, stream reliability, typecheck, lint, lines, architecture, secrets, 41 API suites/222 tests, web tests, build, E2E 7/7, and Docker health pass against routergo_t035. T040 is next by dependency order.
