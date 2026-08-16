@@ -14,7 +14,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "pnpm -r test",
-    "test:performance": "pnpm --filter @routergo/api exec vitest run src/domain/performance/PerformanceBudget.test.ts src/__tests__/performance-budget.integration.test.ts",
+    "test:performance": "pnpm --filter @routergo/api exec vitest run src/domain/performance/PerformanceBudget.test.ts src/__tests__/performance-budget.integration.test.ts src/__tests__/realtime-performance.integration.test.ts",
     "test:e2e": "playwright test && playwright test --config playwright.admin.config.ts",
     "test:e2e:admin": "playwright test --config playwright.admin.config.ts",
     "check:lines": "node scripts/check-file-lines.mjs",
