@@ -61,7 +61,7 @@ hooks remain T054-T055.
 
 ### Battle/Treasure/Risk
 - `battle_matches`, `battle_players`, `battle_rounds`, `battle_answers`, `battle_results`
-- `treasure_hunts`, `treasure_steps`, `treasure_qr_tokens`, `treasure_progress`
+- `treasure_hunts(owner_organization_id,status,public_location_reviewed)`, `treasure_steps(sequence,proof_type,coarse_geohash,radius_meters)`, `treasure_qr_tokens(token_hash,expires_at,consumed_at)`, `treasure_progress(hunt_id,user_id,current_sequence,status)`
 - `risk_events`, `risk_scores`, `review_cases`
 
 Battle scores are server-owned integers. Answer rows store hashes and a unique
@@ -78,6 +78,7 @@ Redis stores short-lived match state with an explicit TTL; `battle_results` is t
 - Campaign finalized spend cannot exceed funded/authorized budget.
 - Battle scoring is server authoritative.
 - QR tokens are replay-resistant and expire/version explicitly.
+- Treasure moderation requires a reviewed public location, allow-listed location kinds, coarse geohash precision (maximum six characters), and bounded geofence radii; precise coordinates are not persisted.
 - An organization-scoped role cannot be assigned to a membership from another organization; assigned roles cannot be retargeted across organizations.
 - Audit metadata is a sanitized JSON object and audit rows cannot be updated or deleted.
 - A privileged change commits its business mutation, audit row, and outbox event atomically; its outbox ID is `outbox:<operationId>`.

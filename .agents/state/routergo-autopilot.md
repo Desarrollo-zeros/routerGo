@@ -1,7 +1,7 @@
 phase: 4
-current_objective: T081
+current_objective: T091
 status: executing
-last_green_commit: 9cdc2be
+last_green_commit: 84aec42
 last_completed_tasks:
   - T020
   - T021
@@ -37,11 +37,13 @@ last_completed_tasks:
   - T075
   - T080
   - T082
+  - T090
 next_candidates:
+  - T091
   - T042
   - T043
   - T054
   - T065
   - T081
 blocked_tasks: []
-last_validation: T082 unit and persistence tests pass; local database migrations 001-014 pass; clean temporary database double seed pass with checksum a97a1259b6596eb4; full tests pass 64 files/280 API tests, E2E 7/7, install frozen, build, typecheck, lint, lines, architecture, secrets. Main volume retains historical snapshots and is not used for clean-seed claims.
+last_validation: T090 domain and PostgreSQL persistence tests pass; local database migrations 001-016 pass; clean temporary database double seed pass with checksum a97a1259b6596eb4; full tests pass 69 files/288 API tests, E2E 7/7, install frozen, build, typecheck, lint, lines, architecture, secrets. Main volume retains historical snapshots and is not used for clean-seed claims.
