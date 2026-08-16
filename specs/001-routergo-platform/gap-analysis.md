@@ -46,6 +46,7 @@
 - T051 is implemented: the Ads domain campaign aggregate requires explicit review/approval before activation, supports pause/resume, and enforces fixed-precision budget exhaustion without coupling delivery to persistence.
 - T052 is implemented: `AdDecisionPort` and three typed inventory strategies select only active, approved, labeled candidates, support deterministic priority and caller allow-lists, and return explicit no-fill without mutating campaign or delivery state. Delivery/reconciliation remains T053.
 - T053 is implemented: campaign delivery events are recorded transactionally with unique event-key idempotency, active-campaign spend is applied once within budget, impressions remain zero-cost, and finalized ad revenue keeps the existing idempotent USD reconciliation path.
+- T054 is partially scaffolded: `apps/advertiser` now has an independent responsive shell with explicit balance, campaign, creative, and analytics entry points. The authenticated transport and advertiser application workflows remain open; no disabled UI action is presented as a successful mutation.
 
 ### P0 — Foundation blockers
 
