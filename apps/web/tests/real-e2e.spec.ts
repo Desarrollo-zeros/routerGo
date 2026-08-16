@@ -10,6 +10,7 @@ test("usuario real se registra, navega y recibe GoCredits", async ({ page }) => 
   await page.getByRole("button", { name: "Crear mi cuenta" }).click();
   await expect(page.getByRole("link", { name: "Actividad" })).toBeVisible();
   await expect(page.getByText(/ejercicios de peso corporal disponibles/)).toBeVisible({ timeout: 25_000 });
+  await page.screenshot({ path: "output/playwright/activity-real-desktop.png", fullPage: true });
 
   await page.goto("/catalog");
   await expect(page.getByRole("heading", { name: "Elige tu forma de pensar." })).toBeVisible();
@@ -41,4 +42,11 @@ test("usuario real se registra, navega y recibe GoCredits", async ({ page }) => 
 
   await page.goto("/treasure");
   await expect(page.getByRole("heading", { name: "Treasure hunts" })).toBeVisible();
+
+  await page.getByRole("button", { name: "Salir" }).click();
+  await expect(page.getByRole("tab", { name: "Iniciar sesión" })).toBeVisible();
+  await page.getByLabel("Correo electrónico").fill(email);
+  await page.getByLabel("Contraseña").fill("routergo-real-123");
+  await page.getByRole("button", { name: "Entrar a RouterGo" }).click();
+  await expect(page.getByRole("link", { name: "Actividad" })).toBeVisible();
 });
