@@ -45,6 +45,11 @@
 - `campaigns(status,budget_micro,start_at,end_at,moderation_status)`
 - `creatives`, `placements`, `targeting_rules`, `campaign_events`
 
+Migration `009_ads_core.sql` enforces USD micro-unit balances, non-empty
+sponsored labels, moderation/status fields, `spent_micro <= budget_micro`, and
+unique delivery event keys. It does not fund or deliver campaigns; those
+application workflows remain T051-T055.
+
 ### Battle/Treasure/Risk
 - `battle_matches`, `battle_players`, `battle_rounds`, `battle_answers`
 - `treasure_hunts`, `treasure_steps`, `treasure_qr_tokens`, `treasure_progress`

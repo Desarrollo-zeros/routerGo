@@ -46,7 +46,7 @@ Format: `[ID] [P?] [Story] task`. `[P]` means safe parallel ownership in differe
 - [ ] T044 [US3] Responsive/a11y E2E for admin critical flows.
 
 ## Phase 5 — Ads core + advertiser
-- [ ] T050 [US4] Add advertiser/funding/campaign/creative/placement schema.
+- [x] T050 [US4] Add advertiser/funding/campaign/creative/placement schema.
 - [ ] T051 [P] [US4] Campaign state machine + budget policy + moderation.
 - [ ] T052 [P] [US4] AdDecisionPort and Strategy adapters for direct/third-party/house inventory.
 - [ ] T053 [US4] Reconcile impressions/clicks/finalized revenue idempotently.
