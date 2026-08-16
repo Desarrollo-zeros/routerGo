@@ -64,6 +64,7 @@
 - T082 is implemented: Redis stores validated ephemeral match state with an explicit TTL, while migration `014_battle_results.sql` and `PostgresBattleResultRepository` durably record one server-owned result per match idempotently. Matchmaking/WebSocket transport, reconnect handling, and reward integration remain T081/T083.
 - T090 is implemented: migration `015_treasure_hunts.sql` adds organization-owned hunts, ordered QR/coarse-geofence steps, expiring token records, and per-user progress; `TreasureModerationPolicy` rejects unreviewed/private/over-precise locations and invalid geofence radii. Proof signing, geofence verification, public-location workflow, and privacy-preserving client UX remain T091-T094.
 - T091 is implemented: `CoarseGeofenceProofPort` and its adapter compare only bounded geohash cells, reject stale/invalid/overly inaccurate samples, and retain no location history. Signed QR proofs, public-location workflow, and client permission fallback remain T092-T094.
+- T092 is implemented: `HmacQrProofSigner` creates bounded signed tokens, `RedeemQrProof` separates invalid from replayed proofs, and `RedisQrProofReplayStore` atomically claims nonces until expiry without storing raw tokens. Public-location review workflow and client permission fallback remain T093-T094.
 
 ### P0 — Foundation blockers
 

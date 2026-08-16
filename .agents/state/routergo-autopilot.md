@@ -1,7 +1,7 @@
 phase: 4
-current_objective: T092
+current_objective: T093
 status: executing
-last_green_commit: c656c39
+last_green_commit: d157f2a
 last_completed_tasks:
   - T020
   - T021
@@ -39,8 +39,9 @@ last_completed_tasks:
   - T082
   - T090
   - T091
-next_candidates:
   - T092
+next_candidates:
+  - T093
   - T042
   - T043
   - T054
@@ -48,4 +49,4 @@ next_candidates:
   - T081
   - T093
 blocked_tasks: []
-last_validation: T091 adapter tests pass; local database migrations 001-016 pass; clean temporary database double seed pass with checksum a97a1259b6596eb4; full tests pass 69 files/288 API tests, E2E 7/7, install frozen, build, typecheck, lint, lines, architecture, secrets. Main volume retains historical snapshots and is not used for clean-seed claims.
+last_validation: T092 signer, redeem, and Redis replay tests pass; local database migrations 001-016 pass; clean temporary database double seed pass with checksum a97a1259b6596eb4; full tests pass 69 files/288 API tests, E2E 7/7, install frozen, build, typecheck, lint, lines, architecture, secrets. Main volume retains historical snapshots and is not used for clean-seed claims.
