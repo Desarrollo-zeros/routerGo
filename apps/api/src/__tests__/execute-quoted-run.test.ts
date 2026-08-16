@@ -146,12 +146,29 @@ describe('ExecuteQuotedRunUseCase', () => {
     expect(context.provider.calls).toBe(0);
   });
 
+  it('does not call provider when reservation fails', async () => {
+    const context = setup();
+    context.credits.failReserve = true;
+    await expect(context.useCase.execute({ userId: 'user-1', quoteId: 'quote-1', idempotencyKey: 'run-key', messages: [{ role: 'user', content: 'hi' }] })).rejects.toThrow('InsufficientBalance');
+    expect(context.provider.calls).toBe(0);
+    expect(context.credits.reserved).toBe(0n);
+  });
+
   it('releases the full reservation on pre-delivery provider failure', async () => {
     const context = setup();
     context.provider.failure = new ProviderExecutionError('upstream down', { deliveryStarted: false, requestId: 'provider-2' });
     await expect(context.useCase.execute({ userId: 'user-1', quoteId: 'quote-1', idempotencyKey: 'run-key', messages: [{ role: 'user', content: 'hi' }] })).rejects.toMatchObject({ code: 'PROVIDER_EXECUTION_FAILED' });
     expect(context.credits.settled).toBe(0n);
     expect(context.credits.released).toBe(100n);
+    expect(context.runs.values.get('run-1')?.economyStatus).toBe('RELEASED');
+  });
+
+  it('settles billable partial usage and releases the remainder on provider failure', async () => {
+    const context = setup();
+    context.provider.failure = new ProviderExecutionError('upstream interrupted', { deliveryStarted: true, billableUserCredits: 20n, inputTokens: 2, outputTokens: 3, requestId: 'provider-partial' });
+    await expect(context.useCase.execute({ userId: 'user-1', quoteId: 'quote-1', idempotencyKey: 'run-key', messages: [{ role: 'user', content: 'hi' }] })).rejects.toMatchObject({ code: 'PROVIDER_EXECUTION_FAILED' });
+    expect(context.credits.settled).toBe(20n);
+    expect(context.credits.released).toBe(80n);
     expect(context.runs.values.get('run-1')?.economyStatus).toBe('RELEASED');
   });
 
