@@ -1,5 +1,5 @@
 phase: 3
-current_objective: T030
+current_objective: T031
 status: selecting_next_objective
 last_green_commit: 950dd20
 last_completed_tasks:
@@ -10,7 +10,8 @@ last_completed_tasks:
   - T024
   - T025
   - T026
+  - T030
 blocked_tasks: []
 next_candidates:
-  - T030
-last_validation: Full T026 gates pass; API 35 suites/205 tests, web tests, build, migrations, repeated seed checksum, E2E 7/7, and Docker health verified.
+  - T031
+last_validation: Full T030 gates pass; API 36 suites/207 tests, web tests, build, migration 007, and developer API schema constraints verified.

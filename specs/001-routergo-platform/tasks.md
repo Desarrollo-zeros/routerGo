@@ -30,7 +30,7 @@ Format: `[ID] [P?] [Story] task`. `[P]` means safe parallel ownership in differe
 - [x] T026 [US1] Add reconciliation jobs/metrics for provider costs and ad revenue.
 
 ## Phase 3 — RouterGo Developer API
-- [ ] T030 [US2] Add api-client/key/usage schema; raw keys never persisted.
+- [x] T030 [US2] Add api-client/key/usage schema; raw keys never persisted.
 - [ ] T031 [P] [US2] Implement API key issue/revoke/rotate/scopes.
 - [ ] T032 [P] [US2] Implement layered RPM/TPM/credit/model quotas with Redis + durable policy.
 - [ ] T033 [US2] Implement `/v1/models` contract.
