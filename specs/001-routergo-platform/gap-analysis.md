@@ -52,6 +52,7 @@
 - T061 is implemented: challenge verification resolves only explicitly registered typed strategies, rejects duplicate/unsafe keys, and fails closed for unknown strategy keys without dynamic imports or execution.
 - T062 is implemented: challenge reward eligibility uses bigint GoCredits, challenge and daily caps, and an explicit budget-port decision; it returns no issuance side effect and fails closed on budget/circuit denial.
 - T063 is implemented: the existing exercise boundary now has an approved-template verification strategy with configured repetition/duration limits, typed evidence rejection, and no direct reward side effect.
+- T064 is implemented: physical challenge eligibility applies configured duration/session caps, cooldowns, explicit stop controls, invalid-input rejection, and a non-physical alternative decision.
 
 ### P0 — Foundation blockers
 
