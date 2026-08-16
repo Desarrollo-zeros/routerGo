@@ -53,6 +53,7 @@
 - T062 is implemented: challenge reward eligibility uses bigint GoCredits, challenge and daily caps, and an explicit budget-port decision; it returns no issuance side effect and fails closed on budget/circuit denial.
 - T063 is implemented: the existing exercise boundary now has an approved-template verification strategy with configured repetition/duration limits, typed evidence rejection, and no direct reward side effect.
 - T064 is implemented: physical challenge eligibility applies configured duration/session caps, cooldowns, explicit stop controls, invalid-input rejection, and a non-physical alternative decision.
+- T070 is implemented: migration `011_skills.sql` adds versioned skill definitions/policies and bounded session classifications. Classifier adapters, registry activation, fallback, and Studio workflow remain T071-T074.
 
 ### P0 — Foundation blockers
 
