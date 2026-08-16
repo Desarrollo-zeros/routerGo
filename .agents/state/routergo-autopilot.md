@@ -1,7 +1,7 @@
 phase: 3
-current_objective: T072
+current_objective: T073
 status: executing
-last_green_commit: 2da10d8
+last_green_commit: 8a87f26
 last_completed_tasks:
   - T020
   - T021
@@ -29,12 +29,13 @@ last_completed_tasks:
   - T063
   - T064
   - T071
+  - T072
 next_candidates:
   - T042
   - T043
   - T054
   - T055
   - T065
-  - T072
+  - T073
 blocked_tasks: []
-last_validation: T071 schema-constrained classifier tests pass (2); typecheck, lines, architecture and secrets pass. T042/T043/T054/T055/T065 remain open; T072 is next.
+last_validation: T072 registry tests pass (2); typecheck, lines, architecture and secrets pass. T042/T043/T054/T055/T065 remain open; T073 is next.
