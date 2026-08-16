@@ -1,7 +1,7 @@
 phase: 4
-current_objective: T103
+current_objective: T104
 status: executing
-last_green_commit: 38d4c1e
+last_green_commit: 16105c7
 last_completed_tasks:
   - T020
   - T021
@@ -45,8 +45,9 @@ last_completed_tasks:
   - T100
   - T101
   - T102
-next_candidates:
   - T103
+next_candidates:
+  - T104
   - T042
   - T043
   - T054
@@ -54,4 +55,4 @@ next_candidates:
   - T081
   - T093
 blocked_tasks: []
-last_validation: T102 provider analytics policy and use-case tests pass; clean temporary database migrations 001-017 and API suite pass with 77 files/305 tests; clean seed checksum a97a1259b6596eb4; typecheck, lint, lines, architecture, secrets, build, and E2E 7/7 pass. Main volume retains historical snapshots and is not used for clean-suite claims.
+last_validation: T103 performance policy and 100-request API smoke pass; clean temporary database migrations 001-017 and API suite pass with 77 files/305 tests; clean seed checksum a97a1259b6596eb4; typecheck, lint, lines, architecture, secrets, build, and E2E 7/7 pass. Main volume retains historical snapshots and is not used for clean-suite claims.

@@ -14,6 +14,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "pnpm -r test",
+    "test:performance": "pnpm --filter @routergo/api exec vitest run src/domain/performance/PerformanceBudget.test.ts src/__tests__/performance-budget.integration.test.ts",
     "test:e2e": "playwright test",
     "check:lines": "node scripts/check-file-lines.mjs",
     "check:arch": "dependency-cruiser --config .dependency-cruiser.cjs apps/api/src apps/web/src",

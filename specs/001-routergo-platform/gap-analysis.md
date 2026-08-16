@@ -70,6 +70,7 @@
 - T100 is implemented: migration `017_risk_events.sql` adds idempotent cross-context abuse events, bounded user scores, and review cases; `RiskSignalPolicy` maps duplicate/replay/velocity/severity signals to normal/review/blocked actions without role-name or raw-payload decisions. Risk ingestion orchestration, dashboards, and analyst workflows remain T102-T106.
 - T101 is implemented: the economy read model now derives finalized revenue, provider cost, infrastructure cost, contribution, and current wallet-based reward liability; the admin UI exposes the measures with explicit USD micro-unit versus GoCredit labels. Risk/analytics dashboards beyond unit economics remain T103-T106.
 - T102 is implemented: `ProviderAnalyticsSource` supplies explicit health, quota usage, and cost signals; `GetProviderAnalyticsUseCase` evaluates bounded quota alerts with health-failure precedence. No fake health is inferred from gateway configuration; concrete probes and operator alert delivery remain follow-up hardening.
+- T103 is implemented: a deterministic API smoke load and pure latency/error evaluator enforce a p95/error budget through `pnpm test:performance`; realtime soak testing and production-scale load remain T104/T105 hardening work.
 
 ### P0 — Foundation blockers
 
