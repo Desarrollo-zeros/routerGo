@@ -125,8 +125,8 @@ button{font:inherit;cursor:pointer;border:none;background:none}
 .rg-treasure{display:grid;gap:16px}
 .rg-treasure-layout{display:grid;gap:16px}
 .rg-treasure-map,.rg-treasure-list{border:1px solid var(--rg-color-surface-muted,ButtonFace);background:var(--rg-color-surface,Canvas);padding:16px;border-radius:8px;display:grid;gap:12px}
-.rg-treasure-map-grid{min-height:180px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:16px;background:var(--rg-color-bg,Canvas);border:1px solid var(--rg-color-surface-muted,ButtonFace)}
-.rg-treasure-marker{display:block;min-height:28px;background:var(--rg-color-brand-soft,Highlight);border-radius:50%;opacity:.8}
+.rg-treasure-map-grid{min-height:180px;display:grid;grid-template-columns:repeat(4,1fr);align-items:center;justify-items:center;gap:12px;padding:16px;background:radial-gradient(circle at 30% 40%,rgba(162,155,254,.16),transparent 28%),var(--rg-color-bg,Canvas);border:1px solid var(--rg-color-surface-muted,ButtonFace)}
+.rg-treasure-marker{display:block;width:28px;height:28px;background:var(--rg-color-brand-soft,Highlight);border:5px solid var(--rg-color-bg,Canvas);border-radius:50%;box-shadow:0 0 0 5px rgba(162,155,254,.2),0 0 24px rgba(162,155,254,.55);opacity:.9}
 .rg-treasure-notice{display:flex;flex-wrap:wrap;align-items:center;gap:12px;border-left:3px solid var(--rg-color-warning,var(--rg-color-brand,Highlight));padding:12px;background:var(--rg-color-surface,Canvas)}
 .rg-treasure-item{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px;border:1px solid var(--rg-color-surface-muted,ButtonFace);border-radius:8px}
 .rg-treasure-status{font-size:13px;color:var(--rg-color-text-secondary,CanvasText)}

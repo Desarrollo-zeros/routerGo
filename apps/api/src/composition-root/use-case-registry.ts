@@ -26,6 +26,7 @@ import type { RedisStreamAdapter } from '../infrastructure/adapters/redis/RedisS
 import { createQuoteHandler, createRunHandler } from './chat-session-handlers.js';
 import type { CreateBattle } from '../application/services/CreateBattle.js';
 import { createBattleHandler } from './battle-handlers.js';
+import type { ListPublicTreasureHunts } from '../application/use-cases/ListPublicTreasureHunts.js'; import { listTreasureHandler } from './treasure-handlers.js';
 interface RegistryDeps {
   manifest: RuntimeManifest;
   catalog: GetCatalogPort;
@@ -49,6 +50,7 @@ interface RegistryDeps {
   executeRun: ExecuteQuotedRunPort;
   streams: RedisStreamAdapter;
   battle: CreateBattle;
+  treasureHunts: ListPublicTreasureHunts;
 }
 export function createUseCaseRegistry(deps: RegistryDeps): UseCaseRegistry {
   return {
@@ -81,15 +83,14 @@ export function createUseCaseRegistry(deps: RegistryDeps): UseCaseRegistry {
     chatCompletions: async (req) => deps.chatCompletions.execute(await readChatInput(req, deps.authenticateApiKey)),
     responses: async (req, reply) => deps.responses.execute(await readResponsesInput(req, deps.authenticateApiKey, reply)),
     createBattle: async (req) => createBattleHandler(req, deps.battle),
+    listTreasureHunts: async (req) => listTreasureHandler(req, deps.treasureHunts),
   };
 }
-
 async function executeWalletLedger(req: unknown, deps: RegistryDeps): Promise<unknown> {
   const user = sessionUser(req);
   if (!user) throw new AuthenticationRequiredError();
   return { entries: await deps.walletLedger.listByWallet(user.walletId, queryLimit(req) ?? 50) };
 }
-
 async function executeVerifyActivity(req: unknown, deps: RegistryDeps): Promise<unknown> {
   const user = sessionUser(req); const body = requestBody(req); const params = requestParams(req);
   if (!user || typeof params.id !== 'string') throw new AuthenticationRequiredError();

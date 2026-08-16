@@ -24,7 +24,7 @@ const SCREEN_REGISTRY = new Map<string, ScreenDefinition>([
   ["wallet", { screenKey: "wallet", path: "", available: true, render: ({ api }) => <WalletView api={api} /> }],
   ["catalog", { screenKey: "catalog", path: "", available: true, render: ({ catalog }) => <CatalogView entries={catalog.list()} /> }],
   ["admin-economy", { screenKey: "admin-economy", path: "", available: true, render: () => <EconomySimulator /> }],
-  ["treasure", { screenKey: "treasure", path: "", available: true, render: () => <TreasureView hunts={[]} permission="unknown" /> }],
+  ["treasure", { screenKey: "treasure", path: "", available: true, render: ({ api }) => <TreasureView permission="unknown" api={api} /> }],
   ["battle", { screenKey: "battle", path: "", available: true, render: ({ api }) => <BattleView authenticated api={api} /> }],
 ]);
 

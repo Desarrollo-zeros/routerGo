@@ -62,6 +62,8 @@ import { RewardPolicy } from '../domain/policies/RewardPolicy.js';
 import { DailyCapPolicy } from '../domain/policies/DailyCapPolicy.js';
 import { PostgresWalletLedgerReader } from '../infrastructure/adapters/postgres/PostgresWalletLedgerReader.js';
 import { CreateBattle } from '../application/services/CreateBattle.js';
+import { ListPublicTreasureHunts } from '../application/use-cases/ListPublicTreasureHunts.js';
+import { PostgresTreasureHuntReader } from '../infrastructure/adapters/postgres/PostgresTreasureHuntReader.js';
 
 const { Pool } = pg;
 
@@ -96,6 +98,7 @@ export async function createComposition() {
     challenges: createChallengeHandlers(pool),
     providerAnalytics,
     createQuote, executeRun, streams, battle: new CreateBattle(battleStore),
+    treasureHunts: new ListPublicTreasureHunts(new PostgresTreasureHuntReader(pool)),
   });
   return {
     pool, redis, manifest, schemas, useCases, creditOperations, providerAnalytics, session, sseDeps: { streams },

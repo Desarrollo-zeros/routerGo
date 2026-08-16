@@ -1,4 +1,5 @@
 import React from "react";
+import type { HttpApiPort } from "../../runtime/ApiPort";
 
 export type TreasureHuntCard = {
   id: string;
@@ -9,19 +10,31 @@ export type TreasureHuntCard = {
 };
 
 type TreasureViewProps = {
-  hunts: readonly TreasureHuntCard[];
+  hunts?: readonly TreasureHuntCard[];
   permission: "unknown" | "granted" | "denied";
+  api?: HttpApiPort;
   alternativeAvailable?: boolean;
   onChooseAlternative?: () => void;
 };
 
-export function TreasureView({ hunts, permission, alternativeAvailable = false, onChooseAlternative }: TreasureViewProps): React.ReactElement {
+export function TreasureView({ hunts: initialHunts = [], permission, api, alternativeAvailable = false, onChooseAlternative }: TreasureViewProps): React.ReactElement {
+  const [hunts, setHunts] = React.useState<readonly TreasureHuntCard[]>(initialHunts);
+  const [status, setStatus] = React.useState<"loading" | "ready" | "error">(api ? "loading" : "ready");
+  React.useEffect(() => {
+    if (!api) return;
+    let active = true;
+    void api.request<TreasureHuntCard[]>({ routeKey: "treasure-list" })
+      .then((items) => { if (active) { setHunts(items); setStatus("ready"); } })
+      .catch(() => { if (active) setStatus("error"); });
+    return () => { active = false; };
+  }, [api]);
   return (
     <section className="rg-treasure" aria-labelledby="treasure-title">
       <h1 id="treasure-title">Treasure hunts</h1>
       <p className="rg-privacy-note">No guardamos tu ubicación exacta. Solo usamos una zona aproximada para verificar un paso.</p>
       {permission === "denied" ? <PermissionNotice alternativeAvailable={alternativeAvailable} onChooseAlternative={onChooseAlternative} /> : null}
-      <div className="rg-treasure-layout">
+      {status === "error" ? <p className="rg-error-copy" role="alert">No pudimos cargar las rutas activas. Inténtalo de nuevo.</p> : null}
+      <div className="rg-treasure-layout" aria-busy={status === "loading"}>
         <CoarseMap count={hunts.length} />
         <HuntList hunts={hunts} />
       </div>
@@ -53,8 +66,8 @@ function CoarseMap({ count }: { count: number }): React.ReactElement {
 function HuntList({ hunts }: { hunts: readonly TreasureHuntCard[] }): React.ReactElement {
   return (
     <div className="rg-treasure-list" aria-labelledby="treasure-list-title">
-      <h2 id="treasure-list-title">Available hunts</h2>
-      {hunts.length === 0 ? <p className="rg-muted-copy">No hay hunts disponibles.</p> : <ul className="rg-entry-list">{hunts.map((hunt) => <HuntItem key={hunt.id} hunt={hunt} />)}</ul>}
+      <h2 id="treasure-list-title">Rutas disponibles</h2>
+      {hunts.length === 0 ? <p className="rg-muted-copy">No hay hunts activos disponibles.</p> : <ul className="rg-entry-list">{hunts.map((hunt) => <HuntItem key={hunt.id} hunt={hunt} />)}</ul>}
     </div>
   );
 }

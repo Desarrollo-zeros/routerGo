@@ -44,6 +44,7 @@ test("usuario real se registra, navega y recibe GoCredits", async ({ page }) => 
 
   await page.goto("/treasure");
   await expect(page.getByRole("heading", { name: "Treasure hunts" })).toBeVisible();
+  await expect(page.getByText("Ruta de bienvenida")).toBeVisible();
 
   await page.getByRole("button", { name: "Salir" }).click();
   await expect(page.getByRole("tab", { name: "Iniciar sesión" })).toBeVisible();
