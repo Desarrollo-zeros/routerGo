@@ -24,6 +24,8 @@ import type { CreateQuotePort } from '../application/ports/inbound/CreateQuotePo
 import type { ExecuteQuotedRunPort } from '../application/ports/inbound/ExecuteQuotedRunPort.js';
 import type { RedisStreamAdapter } from '../infrastructure/adapters/redis/RedisStreamAdapter.js';
 import { createQuoteHandler, createRunHandler } from './chat-session-handlers.js';
+import type { CreateBattle } from '../application/services/CreateBattle.js';
+import { createBattleHandler } from './battle-handlers.js';
 interface RegistryDeps {
   manifest: RuntimeManifest;
   catalog: GetCatalogPort;
@@ -46,6 +48,7 @@ interface RegistryDeps {
   createQuote: CreateQuotePort;
   executeRun: ExecuteQuotedRunPort;
   streams: RedisStreamAdapter;
+  battle: CreateBattle;
 }
 export function createUseCaseRegistry(deps: RegistryDeps): UseCaseRegistry {
   return {
@@ -77,6 +80,7 @@ export function createUseCaseRegistry(deps: RegistryDeps): UseCaseRegistry {
     adminChallengeSubmit: async (req) => submitChallenge(req, deps), adminChallengeApprove: async (req) => approveChallenge(req, deps),
     chatCompletions: async (req) => deps.chatCompletions.execute(await readChatInput(req, deps.authenticateApiKey)),
     responses: async (req, reply) => deps.responses.execute(await readResponsesInput(req, deps.authenticateApiKey, reply)),
+    createBattle: async (req) => createBattleHandler(req, deps.battle),
   };
 }
 

@@ -110,7 +110,8 @@ describe('Postgres adapter contracts', () => {
     const manifest = await loadRuntimeManifest(pool);
 
     expect(manifest.models).toHaveLength(18);
-    expect(manifest.routes).toHaveLength(30);
+    expect(manifest.routes.length).toBeGreaterThanOrEqual(31);
+    expect(manifest.routes.some((route) => route.route_key === 'battle-create')).toBe(true);
     expect(manifest.gateways.length).toBeGreaterThan(0);
   });
 });

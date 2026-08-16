@@ -38,6 +38,8 @@ test("usuario real se registra, navega y recibe GoCredits", async ({ page }) => 
 
   await page.goto("/battles");
   await expect(page.getByRole("heading", { name: "Juega en tiempo real" })).toBeVisible();
+  await page.getByRole("button", { name: "Buscar partida" }).click();
+  await expect(page.getByRole("button", { name: "Partida creada" })).toBeVisible({ timeout: 10_000 });
   await page.screenshot({ path: "test-results/real-battles.png", fullPage: true });
 
   await page.goto("/treasure");

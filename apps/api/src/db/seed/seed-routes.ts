@@ -13,6 +13,7 @@ const ROUTES: Route[] = [
   { route_key: 'wallet-get', method: 'GET', path: '/wallet', use_case: 'getWallet', auth: 'session', req: null, res: 'walletResponse' },
   { route_key: 'wallet-ledger', method: 'GET', path: '/wallet/ledger', use_case: 'getWalletLedger', auth: 'session', req: null, res: 'ledgerResponse' },
   { route_key: 'activity-verify', method: 'POST', path: '/activities/:id/verify', use_case: 'verifyActivity', auth: 'session', req: 'verifyActivityRequest', res: 'verifyActivityResponse' },
+  { route_key: 'battle-create', method: 'POST', path: '/battles', use_case: 'createBattle', auth: 'session', req: null, res: null },
   { route_key: 'quote-create', method: 'POST', path: '/quotes', use_case: 'createQuote', auth: 'session', req: 'createQuoteRequest', res: 'quoteResponse' },
   { route_key: 'run-create', method: 'POST', path: '/runs', use_case: 'createRun', auth: 'session', req: 'createRunRequest', res: 'runResponse' },
   { route_key: 'run-events', method: 'GET', path: '/runs/:id/events', use_case: 'streamRun', auth: 'session', req: null, res: 'streamResponse' },

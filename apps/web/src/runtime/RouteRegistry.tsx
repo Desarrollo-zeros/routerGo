@@ -25,7 +25,7 @@ const SCREEN_REGISTRY = new Map<string, ScreenDefinition>([
   ["catalog", { screenKey: "catalog", path: "", available: true, render: ({ catalog }) => <CatalogView entries={catalog.list()} /> }],
   ["admin-economy", { screenKey: "admin-economy", path: "", available: true, render: () => <EconomySimulator /> }],
   ["treasure", { screenKey: "treasure", path: "", available: true, render: () => <TreasureView hunts={[]} permission="unknown" /> }],
-  ["battle", { screenKey: "battle", path: "", available: true, render: () => <BattleView authenticated /> }],
+  ["battle", { screenKey: "battle", path: "", available: true, render: ({ api }) => <BattleView authenticated api={api} /> }],
 ]);
 
 export class RouteRegistry {

@@ -61,6 +61,7 @@ import { VerifyActivityUseCase } from '../application/use-cases/VerifyActivity.j
 import { RewardPolicy } from '../domain/policies/RewardPolicy.js';
 import { DailyCapPolicy } from '../domain/policies/DailyCapPolicy.js';
 import { PostgresWalletLedgerReader } from '../infrastructure/adapters/postgres/PostgresWalletLedgerReader.js';
+import { CreateBattle } from '../application/services/CreateBattle.js';
 
 const { Pool } = pg;
 
@@ -83,7 +84,7 @@ export async function createComposition() {
   const session = new SessionAuthService(new PostgresAuthUserRepository(pool), new ScryptPasswordHasher());
   const verifyActivity = new VerifyActivityUseCase(unitOfWork, new RewardPolicy({ creditsPerRep: 500n, maxRepsPerSession: 50 }), new DailyCapPolicy({ dailyCapCredits: 25000n }), economyClock);
   const walletLedger = new PostgresWalletLedgerReader(pool);
-  const streams = new RedisStreamAdapter(redis as never);
+  const streams = new RedisStreamAdapter(redis as never); const battleStore = new RedisBattleStateStore(redis);
   const useCases = createUseCaseRegistry({
     manifest, catalog: catalogUseCase, models: new ListModelsUseCase(catalogUseCase),
     wallet: new GetWalletUseCase(wallet), economy,
@@ -94,11 +95,11 @@ export async function createComposition() {
     advertiser: createAdvertiserHandlers(pool),
     challenges: createChallengeHandlers(pool),
     providerAnalytics,
-    createQuote, executeRun, streams,
+    createQuote, executeRun, streams, battle: new CreateBattle(battleStore),
   });
   return {
     pool, redis, manifest, schemas, useCases, creditOperations, providerAnalytics, session, sseDeps: { streams },
-    battleGateway: { store: new RedisBattleStateStore(redis), authenticateApiKey: identity.authenticateApiKey, identity: identity.resolveApiKeyIdentity, authorize: authorizePermission },
+    battleGateway: { store: battleStore, authenticateApiKey: identity.authenticateApiKey, identity: identity.resolveApiKeyIdentity, authorize: authorizePermission },
   };
 }
 

@@ -22,7 +22,7 @@ export async function seedRuntimeManifest(client: pg.PoolClient, version: number
   }
   await client.query(
     `INSERT INTO runtime_manifest_state(id, active_version) VALUES ('active',$1)
-     ON CONFLICT (id) DO NOTHING`, [resolvedVersion],
+     ON CONFLICT (id) DO UPDATE SET active_version=EXCLUDED.active_version, updated_at=now()`, [resolvedVersion],
   );
 }
 
