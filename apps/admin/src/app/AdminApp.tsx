@@ -13,6 +13,7 @@ import { HttpAdminEconomyClient, type AdminEconomySummary } from "../runtime/Adm
 import { HttpAdminLedgerClient, type AdminLedgerSummary } from "../runtime/AdminLedgerClient";
 import { HttpAdminRuntimeClient } from "../runtime/AdminRuntimeClient";
 import { HttpAdminWalletClient, type AdminWalletSummary } from "../runtime/AdminWalletClient";
+import { ChallengeBuilderView } from "../features/challenges/ChallengeBuilderView";
 
 interface AdminAppProps {
   manifest?: WebRuntimeManifest;
@@ -24,7 +25,7 @@ export function AdminApp({ manifest, economyAccessToken }: AdminAppProps): React
   const publishRuntime = usePublishRuntime(economyAccessToken);
   return <AdminShell brand={<span aria-label="RouterGo Studio">RouterGo Studio</span>} navigation={manifest ? <RuntimeNavigation manifest={manifest} /> : undefined}>
     <h1>Studio</h1>
-    {manifest ? <div className="admin-stack"><RuntimeConfigView manifest={manifest} onPublish={publishRuntime} /><ModelCatalogView models={manifest.catalog} /><ProviderView models={manifest.catalog} /><WalletReadView authorized={Boolean(reads.wallet)} summary={reads.wallet} /><UnitEconomicsDashboard authorized={Boolean(reads.economy)} summary={reads.economy?.unitEconomics} /><LedgerReadView authorized={Boolean(reads.ledger)} rows={reads.ledger?.entries} /></div> : <Panel title="Área de administración"><StatusMessage>La configuración runtime no está disponible.</StatusMessage></Panel>}
+    {manifest ? <div className="admin-stack"><RuntimeConfigView manifest={manifest} onPublish={publishRuntime} /><ChallengeBuilderView accessToken={economyAccessToken} /><ModelCatalogView models={manifest.catalog} /><ProviderView models={manifest.catalog} /><WalletReadView authorized={Boolean(reads.wallet)} summary={reads.wallet} /><UnitEconomicsDashboard authorized={Boolean(reads.economy)} summary={reads.economy?.unitEconomics} /><LedgerReadView authorized={Boolean(reads.ledger)} rows={reads.ledger?.entries} /></div> : <Panel title="Área de administración"><StatusMessage>La configuración runtime no está disponible.</StatusMessage></Panel>}
   </AdminShell>;
 }
 

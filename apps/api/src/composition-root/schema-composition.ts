@@ -37,4 +37,8 @@ function registerAdvertiserSchemas(schemas: SchemaRegistry): void {
   schemas.register('advertiserCreativeResponse', { type: 'object', properties: { id: { type: 'string' }, campaignId: { type: 'string' }, kind: { type: 'string' }, moderationStatus: { type: 'string' }, payload: { type: 'object' } } });
   schemas.register('advertiserCreativesResponse', { type: 'array', items: { type: 'object' } });
   schemas.register('advertiserAnalyticsResponse', { type: 'object', properties: { impressions: { type: 'number' }, clicks: { type: 'number' }, conversions: { type: 'number' }, spendMicro: { type: 'string' } } });
+  schemas.register('challengeCreateRequest', { type: 'object', required: ['challengeKey', 'challengeType', 'verificationStrategy', 'maxRewardCredits'], properties: { challengeKey: { type: 'string', minLength: 1 }, challengeType: { enum: ['QUIZ', 'CODING', 'LEARNING', 'EXERCISE', 'SPONSORED'] }, verificationStrategy: { type: 'string', minLength: 1 }, content: { type: 'object' }, rewardPolicy: { type: 'object' }, maxRewardCredits: { type: 'string', pattern: '^[1-9][0-9]*$' } }, additionalProperties: false });
+  const challengeProperties = { id: { type: 'string' }, challengeKey: { type: 'string' }, challengeType: { type: 'string' }, verificationStrategy: { type: 'string' }, status: { type: 'string' }, version: { type: 'number' }, versionStatus: { type: 'string' }, maxRewardCredits: { type: 'string' } };
+  schemas.register('challengeResponse', { type: 'object', properties: challengeProperties });
+  schemas.register('challengeListResponse', { type: 'array', items: { type: 'object', properties: challengeProperties } });
 }

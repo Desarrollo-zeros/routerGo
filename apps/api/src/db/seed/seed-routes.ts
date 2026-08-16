@@ -28,6 +28,10 @@ const ROUTES: Route[] = [
   { route_key: 'advertiser-creatives', method: 'GET', path: '/advertiser/creatives', use_case: 'advertiserCreatives', auth: 'api_key', req: null, res: 'advertiserCreativesResponse' },
   { route_key: 'advertiser-creative-create', method: 'POST', path: '/advertiser/creatives', use_case: 'advertiserCreateCreative', auth: 'api_key', req: 'advertiserCreativeRequest', res: 'advertiserCreativeResponse' },
   { route_key: 'advertiser-analytics', method: 'GET', path: '/advertiser/analytics', use_case: 'advertiserAnalytics', auth: 'api_key', req: null, res: 'advertiserAnalyticsResponse' },
+  { route_key: 'admin-challenges', method: 'GET', path: '/admin/challenges', use_case: 'adminChallenges', auth: 'api_key', req: null, res: 'challengeListResponse' },
+  { route_key: 'admin-challenge-create', method: 'POST', path: '/admin/challenges', use_case: 'adminChallengeCreate', auth: 'api_key', req: 'challengeCreateRequest', res: 'challengeResponse' },
+  { route_key: 'admin-challenge-submit', method: 'POST', path: '/admin/challenges/:challengeId/submit', use_case: 'adminChallengeSubmit', auth: 'api_key', req: null, res: 'challengeResponse' },
+  { route_key: 'admin-challenge-approve', method: 'POST', path: '/admin/challenges/:challengeId/approve', use_case: 'adminChallengeApprove', auth: 'api_key', req: null, res: 'challengeResponse' },
 ];
 
 export async function seedRoutes(client: pg.PoolClient): Promise<void> {

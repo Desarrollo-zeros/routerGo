@@ -59,7 +59,7 @@ Format: `[ID] [P?] [Story] task`. `[P]` means safe parallel ownership in differe
 - [x] T062 [P] [US5] Implement reward eligibility/specification and budget integration.
 - [x] T063 [US5] Migrate existing exercise flow into approved challenge template strategy.
 - [x] T064 [US5] Add physical safety caps/cooldowns/stop controls/non-physical alternative tests.
-- [ ] T065 [US5] Studio challenge builder/publish/moderation UI.
+- [x] T065 [US5] Studio challenge builder/publish/moderation UI.
 
 ## Phase 7 — Runtime Intent/Skill Router
 - [x] T070 [US8] Add skill definition/version/classification schema and Studio workflow.

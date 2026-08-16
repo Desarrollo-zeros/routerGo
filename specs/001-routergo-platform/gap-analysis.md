@@ -54,6 +54,7 @@
 - T062 is implemented: challenge reward eligibility uses bigint GoCredits, challenge and daily caps, and an explicit budget-port decision; it returns no issuance side effect and fails closed on budget/circuit denial.
 - T063 is implemented: the existing exercise boundary now has an approved-template verification strategy with configured repetition/duration limits, typed evidence rejection, and no direct reward side effect.
 - T064 is implemented: physical challenge eligibility applies configured duration/session caps, cooldowns, explicit stop controls, invalid-input rejection, and a non-physical alternative decision.
+- T065 is implemented: Studio exposes a fail-closed challenge builder and moderation controls backed by API-key permissions, PostgreSQL versioned persistence, and explicit draft/review/published transitions.
 - T070 is implemented: migration `011_skills.sql` adds versioned skill definitions/policies and bounded session classifications. Classifier adapters, registry activation, fallback, and non-blocking session activation are implemented in T071-T075; Studio administration remains open.
 - T071 is implemented: `IntentClassifierPort` and a schema-constrained adapter accept only the fixed intent taxonomy, confidence range, bounded tags, and no executable extra fields.
 - T072 is implemented: `SkillRegistry` resolves only typed, uniquely versioned skills and deep-freezes policy JSON so callers cannot mutate registered versions.
@@ -78,7 +79,7 @@
 
 - Local foundation gates are reproducible through clean PostgreSQL migration/seed runs, Docker health checks, typecheck, lint, line and architecture checks, secrets scan, API/web tests, build, performance smoke, provider contracts, and E2E.
 - Completed phase-10 work is limited to risk foundations (T100) and regression evidence (T104). T101-T103 have tested foundations but remain open until their integration requirements are met; T105 is intentionally not marked complete because staging and rollback evidence are external.
-- Remaining product and operational gaps are explicit in `tasks.md`: challenge/battle completion (T065, T081, T083-T084), and staged beta operations (T105). Rev.7 is not declared complete.
+- Remaining product and operational gaps are explicit in `tasks.md`: battle completion (T081, T083-T084), and staged beta operations (T105). Rev.7 is not declared complete.
 
 ### P0 — Foundation blockers
 

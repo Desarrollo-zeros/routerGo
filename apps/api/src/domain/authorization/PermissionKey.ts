@@ -15,6 +15,9 @@ export const PERMISSION_KEYS = [
   'cms.publish',
   'campaigns.read',
   'campaigns.manage',
+  'challenges.read',
+  'challenges.manage',
+  'challenges.publish',
   'audit.read',
 ] as const;
 

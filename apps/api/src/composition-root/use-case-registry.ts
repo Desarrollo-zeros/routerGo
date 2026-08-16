@@ -16,7 +16,8 @@ import type { GetLedgerPort } from '../application/ports/inbound/GetLedgerPort.j
 import { AuthorizationDeniedError } from '../application/errors/AuthorizationDeniedError.js';
 import type { AdvertiserHandlers } from './advertiser-handlers.js';
 import { advertiserRead, advertiserWrite } from './advertiser-handlers.js';
-
+import type { ChallengeHandlers } from './challenge-handlers.js';
+import { listChallenges, createChallenge, submitChallenge, approveChallenge } from './challenge-handlers.js';
 interface RegistryDeps {
   manifest: RuntimeManifest;
   catalog: GetCatalogPort;
@@ -32,8 +33,8 @@ interface RegistryDeps {
   rollbackRuntime: RollbackRuntimeManifest;
   ledger: GetLedgerPort;
   advertiser: AdvertiserHandlers;
+  challenges: ChallengeHandlers;
 }
-
 export function createUseCaseRegistry(deps: RegistryDeps): UseCaseRegistry {
   return {
     healthCheck: async () => ({ status: 'ok' }),
@@ -59,12 +60,12 @@ export function createUseCaseRegistry(deps: RegistryDeps): UseCaseRegistry {
     advertiserCreateCampaign: async (req) => advertiserWrite(req, deps, 'createCampaign'),
     advertiserCreateCreative: async (req) => advertiserWrite(req, deps, 'createCreative'),
     advertiserSubmitCampaign: async (req) => advertiserWrite(req, deps, 'submitCampaign'),
+    adminChallenges: async (req) => listChallenges(req, deps), adminChallengeCreate: async (req) => createChallenge(req, deps),
+    adminChallengeSubmit: async (req) => submitChallenge(req, deps), adminChallengeApprove: async (req) => approveChallenge(req, deps),
     chatCompletions: async (req, reply) => deps.chatCompletions.execute(await readChatInput(req, deps.authenticateApiKey, reply)),
     responses: async (req, reply) => deps.responses.execute(await readResponsesInput(req, deps.authenticateApiKey, reply)),
   };
 }
-
-
 async function executePublish(req: unknown, deps: RegistryDeps): Promise<unknown> {
   const context = await authenticate(req, deps.authenticateApiKey, 'runtime.publish');
   const identity = await requireIdentity(context, deps.resolveApiKeyIdentity);

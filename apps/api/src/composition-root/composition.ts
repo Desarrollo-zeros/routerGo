@@ -51,6 +51,8 @@ import { PostgresApiKeyIdentityResolver } from '../infrastructure/adapters/postg
 import { createRuntimeManifestUseCases } from './runtime-composition.js';
 import { PostgresAdvertiserRepository } from '../infrastructure/adapters/postgres/PostgresAdvertiserRepository.js';
 import { GetAdvertiserAccount, ListAdvertiserCampaigns, ListAdvertiserCreatives, GetAdvertiserAnalytics, CreateAdvertiserCampaign, CreateAdvertiserCreative, SubmitAdvertiserCampaign } from '../application/use-cases/AdvertiserUseCases.js';
+import { PostgresChallengeAdminRepository } from '../infrastructure/adapters/postgres/PostgresChallengeAdminRepository.js';
+import { ApproveChallenge, CreateChallenge, ListChallenges, SubmitChallenge } from '../application/use-cases/ChallengeAdminUseCases.js';
 
 const { Pool } = pg;
 
@@ -80,8 +82,7 @@ export async function createComposition() {
     new PostgresProviderAnalyticsSource(pool, new HttpProviderHealthProbe()),
     new PostgresProviderAnalyticsAlertSink(pool),
   );
-  const runtimeManifest = createRuntimeManifestUseCases(pool, redis);
-  const authorizePermission = new AuthorizePermissionUseCase(new PostgresAuthorizationGrantReader(pool));
+  const runtimeManifest = createRuntimeManifestUseCases(pool, redis); const authorizePermission = new AuthorizePermissionUseCase(new PostgresAuthorizationGrantReader(pool));
   const useCases = createUseCaseRegistry({
     manifest, catalog: catalogUseCase, models: new ListModelsUseCase(catalogUseCase),
     wallet: new GetWalletUseCase(wallet), economy,
@@ -91,6 +92,7 @@ export async function createComposition() {
     publishRuntime: runtimeManifest.publish, rollbackRuntime: runtimeManifest.rollback,
     ledger: new GetLedgerUseCase(new PostgresAdminLedgerReader(pool)),
     advertiser: createAdvertiserHandlers(pool),
+    challenges: createChallengeHandlers(pool),
   });
   const streams = new RedisStreamAdapter(redis as never); return { pool, redis, manifest, schemas, useCases, creditOperations, providerAnalytics, sseDeps: { streams } };
 }
@@ -103,6 +105,11 @@ function createAdvertiserHandlers(pool: pg.Pool) {
     createCampaign: new CreateAdvertiserCampaign(repository), createCreative: new CreateAdvertiserCreative(repository),
     submitCampaign: new SubmitAdvertiserCampaign(repository),
   };
+}
+
+function createChallengeHandlers(pool: pg.Pool) {
+  const repository = new PostgresChallengeAdminRepository(pool);
+  return { list: new ListChallenges(repository), create: new CreateChallenge(repository), submit: new SubmitChallenge(repository), approve: new ApproveChallenge(repository) };
 }
 
 function createCreditOperations(factory: PgEconomyUnitOfWorkFactory, clock: SystemClock) {

@@ -1,7 +1,7 @@
 phase: 4
-current_objective: T054
+current_objective: T065
 status: executing
-last_green_commit: ac31617
+last_green_commit: 8ac0bf7
 last_completed_tasks:
   - T020
   - T021
@@ -48,12 +48,11 @@ last_completed_tasks:
   - T043
   - T044
   - T054
-next_candidates:
-  - T054
-  - T105
   - T065
+next_candidates:
+  - T105
   - T081
   - T093
 blocked_tasks:
   - T105: staged beta deployment and rollback drill require an external staging controller/environment
-last_validation: T054 clean database migrations 001-017, double seed checksum df34c51030919c37, advertiser tests, full typecheck/lint/lines/architecture/secrets/build, web E2E 7/7, admin E2E 2/2, and PostgreSQL/Redis/LiteLLM healthy. Existing routergo database retains an immutable manifest mismatch; validation used routergo_t054_validation. T105 remains externally blocked.
+last_validation: T065 clean database migrations 001-017, double seed checksum df34c51030919c37, challenge persistence transition test, 89 API files/327 tests, admin tests/build, full typecheck/lint/lines/architecture/secrets, web E2E 7/7, admin E2E 2/2, and PostgreSQL/Redis/LiteLLM healthy. Existing routergo database retains an immutable manifest mismatch; validation used routergo_t065_validation. T105 remains externally blocked.

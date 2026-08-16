@@ -21,6 +21,9 @@ const PERMISSION_DESCRIPTIONS: Record<PermissionKey, string> = {
   'cms.publish': 'Publish managed content',
   'campaigns.read': 'Read campaign records',
   'campaigns.manage': 'Manage campaign records',
+  'challenges.read': 'Read challenge definitions',
+  'challenges.manage': 'Create and submit challenge definitions',
+  'challenges.publish': 'Approve and publish challenge versions',
   'audit.read': 'Read audit records',
 };
 
@@ -30,7 +33,7 @@ const ROLES: Role[] = [
   { id: 'role-user', key: 'USER', name: 'User', permissions: ['wallet.read', 'models.read'] },
   {
     id: 'role-owner', key: 'OWNER', name: 'Organization Owner',
-    permissions: ['users.read', 'wallet.read', 'runtime.read', 'models.read', 'campaigns.read', 'campaigns.manage'],
+    permissions: ['users.read', 'wallet.read', 'runtime.read', 'models.read', 'campaigns.read', 'campaigns.manage', 'challenges.read', 'challenges.manage', 'challenges.publish'],
   },
   {
     id: 'role-operator', key: 'OPERATOR', name: 'RouterGo Operator',
