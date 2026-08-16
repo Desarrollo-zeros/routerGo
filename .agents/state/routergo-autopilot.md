@@ -1,7 +1,7 @@
 phase: 3
-current_objective: T051
+current_objective: T052
 status: executing
-last_green_commit: 29b399e
+last_green_commit: 460f31e
 last_completed_tasks:
   - T020
   - T021
@@ -20,9 +20,10 @@ last_completed_tasks:
   - T040
   - T041
   - T050
+  - T051
 next_candidates:
   - T042
   - T043
-  - T051
+  - T052
 blocked_tasks: []
-last_validation: T050 migration and real PostgreSQL tests pass; concurrent run claim fix passes 43 API suites/227 tests, web tests, build, E2E 7/7, typecheck, lint, lines, architecture, secrets, repeated seed checksum a97a1259b6596eb4, and healthy PostgreSQL/Redis/LiteLLM. T042/T043 remain open; T051 is the next Ads application candidate.
+last_validation: T051 campaign state/budget/moderation domain tests pass; prior full validation remains green at 43 API suites/227 tests, web tests, build, E2E 7/7, typecheck, lint, lines, architecture, secrets, repeated seed checksum a97a1259b6596eb4, and healthy PostgreSQL/Redis/LiteLLM. T042/T043 remain open; T052 is next.
