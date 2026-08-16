@@ -19,6 +19,17 @@ export class RunPostgresRepository implements RunRepository {
     return r.rows[0] ? ChatRunMapper.toDomain(r.rows[0]) : null;
   }
 
+  async createIfAbsent(run: import('../../../domain/entities/ChatRun').ChatRun): Promise<boolean> {
+    const row = ChatRunMapper.toRow(run);
+    const result = await this.pool.query(
+      `INSERT INTO chat_runs (id,quote_id,user_id,logical_model_id,status,charged_credits,idempotency_key,created_at,completed_at,reservation_id,economy_status,provider_request_id,provider_cost_microusd,input_tokens,output_tokens)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
+       ON CONFLICT DO NOTHING`,
+      [row.id, row.quote_id, row.user_id, row.logical_model_id, row.status, row.charged_credits, row.idempotency_key, row.created_at, row.completed_at, row.reservation_id ?? null, row.economy_status ?? 'UNRESERVED', row.provider_request_id ?? null, row.provider_cost_microusd ?? '0', row.input_tokens ?? 0, row.output_tokens ?? 0],
+    );
+    return result.rowCount === 1;
+  }
+
   async save(run: import('../../../domain/entities/ChatRun').ChatRun): Promise<void> {
     const row = ChatRunMapper.toRow(run);
     await this.pool.query(

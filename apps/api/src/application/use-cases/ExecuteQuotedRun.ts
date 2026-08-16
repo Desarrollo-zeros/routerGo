@@ -72,23 +72,16 @@ export class ExecuteQuotedRunUseCase implements ExecuteQuotedRunPort {
     });
   }
   private async claimRun(input: ExecuteQuotedRunInput, quote: Awaited<ReturnType<ExecuteQuotedRunUseCase['loadQuote']>>): Promise<{ run: ChatRun; created: boolean }> {
-    try {
-      return await this.uowFactory.withTransaction(async (uow) => {
-        const existing = await uow.runs.findByIdempotency(quote.walletId, input.idempotencyKey);
-        if (existing) return { run: existing, created: false };
-        const now = this.clock.now();
-        const run = ChatRun.create({ id: this.idGenerator(), quoteId: quote.id, userId: input.userId, walletId: quote.walletId, modelId: quote.modelId, status: 'PENDING', creditsDebited: quote.creditPrice.toString(), idempotencyKey: input.idempotencyKey, createdAt: now, updatedAt: now });
-        await uow.runs.save(run);
-        return { run, created: true };
-      });
-    } catch (error) {
-      if (!isUniqueViolation(error)) throw error;
-      return this.uowFactory.withTransaction(async (uow) => {
-        const run = await uow.runs.findByIdempotency(quote.walletId, input.idempotencyKey);
-        if (!run) throw error;
-        return { run, created: false };
-      });
-    }
+    return this.uowFactory.withTransaction(async (uow) => {
+      const existing = await uow.runs.findByIdempotency(quote.walletId, input.idempotencyKey);
+      if (existing) return { run: existing, created: false };
+      const now = this.clock.now();
+      const run = ChatRun.create({ id: this.idGenerator(), quoteId: quote.id, userId: input.userId, walletId: quote.walletId, modelId: quote.modelId, status: 'PENDING', creditsDebited: quote.creditPrice.toString(), idempotencyKey: input.idempotencyKey, createdAt: now, updatedAt: now });
+      if (await uow.runs.createIfAbsent(run)) return { run, created: true };
+      const claimed = await uow.runs.findByIdempotency(quote.walletId, input.idempotencyKey);
+      if (!claimed) throw new ExecuteQuotedRunError('RECONCILIATION_REQUIRED', 'Run claim disappeared');
+      return { run: claimed, created: false };
+    });
   }
 
   private async reserve(input: ExecuteQuotedRunInput, quote: Awaited<ReturnType<ExecuteQuotedRunUseCase['loadQuote']>>, run: ChatRun) {
@@ -170,10 +163,6 @@ export class ExecuteQuotedRunUseCase implements ExecuteQuotedRunPort {
 
 function assertInput(input: ExecuteQuotedRunInput): void {
   if (!input.userId || !input.quoteId || !input.idempotencyKey || input.messages.length === 0) throw new ExecuteQuotedRunError('INVALID_INPUT', 'Run input is incomplete');
-}
-
-function isUniqueViolation(error: unknown): boolean {
-  return typeof error === 'object' && error !== null && (error as { code?: unknown }).code === '23505';
 }
 
 function errorCode(error: unknown): string {

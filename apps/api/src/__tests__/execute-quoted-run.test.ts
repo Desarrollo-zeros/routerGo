@@ -32,6 +32,11 @@ class MemoryRuns implements RunRepository {
   async findByIdempotency(_walletId: string, key: string): Promise<ChatRun | null> {
     return [...this.values.values()].find((run) => run.toProps().idempotencyKey === key) ?? null;
   }
+  async createIfAbsent(value: ChatRun): Promise<boolean> {
+    if ([...this.values.values()].some((run) => run.toProps().idempotencyKey === value.toProps().idempotencyKey)) return false;
+    this.values.set(value.id, value);
+    return true;
+  }
   async save(value: ChatRun): Promise<void> { this.values.set(value.id, value); }
 }
 
