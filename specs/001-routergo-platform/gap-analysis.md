@@ -43,6 +43,7 @@
 - T040 is implemented: `apps/admin` has an independent Vite/React composition, a semantic shell with skip-link/main/navigation landmarks, reusable Button/Panel/Status primitives, responsive layout, focus-visible states, and token-backed styling. Business navigation and CMS/admin workflows remain T042-T044.
 - T041 is implemented: the CMS domain owns validated slugs, append-only content versions, explicit editorial transitions, and media metadata; `CmsContentRepository` keeps persistence behind an application port. HTTP, binary storage, and Studio workflows remain later tasks.
 - T050 is implemented: migration `009_ads_core.sql` adds advertiser organizations, USD-micro funding accounts, campaign moderation/budget state, creatives, placements, targeting rules, and idempotent delivery events. PostgreSQL guards campaign overruns and real persistence tests cover budget and duplicate-event invariants.
+- T051 is implemented: the Ads domain campaign aggregate requires explicit review/approval before activation, supports pause/resume, and enforces fixed-precision budget exhaustion without coupling delivery to persistence.
 
 ### P0 — Foundation blockers
 
