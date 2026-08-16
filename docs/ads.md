@@ -19,3 +19,9 @@ inventory use the same typed strategy contract, with deterministic priority
 and an optional allow-list supplied by the caller. Selection does not record
 impressions or mutate campaign spend; those idempotent delivery and revenue
 concerns belong to T053.
+
+T053 adds transactional campaign-event reconciliation. A unique `eventKey`
+makes retries return `DUPLICATE` without charging spend twice; priced events
+increment active campaign spend atomically and are rejected when the budget is
+insufficient. Impressions remain zero-cost. Finalized USD revenue continues to
+use the existing idempotent `ad:<event>:revenue` reconciliation path.

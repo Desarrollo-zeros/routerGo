@@ -48,8 +48,10 @@
 Migration `009_ads_core.sql` enforces USD micro-unit balances, non-empty
 sponsored labels, moderation/status fields, `spent_micro <= budget_micro`, and
 unique delivery event keys. T052 selects eligible candidates through a typed
-strategy boundary without mutating campaign or delivery state. Funding,
-delivery, and reconciliation remain T053-T055.
+strategy boundary without mutating campaign or delivery state. T053 records
+delivery events transactionally and applies priced spend once; finalized
+revenue remains an idempotent USD reconciliation entry. Funding and policy
+hooks remain T054-T055.
 
 ### Battle/Treasure/Risk
 - `battle_matches`, `battle_players`, `battle_rounds`, `battle_answers`
