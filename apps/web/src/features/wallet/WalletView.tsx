@@ -6,7 +6,7 @@ import { useWallet } from "./useWallet";
 export function WalletView({ api }: { api: HttpApiPort }): React.ReactElement {
   const { wallet, entries, loading, error, refresh } = useWallet(api);
   const balance = wallet?.balance ?? 0;
-  const lifetime = wallet?.lifetime_earned ?? 0;
+  const lifetime = wallet?.lifetime_earned || entries.reduce((total, entry) => total + (entry.amount_signed > 0 ? entry.amount_signed : 0), 0);
   return (
     <div className="rg-wallet-page">
       <section className="rg-wallet-hero"><p className="rg-wallet-kicker">Tu economía RouterGo</p><h1>Tu saldo, listo para usar.</h1><p>Convierte tu esfuerzo en conversaciones, herramientas y acceso sin perder el control.</p></section>

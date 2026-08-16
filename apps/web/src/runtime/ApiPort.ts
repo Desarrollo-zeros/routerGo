@@ -6,6 +6,7 @@ export type ApiCall = {
   params?: Record<string, string>;
   query?: Record<string, string>;
   body?: unknown;
+  headers?: Record<string, string>;
   signal?: AbortSignal;
 };
 
@@ -35,7 +36,7 @@ export class HttpApiPort implements ApiPort {
     }
     const res = await fetch(url, {
       method: route.method,
-      headers: { "content-type": "application/json" },
+      headers: { "content-type": "application/json", ...call.headers },
       body: call.body ? JSON.stringify(call.body) : undefined,
       credentials: "include",
       signal: call.signal,

@@ -1,4 +1,4 @@
-import Fastify, { type FastifyReply } from 'fastify';
+import Fastify, { type FastifyReply, type FastifyRequest } from 'fastify';
 import type { RuntimeManifest } from '../../config/RuntimeManifest.js';
 import { DynamicRouteRegistry, type UseCaseRegistry } from './dynamic-route-registry.js';
 import type { SchemaRegistry } from './schema-registry.js';
@@ -10,6 +10,7 @@ import { ApiQuotaExceededError } from '../../application/use-cases/ChatCompletio
 import { PrivilegedChangeError } from '../../application/errors/PrivilegedChangeError.js';
 import { AuthorizationDeniedError } from '../../application/errors/AuthorizationDeniedError.js';
 import { registerBattleGateway, type BattleGatewayDeps } from './battle-websocket.js';
+import type { SessionAuthPort, SessionPrincipal } from '../../application/ports/outbound/SessionAuthPort.js';
 
 export interface BootstrapDeps {
   manifest: RuntimeManifest;
@@ -18,6 +19,7 @@ export interface BootstrapDeps {
   sseDeps: SseDeps;
   trustProxy?: boolean | string | number;
   battleGateway?: BattleGatewayDeps;
+  session: SessionAuthPort;
 }
 
 export function toWebManifest(m: RuntimeManifest): Record<string, unknown> {
@@ -55,13 +57,18 @@ export function buildApp(deps: BootstrapDeps): ReturnType<typeof Fastify> {
   app.get('/health', async () => ({ status: 'ok', uptime: process.uptime() }));
   app.get('/readiness', async () => ({ ready: true }));
   app.get('/runtime-manifest', async () => toWebManifest(deps.manifest));
+  app.addHook('onRequest', async (request) => {
+    const token = readCookie(request.headers.cookie, 'routergo_session');
+    if (token) (request as SessionRequest).user = await deps.session.authenticate(token) ?? undefined;
+  });
+  registerAuthRoutes(app, deps.session);
 
   app.get('/runs/:id/events', async (req, reply) => {
     await sseHandler(req as never, reply as never, deps.sseDeps);
   });
 
   const registry = new DynamicRouteRegistry(deps.useCases, deps.schemas);
-  const reserved = ['/health', '/readiness', '/runtime-manifest', '/runs/:id/events'];
+  const reserved = ['/health', '/readiness', '/runtime-manifest', '/runs/:id/events', '/auth/'];
   const filtered = deps.manifest.apiRoutes
     .filter((r) => r.enabled)
     .filter((r) => !reserved.some((p) => r.path_template === p));
@@ -70,6 +77,34 @@ export function buildApp(deps: BootstrapDeps): ReturnType<typeof Fastify> {
 
   return app;
 }
+
+type SessionRequest = { user?: SessionPrincipal };
+type AuthBody = { email?: unknown; password?: unknown };
+
+function registerAuthRoutes(app: ReturnType<typeof Fastify>, auth: SessionAuthPort): void {
+  app.post('/auth/register', async (request: FastifyRequest, reply: FastifyReply) => authReply(reply, () => auth.register(readString(request.body as AuthBody, 'email'), readString(request.body as AuthBody, 'password'))));
+  app.post('/auth/login', async (request: FastifyRequest, reply: FastifyReply) => authReply(reply, () => auth.login(readString(request.body as AuthBody, 'email'), readString(request.body as AuthBody, 'password'))));
+  app.get('/auth/me', async (request: FastifyRequest, reply: FastifyReply) => { const user = (request as SessionRequest).user; return user ? reply.send({ user }) : reply.code(401).send({ error: 'authentication_required' }); });
+  app.post('/auth/logout', async (request: FastifyRequest, reply: FastifyReply) => { const token = readCookie(request.headers.cookie, 'routergo_session'); if (token) await auth.logout(token); return reply.header('set-cookie', clearSessionCookie()).send({ ok: true }); });
+}
+
+async function authReply(reply: FastifyReply, operation: () => Promise<{ principal: SessionPrincipal; token: string }>): Promise<unknown> {
+  try { const result = await operation(); return reply.header('set-cookie', sessionCookie(result.token)).send({ user: result.principal }); }
+  catch (error) { return authFailure(reply, error); }
+}
+
+function authFailure(reply: FastifyReply, error: unknown): FastifyReply {
+  if (error instanceof Error && error.message === 'InvalidCredentials') return reply.code(401).send({ error: 'invalid_credentials' });
+  if (error instanceof Error && ['InvalidEmail', 'WeakPassword'].includes(error.message)) return reply.code(400).send({ error: error.message });
+  if (isUniqueViolation(error)) return reply.code(409).send({ error: 'email_already_registered' });
+  throw error;
+}
+
+function isUniqueViolation(error: unknown): boolean { return typeof error === 'object' && error !== null && 'code' in error && (error as { code?: unknown }).code === '23505'; }
+function readString(body: AuthBody, key: 'email' | 'password'): string { const value = body?.[key]; if (typeof value !== 'string') throw new Error('InvalidInput'); return value; }
+function sessionCookie(token: string): string { return `routergo_session=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=604800`; }
+function clearSessionCookie(): string { return 'routergo_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0'; }
+function readCookie(header: string | undefined, key: string): string | undefined { return header?.split(';').map((part) => part.trim()).find((part) => part.startsWith(`${key}=`))?.slice(key.length + 1); }
 
 function isUnauthorizedPrivilegedChange(error: unknown): error is PrivilegedChangeError {
   return error instanceof PrivilegedChangeError && error.code === 'UNAUTHORIZED';

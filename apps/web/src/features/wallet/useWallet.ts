@@ -15,7 +15,9 @@ export function useWallet(api: HttpApiPort) {
     try {
       const w = await api.request<Wallet>({ routeKey: "wallet-get" });
       const l = await api.request<{ entries: LedgerEntry[] }>({ routeKey: "wallet-ledger" });
-      setWallet(w); setEntries(l.entries ?? []);
+      const normalized = { ...w, balance: Number(w.balance), lifetime_earned: Number(w.lifetime_earned ?? 0), currency: w.currency ?? "CREDITS" };
+      const normalizedEntries = (l.entries ?? []).map((entry) => ({ ...entry, amount_signed: Number(entry.amount_signed) }));
+      setWallet(normalized); setEntries(normalizedEntries);
     } catch (e) { setError(e instanceof Error ? e.message : String(e)); }
     setLoading(false);
   }, [api]);

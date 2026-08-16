@@ -5,7 +5,6 @@ import { CreditBalance } from "../design-system/CreditBalance";
 import type { RuntimeBundle } from "../runtime/bootstrap";
 import { useRuntime } from "../runtime/RuntimeProvider";
 import type { NavigationItem } from "../runtime/NavigationRegistry";
-import { clearLocalSession } from "../features/auth/AuthView";
 
 function Layout({ bundle }: { bundle: RuntimeBundle }): React.ReactElement {
   const [balance, setBalance] = React.useState(0);
@@ -18,7 +17,8 @@ function Layout({ bundle }: { bundle: RuntimeBundle }): React.ReactElement {
 }
 
 function RuntimeHeader({ balance }: { balance: number }): React.ReactElement {
-  return <div className="rg-topbar"><Link to="/" className="rg-topbar-brand"><span className="rg-mark">R</span><span>RouterGo</span></Link><div className="rg-topbar-actions"><CreditBalance balance={balance} label="GoCredits" /><button className="rg-logout" onClick={() => { clearLocalSession(); window.location.reload(); }}>Salir</button></div></div>;
+  const logout = async (): Promise<void> => { await fetch("/api/auth/logout", { method: "POST", credentials: "include" }); window.location.reload(); };
+  return <div className="rg-topbar"><Link to="/" className="rg-topbar-brand"><span className="rg-mark">R</span><span>RouterGo</span></Link><div className="rg-topbar-actions"><CreditBalance balance={balance} label="GoCredits" /><button className="rg-logout" onClick={() => void logout()}>Salir</button></div></div>;
 }
 
 function RuntimeNavigation({ items }: { items: NavigationItem[] }): React.ReactElement {
