@@ -2,7 +2,7 @@ import React, { useCallback } from "react";
 import { SponsorPlacement } from "../../design-system/SponsorPlacement";
 import type { HttpApiPort } from "../../runtime/ApiPort";
 import { useActivityMachine } from "./useActivityMachine";
-import { DEFAULT_EXERCISE, EXERCISES } from "./exerciseCatalog";
+import { DEFAULT_EXERCISE, EXERCISES, loadExerciseDataset } from "./exerciseCatalog";
 
 type ActivityMachine = ReturnType<typeof useActivityMachine>;
 
@@ -29,6 +29,8 @@ function actionLabel(state: string): string {
 export function ActivityView({ api }: { api: HttpApiPort }): React.ReactElement {
   const machine = useActivityMachine();
   const [exerciseId, setExerciseId] = React.useState(DEFAULT_EXERCISE.id);
+  const [exercises, setExercises] = React.useState(EXERCISES);
+  const [catalogStatus, setCatalogStatus] = React.useState("Catálogo local disponible");
   const [verified, setVerified] = React.useState<number | undefined>();
   const [balance, setBalance] = React.useState(0);
   React.useEffect(() => {
@@ -36,6 +38,16 @@ export function ActivityView({ api }: { api: HttpApiPort }): React.ReactElement 
       .then((wallet) => setBalance(wallet.balance))
       .catch(() => undefined);
   }, [api]);
+  React.useEffect(() => {
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 8000);
+    void loadExerciseDataset(controller.signal).then((items) => {
+      setExercises(items);
+      setExerciseId((current) => items.some((item) => item.id === current) ? current : items[0].id);
+      setCatalogStatus(`${items.length} ejercicios de peso corporal disponibles`);
+    }).catch(() => setCatalogStatus("Catálogo local disponible · sin conexión")).finally(() => window.clearTimeout(timeout));
+    return () => { window.clearTimeout(timeout); controller.abort(); };
+  }, []);
   const submit = useCallback(async () => {
     machine.submit();
     machine.verifying();
@@ -50,10 +62,10 @@ export function ActivityView({ api }: { api: HttpApiPort }): React.ReactElement 
   const action = primaryAction(machine.state, machine, submit);
   const isCameraVisible = !["idle", "permission"].includes(machine.state);
   const shownReps = machine.state === "verified" ? verified ?? machine.count : machine.count;
-  const exercise = EXERCISES.find((item) => item.id === exerciseId) ?? DEFAULT_EXERCISE;
+  const exercise = exercises.find((item) => item.id === exerciseId) ?? DEFAULT_EXERCISE;
 
   return <div className="rg-activity-page">
-    <section className="rg-activity-hero"><p>Una forma distinta de acceder</p><h1>Recupera GoCredits<br /><span>con tu esfuerzo 💪</span></h1><p>Entrena, verifica tu esfuerzo y usa tus créditos al instante.</p><div className="rg-exercise-picker"><label htmlFor="exercise-select">Actividad actual</label><select id="exercise-select" value={exercise.id} onChange={(event) => setExerciseId(event.target.value)} disabled={machine.state !== "idle"}><option value="" disabled>Elige un ejercicio</option>{EXERCISES.map((item) => <option key={item.id} value={item.id}>{item.name} · {item.target}</option>)}</select></div></section>
+    <section className="rg-activity-hero"><p>Una forma distinta de acceder</p><h1>Recupera GoCredits<br /><span>con tu esfuerzo 💪</span></h1><p>Entrena, verifica tu esfuerzo y usa tus créditos al instante.</p><div className="rg-exercise-picker"><label htmlFor="exercise-select">Actividad actual</label><select id="exercise-select" value={exercise.id} onChange={(event) => setExerciseId(event.target.value)} disabled={machine.state !== "idle"}><option value="" disabled>Elige un ejercicio</option>{exercises.map((item) => <option key={item.id} value={item.id}>{item.name} · {item.target}</option>)}</select><small>{catalogStatus}</small></div></section>
     <section className="rg-exercise-card" aria-live="polite">
       <div className="rg-exercise-meta"><div><span className="rg-exercise-tag">♟ {exercise.category} · {exercise.level}</span><h2>{exercise.name}</h2><p>{exercise.target} · {exercise.equipment}</p></div><div className="rg-rep-ring">{shownReps}<small>reps</small></div></div>
       <div className="rg-exercise-visual"><img src={exercise.imageUrl ?? "/exercise-pushup.png"} onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = "/exercise-pushup.png"; }} alt={`Demostración de ${exercise.name.toLowerCase()}`} /></div>
