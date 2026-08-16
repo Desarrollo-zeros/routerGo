@@ -84,7 +84,7 @@ Format: `[ID] [P?] [Story] task`. `[P]` means safe parallel ownership in differe
 - [x] T094 [US7] Responsive map/list experience with privacy notices.
 
 ## Phase 10 — Risk, analytics, hardening, beta
-- [ ] T100 Add risk events/scores/review cases for reward/API/ad/battle/treasure abuse.
+- [x] T100 Add risk events/scores/review cases for reward/API/ad/battle/treasure abuse.
 - [ ] T101 [P] Build unit-economics dashboard: revenue, cost, contribution, reward liability.
 - [ ] T102 [P] Add provider health/quota/cost routing analytics and alerts.
 - [ ] T103 Load-test critical API/realtime paths and enforce performance budgets.

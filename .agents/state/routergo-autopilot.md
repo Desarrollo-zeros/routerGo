@@ -1,7 +1,7 @@
 phase: 4
-current_objective: T100
+current_objective: T101
 status: executing
-last_green_commit: 6afbd7e
+last_green_commit: 0dd6d70
 last_completed_tasks:
   - T020
   - T021
@@ -42,8 +42,9 @@ last_completed_tasks:
   - T092
   - T093
   - T094
-next_candidates:
   - T100
+next_candidates:
+  - T101
   - T042
   - T043
   - T054
@@ -51,4 +52,4 @@ next_candidates:
   - T081
   - T093
 blocked_tasks: []
-last_validation: T094 web static rendering tests pass; local database migrations 001-016 pass; clean temporary database double seed pass with checksum a97a1259b6596eb4; full suite baseline 69 files/288 API tests and current gates pass, E2E 7/7, install frozen, build, typecheck, lint, lines, architecture, secrets. Main volume retains historical snapshots and is not used for clean-seed claims.
+last_validation: T100 risk policy and PostgreSQL schema tests pass; local database migrations 001-017 pass; clean temporary database double seed pass with checksum a97a1259b6596eb4; full suite baseline 69 files/288 API tests and current gates pass, E2E 7/7, install frozen, build, typecheck, lint, lines, architecture, secrets. Main volume retains historical snapshots and is not used for clean-seed claims.
