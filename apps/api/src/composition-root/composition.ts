@@ -6,7 +6,7 @@ import { WalletPostgresRepository } from '../infrastructure/adapters/postgres/Wa
 import { CatalogPostgresAdapter } from '../infrastructure/adapters/postgres/CatalogPostgresAdapter.js';
 import { RedisStreamAdapter } from '../infrastructure/adapters/redis/RedisStreamAdapter.js';
 import { buildApp } from '../infrastructure/http/bootstrap.js';
-import { SchemaRegistry } from '../infrastructure/http/schema-registry.js';
+import { createSchemas } from './schema-composition.js';
 import { GetEconomyUseCase } from '../application/use-cases/GetEconomy.js';
 import { GetCatalogUseCase } from '../application/use-cases/GetCatalog.js';
 import { ListModelsUseCase } from '../application/use-cases/ListModels.js';
@@ -16,7 +16,6 @@ import { PgEconomyUnitOfWorkFactory } from '../infrastructure/adapters/postgres/
 import { ReserveCreditsUseCase } from '../application/use-cases/ReserveCredits.js';
 import { SettleCreditsUseCase } from '../application/use-cases/SettleCredits.js';
 import { ReleaseCreditsUseCase } from '../application/use-cases/ReleaseCredits.js';
-import { z } from 'zod';
 import { PgUnitOfWorkFactory } from '../infrastructure/adapters/postgres/PgUnitOfWork.js';
 import { PostgresExecutionTargetAdapter } from '../infrastructure/adapters/postgres/PostgresExecutionTargetAdapter.js';
 import { PostgresBudgetEvaluator } from '../infrastructure/adapters/postgres/PostgresBudgetEvaluator.js';
@@ -50,6 +49,8 @@ import { PostgresAuthorizationGrantReader } from '../infrastructure/adapters/pos
 import { AuthorizePermissionUseCase } from '../application/use-cases/AuthorizePermission.js';
 import { PostgresApiKeyIdentityResolver } from '../infrastructure/adapters/postgres/PostgresApiKeyIdentityResolver.js';
 import { createRuntimeManifestUseCases } from './runtime-composition.js';
+import { PostgresAdvertiserRepository } from '../infrastructure/adapters/postgres/PostgresAdvertiserRepository.js';
+import { GetAdvertiserAccount, ListAdvertiserCampaigns, ListAdvertiserCreatives, GetAdvertiserAnalytics, CreateAdvertiserCampaign, CreateAdvertiserCreative, SubmitAdvertiserCampaign } from '../application/use-cases/AdvertiserUseCases.js';
 
 const { Pool } = pg;
 
@@ -89,9 +90,19 @@ export async function createComposition() {
     resolveApiKeyIdentity: new PostgresApiKeyIdentityResolver(pool), authorizePermission,
     publishRuntime: runtimeManifest.publish, rollbackRuntime: runtimeManifest.rollback,
     ledger: new GetLedgerUseCase(new PostgresAdminLedgerReader(pool)),
+    advertiser: createAdvertiserHandlers(pool),
   });
-  const streams = new RedisStreamAdapter(redis as never);
-  return { pool, redis, manifest, schemas, useCases, creditOperations, providerAnalytics, sseDeps: { streams } };
+  const streams = new RedisStreamAdapter(redis as never); return { pool, redis, manifest, schemas, useCases, creditOperations, providerAnalytics, sseDeps: { streams } };
+}
+
+function createAdvertiserHandlers(pool: pg.Pool) {
+  const repository = new PostgresAdvertiserRepository(pool);
+  return {
+    account: new GetAdvertiserAccount(repository), campaigns: new ListAdvertiserCampaigns(repository),
+    creatives: new ListAdvertiserCreatives(repository), analytics: new GetAdvertiserAnalytics(repository),
+    createCampaign: new CreateAdvertiserCampaign(repository), createCreative: new CreateAdvertiserCreative(repository),
+    submitCampaign: new SubmitAdvertiserCampaign(repository),
+  };
 }
 
 function createCreditOperations(factory: PgEconomyUnitOfWorkFactory, clock: SystemClock) {
@@ -160,31 +171,6 @@ async function queryProviderCost(pool: pg.Pool): Promise<number> {
 async function queryRewardLiability(pool: pg.Pool): Promise<number> {
   const result = await pool.query<{ total: string }>('SELECT COALESCE(SUM(balance), 0)::text AS total FROM wallets');
   return Number(result.rows[0]?.total ?? 0);
-}
-
-function createSchemas(): SchemaRegistry {
-  const schemas = new SchemaRegistry();
-  schemas.registerZod('verifyActivityRequest', z.object({ reps: z.number(), sessionId: z.string() }));
-  schemas.registerZod('createQuoteRequest', z.object({ logicalModelId: z.string(), maxOutputTokens: z.number().optional() }));
-  schemas.registerZod('createRunRequest', z.object({ quoteId: z.string() }));
-  schemas.register('economyResponse', { type: 'object', properties: { go: { type: 'object' }, windows: { type: 'object' }, contribution: { type: 'object' }, unitEconomics: { type: 'object' }, dau: { type: 'number' } } });
-  schemas.register('healthResponse', { type: 'object', properties: { status: { type: 'string' } } });
-  schemas.register('manifestResponse', { type: 'object' });
-  schemas.register('runtimeManifestResponse', { type: 'object', required: ['version', 'contentHash', 'manifest'], properties: { version: { type: 'number' }, contentHash: { type: 'string' }, manifest: { type: 'object' } } });
-  schemas.register('runtimeRollbackRequest', { type: 'object', required: ['targetVersion'], properties: { targetVersion: { type: 'integer', minimum: 1 } }, additionalProperties: false });
-  schemas.register('catalogResponse', { type: 'object', properties: { models: { type: 'array', items: { type: 'object', properties: { logicalId: { type: 'string' }, tier: { type: 'string' }, creditPrice: { type: 'string' }, enabled: { type: 'boolean' } } } } } });
-  schemas.register('modelsResponse', { type: 'object', required: ['object', 'data'], properties: { object: { const: 'list' }, data: { type: 'array', items: { type: 'object', required: ['id', 'object', 'created', 'owned_by'], properties: { id: { type: 'string' }, object: { const: 'model' }, created: { type: 'number' }, owned_by: { type: 'string' } } } } } });
-  schemas.register('chatCompletionsRequest', { type: 'object', required: ['model', 'messages'], properties: { model: { type: 'string' }, messages: { type: 'array', minItems: 1, items: { type: 'object', required: ['role', 'content'], properties: { role: { enum: ['system', 'user', 'assistant'] }, content: { type: 'string' } }, additionalProperties: false } }, max_tokens: { type: 'integer', minimum: 1 }, temperature: { type: 'number' }, stream: { type: 'boolean' } }, additionalProperties: false });
-  schemas.register('chatCompletionsResponse', { type: 'object', required: ['id', 'object', 'created', 'model', 'choices', 'usage'], properties: { id: { type: 'string' }, object: { const: 'chat.completion' }, created: { type: 'number' }, model: { type: 'string' }, choices: { type: 'array' }, usage: { type: 'object' } } });
-  schemas.register('responsesRequest', { type: 'object', required: ['model', 'input'], properties: { model: { type: 'string' }, input: { oneOf: [{ type: 'string' }, { type: 'array', items: { type: 'object' } }] }, max_output_tokens: { type: 'integer', minimum: 1 }, stream: { type: 'boolean' } }, additionalProperties: false });
-  schemas.register('responsesResponse', { type: 'object', required: ['id', 'object', 'status', 'model', 'output'], properties: { id: { type: 'string' }, object: { const: 'response' }, status: { const: 'completed' }, model: { type: 'string' }, output: { type: 'array' } } });
-  schemas.register('walletResponse', { type: 'object', properties: { walletId: { type: 'string' }, balance: { type: 'string' }, version: { type: 'number' } } });
-  schemas.register('ledgerResponse', { type: 'object', properties: { entries: { type: 'array', items: { type: 'object', properties: { id: { type: 'string' }, kind: { type: 'string' }, amount: { type: 'string' }, occurredAt: { type: 'string' } } } } } });
-  schemas.register('verifyActivityResponse', { type: 'object', properties: { verified: { type: 'boolean' } } });
-  schemas.register('quoteResponse', { type: 'object', properties: { quoteId: { type: 'string' } } });
-  schemas.register('runResponse', { type: 'object', properties: { runId: { type: 'string' } } });
-  schemas.register('streamResponse', { type: 'object' });
-  return schemas;
 }
 
 export function buildCompositionApp(deps: Awaited<ReturnType<typeof createComposition>>) {

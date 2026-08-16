@@ -14,6 +14,8 @@ import type { PublishRuntimeManifest } from '../application/use-cases/PublishRun
 import type { RollbackRuntimeManifest } from '../application/use-cases/RollbackRuntimeManifest.js';
 import type { GetLedgerPort } from '../application/ports/inbound/GetLedgerPort.js';
 import { AuthorizationDeniedError } from '../application/errors/AuthorizationDeniedError.js';
+import type { AdvertiserHandlers } from './advertiser-handlers.js';
+import { advertiserRead, advertiserWrite } from './advertiser-handlers.js';
 
 interface RegistryDeps {
   manifest: RuntimeManifest;
@@ -29,6 +31,7 @@ interface RegistryDeps {
   publishRuntime: PublishRuntimeManifest;
   rollbackRuntime: RollbackRuntimeManifest;
   ledger: GetLedgerPort;
+  advertiser: AdvertiserHandlers;
 }
 
 export function createUseCaseRegistry(deps: RegistryDeps): UseCaseRegistry {
@@ -49,10 +52,18 @@ export function createUseCaseRegistry(deps: RegistryDeps): UseCaseRegistry {
     getAdminWallet: async (req) => executeAdminWallet(req, deps),
     publishRuntime: async (req) => executePublish(req, deps),
     rollbackRuntime: async (req) => executeRollback(req, deps),
+    advertiserAccount: async (req) => advertiserRead(req, deps, 'account'),
+    advertiserCampaigns: async (req) => advertiserRead(req, deps, 'campaigns'),
+    advertiserCreatives: async (req) => advertiserRead(req, deps, 'creatives'),
+    advertiserAnalytics: async (req) => advertiserRead(req, deps, 'analytics'),
+    advertiserCreateCampaign: async (req) => advertiserWrite(req, deps, 'createCampaign'),
+    advertiserCreateCreative: async (req) => advertiserWrite(req, deps, 'createCreative'),
+    advertiserSubmitCampaign: async (req) => advertiserWrite(req, deps, 'submitCampaign'),
     chatCompletions: async (req, reply) => deps.chatCompletions.execute(await readChatInput(req, deps.authenticateApiKey, reply)),
     responses: async (req, reply) => deps.responses.execute(await readResponsesInput(req, deps.authenticateApiKey, reply)),
   };
 }
+
 
 async function executePublish(req: unknown, deps: RegistryDeps): Promise<unknown> {
   const context = await authenticate(req, deps.authenticateApiKey, 'runtime.publish');

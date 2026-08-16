@@ -21,6 +21,13 @@ const ROUTES: Route[] = [
   { route_key: 'admin-ledger', method: 'GET', path: '/admin/ledger', use_case: 'getLedger', auth: 'api_key', req: null, res: 'ledgerResponse' },
   { route_key: 'admin-runtime-publish', method: 'POST', path: '/admin/runtime/publish', use_case: 'publishRuntime', auth: 'api_key', req: null, res: 'runtimeManifestResponse' },
   { route_key: 'admin-runtime-rollback', method: 'POST', path: '/admin/runtime/rollback', use_case: 'rollbackRuntime', auth: 'api_key', req: 'runtimeRollbackRequest', res: 'runtimeManifestResponse' },
+  { route_key: 'advertiser-account', method: 'GET', path: '/advertiser/account', use_case: 'advertiserAccount', auth: 'api_key', req: null, res: 'advertiserAccountResponse' },
+  { route_key: 'advertiser-campaigns', method: 'GET', path: '/advertiser/campaigns', use_case: 'advertiserCampaigns', auth: 'api_key', req: null, res: 'advertiserCampaignsResponse' },
+  { route_key: 'advertiser-campaign-create', method: 'POST', path: '/advertiser/campaigns', use_case: 'advertiserCreateCampaign', auth: 'api_key', req: 'advertiserCampaignRequest', res: 'advertiserCampaignResponse' },
+  { route_key: 'advertiser-campaign-submit', method: 'POST', path: '/advertiser/campaigns/:campaignId/submit', use_case: 'advertiserSubmitCampaign', auth: 'api_key', req: null, res: 'advertiserCampaignResponse' },
+  { route_key: 'advertiser-creatives', method: 'GET', path: '/advertiser/creatives', use_case: 'advertiserCreatives', auth: 'api_key', req: null, res: 'advertiserCreativesResponse' },
+  { route_key: 'advertiser-creative-create', method: 'POST', path: '/advertiser/creatives', use_case: 'advertiserCreateCreative', auth: 'api_key', req: 'advertiserCreativeRequest', res: 'advertiserCreativeResponse' },
+  { route_key: 'advertiser-analytics', method: 'GET', path: '/advertiser/analytics', use_case: 'advertiserAnalytics', auth: 'api_key', req: null, res: 'advertiserAnalyticsResponse' },
 ];
 
 export async function seedRoutes(client: pg.PoolClient): Promise<void> {

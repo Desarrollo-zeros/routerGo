@@ -31,3 +31,10 @@ cap, and click-rate fraud signals are evaluated from caller-supplied policy
 values and return explicit denial reasons. The policy has no hidden defaults,
 does not persist telemetry, and does not grant rewards; policy configuration
 and anti-fraud telemetry storage remain application concerns.
+
+T054 exposes the advertiser foundation through organization-scoped API-key
+routes for account balance, campaigns, creatives, aggregate delivery analytics,
+campaign creation, creative creation, and draft-to-review submission. Money
+remains USD micro-units serialized as strings. Identity and RBAC are evaluated
+before the repository, every query filters by the resolved organization, and the
+advertiser UI fails closed without a real session.
