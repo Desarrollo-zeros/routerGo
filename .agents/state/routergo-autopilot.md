@@ -1,7 +1,7 @@
 phase: 3
-current_objective: T034
+current_objective: T036
 status: executing
-last_green_commit: pending-t035-commit
+last_green_commit: 1872e1a
 last_completed_tasks:
   - T020
   - T021
@@ -16,7 +16,7 @@ last_completed_tasks:
   - T033
   - T034
   - T035
-blocked_tasks: []
 next_candidates:
-  - T035
-last_validation: T035 Responses boundary and provider SSE reader pass typecheck, line, lint, architecture, clean r6 seed, full API/web tests, build, and provider stream unit coverage. Full E2E and Docker health are reused from the same local environment.
+  - T036
+blocked_tasks: []
+last_validation: T035 Responses boundary and provider SSE reader pass typecheck, line, lint, architecture, clean r6 seed, 41 API suites/221 tests, build, E2E 7/7, and Docker health. T036 is next.
