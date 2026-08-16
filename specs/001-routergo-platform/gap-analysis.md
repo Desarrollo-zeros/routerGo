@@ -33,6 +33,7 @@
 - T010 is implemented: additive identity/RBAC/audit migration `002_identity_rbac_audit.sql`, multi-file migration runner, least-privilege system role/permission seeds, cross-organization role assignment guards, append-only audit persistence, and PostgreSQL integration tests are present. Seed version `2026-08-15-r2` is repeatable with a stable checksum.
 - T011/T012 are converged: `ResolveIdentityContextUseCase` supplies the small verified `IdentityContext` consumed by `AuthorizePermissionUseCase`; scoped/global permission decisions are fail-closed and covered by six integration scenarios. Authentication transport, HTTP enforcement, and RBAC persistence adapters remain future work.
 - T013 is implemented: `PrivilegedChangeService` requires an allowed `AccessDecision`, runs the typed mutation/audit/outbox scope through one PostgreSQL transaction, sanitizes metadata and event payloads, and uses deterministic operation IDs for idempotency. Unit tests plus PostgreSQL commit, rollback, and duplicate-operation tests cover the boundary.
+- T015 is implemented: published runtime snapshots are validated, hashed, immutable, selected through an explicit active pointer, and exposed with separate API/UI projections. Publish and rollback reuse T013, enforce expected-version/idempotency/concurrency boundaries, and synchronize a versioned Redis cache after commit.
 
 ### P0 — Foundation blockers
 
@@ -59,7 +60,7 @@
 - Admin/Studio and advertiser applications are not present.
 - Generic challenge engine, exercise safety workflow, battles, treasure, risk, analytics, and audit query/reporting workflows are not implemented; T013 covers only the privileged mutation/audit/outbox write boundary.
 - Web unit tests are absent; Playwright specs exist but the web Vite build/test execution is not yet part of a green full gate.
-- Runtime manifest versioning/cache invalidation/rollback is represented by a fixed `version: 1` loader and no manifest table or publish workflow.
+- Runtime manifest versioning/cache invalidation/rollback is resolved by T015: `runtime_manifest_snapshots`, `runtime_manifest_state`, `runtime_ui_routes`, typed publish/rollback use cases, PostgreSQL contract tests, and cache miss/failure coverage are present. HTTP authentication/Studio transport remains future work.
 - Observability is partial; there is no end-to-end correlation/cost/revenue/reward reconciliation evidence.
 - Accessibility/responsive checks are represented by source/spec intent, not a passing browser/a11y evidence set.
 

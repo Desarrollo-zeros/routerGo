@@ -17,10 +17,10 @@ export class PrivilegedChangeService<TScope extends PrivilegedChangeScope = Priv
       throw new PrivilegedChangeError('UNAUTHORIZED', 'Privileged change denied', command.decision.reason);
     }
     const occurredAt = this.clock.now();
-    const metadata = sanitizeAuditMetadata({ ...command.metadata, authorizationReason: command.decision.reason });
     return this.unitOfWork.run(command.operationId, async (scope) => {
       if (await scope.idempotency.isCompleted(command.operationId)) throw duplicateOperation();
       const result = await command.mutate(scope);
+      const metadata = sanitizeAuditMetadata({ ...command.metadata, authorizationReason: command.decision.reason });
       await appendAudit(scope, command, metadata, occurredAt);
       await appendOutbox(scope, command, metadata, occurredAt);
       return result;

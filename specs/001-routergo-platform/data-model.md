@@ -3,6 +3,12 @@
 ## Existing entities to preserve
 `users`, `wallets`, `ledger_entries`, `reward_policies`, `activity_sessions`, `provider_gateways`, `provider_endpoints`, `model_catalog`, `credential_deployments`, `credential_usage_windows`, `pool_policies`, `api_routes`, `ui_navigation`, `design_tokens`, `feature_flags`, `chat_quotes`, `chat_runs`, `ad_events`, `outbox_events`, `seed_runs`.
 
+### Runtime manifest publication
+- runtime_ui_routes(route_key,path,screen_key,enabled) is the UI screen projection and is separate from api_routes.
+- runtime_manifest_snapshots(version,schema_version,content_hash,snapshot_json,created_at) stores immutable validated published snapshots.
+- runtime_manifest_state(id,active_version,updated_at) is the explicit active pointer; it is not derived from MAX(version).
+- Editable operational tables remain the candidate source. A published snapshot is a durable immutable projection and is retained across rollback.
+
 ## Additive model
 ### Identity
 - `organizations(id,name,slug,kind,status,created_at,updated_at)` with unique slug and `PERSONAL`, `ADVERTISER`, `DEVELOPER`, or `INTERNAL` kind.

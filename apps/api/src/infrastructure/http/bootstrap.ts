@@ -12,7 +12,7 @@ export interface BootstrapDeps {
   trustProxy?: boolean | string | number;
 }
 
-function toWebManifest(m: RuntimeManifest): Record<string, unknown> {
+export function toWebManifest(m: RuntimeManifest): Record<string, unknown> {
   const catalog = (m.models ?? []).map((e: Record<string, unknown>) => ({
     logical_id: e.logical_id,
     provider_model_id: e.provider_model_id,
@@ -28,13 +28,17 @@ function toWebManifest(m: RuntimeManifest): Record<string, unknown> {
   return {
     manifest_version: (m as unknown as { version: number }).version ?? 1,
     version: (m as unknown as { version: number }).version ?? 1,
+    contentHash: m.contentHash,
+    apiRoutes: m.apiRoutes,
+    uiRoutes: m.uiRoutes,
+    ui: { routes: m.uiRoutes, navigation: m.uiNavigation },
     routes: m.routes ?? [],
     catalog,
     models: m.models ?? [],
     gateways: m.gateways ?? [],
     endpoints: m.endpoints ?? [],
     tokens: m.tokens ?? [],
-    navigation: m.navigation ?? [],
+    navigation: m.uiNavigation ?? [],
     feature_flags: featureFlags,
     flags: m.flags ?? [],
     poolPolicies: (m as unknown as { poolPolicies: unknown[] }).poolPolicies ?? [],
