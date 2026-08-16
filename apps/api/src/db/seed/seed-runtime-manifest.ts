@@ -5,10 +5,12 @@ import { RuntimeManifestSourcePostgresAdapter } from '../../infrastructure/adapt
 export async function seedRuntimeManifest(client: pg.PoolClient, version: number): Promise<void> {
   const source = await new RuntimeManifestSourcePostgresAdapter(client).read();
   const manifest = buildRuntimeManifest(version, source);
+  const hash = manifest.contentHash;
+  if (!hash) throw new Error('runtime manifest seed produced no content hash');
   const existing = await client.query<{ content_hash: string }>(
     'SELECT content_hash FROM runtime_manifest_snapshots WHERE version=$1', [version],
   );
-  const resolvedVersion = await resolveVersion(client, version, manifest.contentHash, existing.rows[0]?.content_hash);
+  const resolvedVersion = await resolveVersion(client, version, hash, existing.rows[0]?.content_hash);
   const resolved = await client.query('SELECT 1 FROM runtime_manifest_snapshots WHERE version=$1', [resolvedVersion]);
   if (resolved.rowCount === 0) {
     const resolvedManifest = resolvedVersion === version ? manifest : buildRuntimeManifest(resolvedVersion, source);
