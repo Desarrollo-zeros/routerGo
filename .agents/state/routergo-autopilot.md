@@ -1,7 +1,7 @@
 phase: 4
-current_objective: T043
+current_objective: T044
 status: executing
-last_green_commit: 76b3934
+last_green_commit: 80c5f78
 last_completed_tasks:
   - T020
   - T021
@@ -45,8 +45,8 @@ last_completed_tasks:
   - T100
   - T104
   - T042
-next_candidates:
   - T043
+next_candidates:
   - T044
   - T105
   - T054
@@ -55,4 +55,4 @@ next_candidates:
   - T093
 blocked_tasks:
   - T105: staged beta deployment and rollback drill require an external staging controller/environment
-last_validation: T042 authenticated publish/rollback integration, T101 scoped economy route/client tests, and T102 explicit provider analytics adapters pass; T103 performance smoke covers health and catalog reads. Clean temporary database migrations 001-017, double seed checksum c0c1362b340b3488, and full API suite 87 files/321 tests pass. T043 is next; wallet/ledger transport, authenticated critical-route/realtime load, and staged beta remain open.
+last_validation: T043 clean database migrations 001-017, double seed checksum df34c51030919c37, scoped wallet/ledger authorization (200 with grant, 403 without), 87 API files/324 tests, admin tests/build, typecheck, lint, lines, architecture, secrets, build, E2E 7/7, and PostgreSQL/Redis/LiteLLM healthy. T044 is next; staged beta remains externally blocked.
