@@ -1,7 +1,7 @@
 phase: 4
 current_objective: T105
 status: executing
-last_green_commit: 99aaece
+last_green_commit: 897f0e5
 last_completed_tasks:
   - T020
   - T021
@@ -56,4 +56,4 @@ next_candidates:
   - T081
   - T093
 blocked_tasks: []
-last_validation: T104 regression suite pass: performance smoke 3 tests, provider contracts 11 tests, secrets scan, responsive/security E2E 7/7; clean temporary database migrations 001-017 and API suite pass with 77 files/305 tests; clean seed checksum a97a1259b6596eb4. Main volume retains historical snapshots and is not used for clean-suite claims.
+last_validation: T104 regression suite pass: performance smoke 3 tests, provider contracts 11 tests, secrets scan, responsive/security E2E 7/7; local T105 beta release gate tests pass; clean temporary database migrations 001-017 and API suite pass with 77 files/305 tests; clean seed checksum a97a1259b6596eb4. Staged beta deployment and rollback drill remain externally blocked.
