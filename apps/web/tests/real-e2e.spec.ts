@@ -50,3 +50,31 @@ test("usuario real se registra, navega y recibe GoCredits", async ({ page }) => 
   await page.getByRole("button", { name: "Entrar a RouterGo" }).click();
   await expect(page.getByRole("link", { name: "Actividad" })).toBeVisible();
 });
+
+test("usuario real recorre las pantallas principales en desktop y móvil", async ({ page }) => {
+  const email = `audit-${Date.now()}@routergo.local`;
+  await page.goto("/");
+  await page.getByRole("tab", { name: "Crear cuenta" }).click();
+  await page.getByLabel("Correo electrónico").fill(email);
+  await page.getByLabel("Contraseña").fill("routergo-audit-123");
+  await page.getByRole("button", { name: "Crear mi cuenta" }).click();
+  await expect(page.getByRole("link", { name: "Actividad" })).toBeVisible();
+
+  const routes = [
+    ["activity", "/", "Recupera GoCredits"],
+    ["catalog", "/catalog", "Elige tu forma de pensar."],
+    ["wallet", "/wallet", "Tu saldo, listo para usar."],
+    ["chat", "/chat", "Piensa en voz alta."],
+    ["battles", "/battles", "Juega en tiempo real"],
+    ["treasure", "/treasure", "Treasure hunts"],
+  ] as const;
+  for (const width of [1440, 390, 360]) {
+    await page.setViewportSize({ width, height: width === 1440 ? 900 : 844 });
+    for (const [name, path, heading] of routes) {
+      await page.goto(path);
+      await expect(page.getByRole("heading", { name: heading })).toBeVisible({ timeout: 25_000 });
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBeTruthy();
+      await page.screenshot({ path: `output/playwright/audit-real-${name}-${width}.png`, fullPage: true });
+    }
+  }
+});
