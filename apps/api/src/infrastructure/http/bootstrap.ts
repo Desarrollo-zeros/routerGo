@@ -1,4 +1,4 @@
-import Fastify from 'fastify';
+import Fastify, { type FastifyReply } from 'fastify';
 import type { RuntimeManifest } from '../../config/RuntimeManifest.js';
 import { DynamicRouteRegistry, type UseCaseRegistry } from './dynamic-route-registry.js';
 import type { SchemaRegistry } from './schema-registry.js';
@@ -8,6 +8,7 @@ import { ApiKeyLifecycleError } from '../../application/use-cases/ApiKeyLifecycl
 import { ExecuteQuotedRunError } from '../../application/errors/ExecuteQuotedRunError.js';
 import { ApiQuotaExceededError } from '../../application/use-cases/ChatCompletions.js';
 import { PrivilegedChangeError } from '../../application/errors/PrivilegedChangeError.js';
+import { AuthorizationDeniedError } from '../../application/errors/AuthorizationDeniedError.js';
 
 export interface BootstrapDeps {
   manifest: RuntimeManifest;
@@ -47,16 +48,7 @@ export function buildApp(deps: BootstrapDeps): ReturnType<typeof Fastify> {
     trustProxy: deps.trustProxy ?? false,
   });
 
-  app.setErrorHandler((error, _request, reply) => {
-    if (error instanceof AuthenticationRequiredError) return reply.code(401).send({ error: 'authentication_required' });
-    if (error instanceof ApiKeyLifecycleError) return reply.code(apiKeyStatus(error.code)).send({ error: apiKeyError(error.code) });
-    if (error instanceof Error && error.message === 'API_KEY_CONTEXT_NOT_FOUND') return reply.code(401).send({ error: 'authentication_required' });
-    if (error instanceof ExecuteQuotedRunError) return reply.code(runErrorStatus(error.code)).send({ error: runErrorName(error.code) });
-    if (error instanceof ApiQuotaExceededError) return reply.code(429).header('retry-after-ms', error.retryAfterMs).send({ error: error.reason.toLowerCase() });
-    if (isUnauthorizedPrivilegedChange(error)) return reply.code(403).send({ error: 'forbidden', reason: error.reason ?? 'MISSING_PERMISSION' });
-    if (error instanceof RouteNotReadyError) return reply.code(501).send({ error: 'route_not_ready' });
-    return reply.send(error);
-  });
+  app.setErrorHandler((error, _request, reply) => { if (!handleKnownError(error, reply)) reply.send(error); });
 
   app.get('/health', async () => ({ status: 'ok', uptime: process.uptime() }));
   app.get('/readiness', async () => ({ ready: true }));
@@ -78,6 +70,50 @@ export function buildApp(deps: BootstrapDeps): ReturnType<typeof Fastify> {
 
 function isUnauthorizedPrivilegedChange(error: unknown): error is PrivilegedChangeError {
   return error instanceof PrivilegedChangeError && error.code === 'UNAUTHORIZED';
+}
+
+function handleKnownError(error: unknown, reply: FastifyReply): boolean {
+  return handleAuthError(error, reply) || handleRunError(error, reply) || handleQuotaError(error, reply) || handlePrivilegedError(error, reply) || handleNotReadyError(error, reply);
+}
+
+function handleAuthError(error: unknown, reply: FastifyReply): boolean {
+  if (error instanceof AuthenticationRequiredError || error instanceof Error && error.message === 'API_KEY_CONTEXT_NOT_FOUND') {
+    reply.code(401).send({ error: 'authentication_required' });
+    return true;
+  }
+  if (!(error instanceof ApiKeyLifecycleError)) return false;
+  reply.code(apiKeyStatus(error.code)).send({ error: apiKeyError(error.code) });
+  return true;
+}
+
+function handleRunError(error: unknown, reply: FastifyReply): boolean {
+  if (!(error instanceof ExecuteQuotedRunError)) return false;
+  reply.code(runErrorStatus(error.code)).send({ error: runErrorName(error.code) });
+  return true;
+}
+
+function handleQuotaError(error: unknown, reply: FastifyReply): boolean {
+  if (!(error instanceof ApiQuotaExceededError)) return false;
+  reply.code(429).header('retry-after-ms', error.retryAfterMs).send({ error: error.reason.toLowerCase() });
+  return true;
+}
+
+function handlePrivilegedError(error: unknown, reply: FastifyReply): boolean {
+  if (isUnauthorizedPrivilegedChange(error)) {
+    reply.code(403).send({ error: 'forbidden', reason: error.reason ?? 'MISSING_PERMISSION' });
+    return true;
+  }
+  if (error instanceof AuthorizationDeniedError) {
+    reply.code(403).send({ error: 'forbidden', reason: error.reason });
+    return true;
+  }
+  return false;
+}
+
+function handleNotReadyError(error: unknown, reply: FastifyReply): boolean {
+  if (!(error instanceof RouteNotReadyError)) return false;
+  reply.code(501).send({ error: 'route_not_ready' });
+  return true;
 }
 
 function apiKeyStatus(code: string): number {

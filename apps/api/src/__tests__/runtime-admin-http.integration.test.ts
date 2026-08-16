@@ -15,7 +15,8 @@ beforeAll(async () => {
   await pool.query('INSERT INTO wallets(id,user_id,balance) VALUES ($1,$2,0)', [ids.wallet, ids.user]);
   await pool.query("INSERT INTO organization_members(id,organization_id,user_id,status) VALUES ($1,$2,$3,'ACTIVE')", [ids.member, ids.org, ids.user]);
   await pool.query("INSERT INTO api_clients(id,organization_id,name,status) VALUES ($1,$2,'T042 client','ACTIVE')", [ids.client, ids.org]);
-  await pool.query("INSERT INTO api_keys(id,client_id,key_hash,prefix,scopes_json,status) VALUES ($1,$2,$3,$4,$5,'ACTIVE')", [ids.key, ids.client, hash(rawKey), rawKey.slice(0, 8), JSON.stringify(['runtime.publish', 'runtime.rollback'])]);
+  await pool.query("INSERT INTO ledger_entries(id,wallet_id,type,amount_signed,idempotency_key) VALUES ($1,$2,'EARN',10,$3)", [`${suffix}-ledger`, ids.wallet, `${suffix}-earn`]);
+  await pool.query("INSERT INTO api_keys(id,client_id,key_hash,prefix,scopes_json,status) VALUES ($1,$2,$3,$4,$5,'ACTIVE')", [ids.key, ids.client, hash(rawKey), rawKey.slice(0, 8), JSON.stringify(['runtime.publish', 'runtime.rollback', 'economy.read', 'audit.read'])]);
   await pool.query('INSERT INTO member_roles(member_id,role_id) VALUES ($1,$2)', [ids.member, 'role-operator']);
 });
 
@@ -36,6 +37,13 @@ describe.sequential('T042 admin runtime HTTP boundary', () => {
     const rollback = await app.inject({ method: 'POST', url: '/admin/runtime/rollback', headers: headers('rollback'), payload: { targetVersion: publishedVersion - 1 } });
     expect(rollback.statusCode).toBe(200);
     expect(rollback.json().version).toBe(publishedVersion - 1);
+
+    const wallet = await app.inject({ method: 'GET', url: '/admin/wallet', headers: headers('wallet') });
+    expect(wallet.statusCode).toBe(200);
+    expect(wallet.json()).toMatchObject({ walletId: ids.wallet, balance: '0' });
+    const ledger = await app.inject({ method: 'GET', url: '/admin/ledger', headers: headers('ledger') });
+    expect(ledger.statusCode).toBe(200);
+    expect(ledger.json().entries).toEqual([expect.objectContaining({ id: `${suffix}-ledger`, amount: '10' })]);
   });
 
   it('denies the same transport when the membership loses its grant', async () => {
@@ -44,6 +52,10 @@ describe.sequential('T042 admin runtime HTTP boundary', () => {
     const response = await (await appPromise).inject({ method: 'POST', url: '/admin/runtime/publish', headers: headers('denied') });
     expect(response.statusCode).toBe(403);
     expect(response.json()).toEqual({ error: 'forbidden', reason: 'MISSING_PERMISSION' });
+    const wallet = await (await appPromise).inject({ method: 'GET', url: '/admin/wallet', headers: headers('wallet-denied') });
+    expect(wallet.statusCode).toBe(403);
+    const ledger = await (await appPromise).inject({ method: 'GET', url: '/admin/ledger', headers: headers('ledger-denied') });
+    expect(ledger.statusCode).toBe(403);
   });
 });
 

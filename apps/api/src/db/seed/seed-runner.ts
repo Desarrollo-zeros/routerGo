@@ -13,8 +13,8 @@ import { seedIdentity } from './seed-identity.js';
 import { seedUiRoutes } from './seed-ui-routes.js';
 import { seedRuntimeManifest } from './seed-runtime-manifest.js';
 
-export const SEED_VERSION = '2026-08-16-r7';
-export const MANIFEST_VERSION = 5;
+export const SEED_VERSION = '2026-08-16-r8';
+export const MANIFEST_VERSION = 6;
 
 function checksumFor(version: string): string {
   return createHash('sha256').update(version).digest('hex').slice(0, 16);

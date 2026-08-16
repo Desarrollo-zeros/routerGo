@@ -5,12 +5,14 @@ import { Panel, StatusMessage } from "../design-system/Primitives";
 import { ModelCatalogView } from "../features/catalog/ModelCatalogView";
 import { ProviderView } from "../features/providers/ProviderView";
 import { RuntimeConfigView } from "../features/runtime/RuntimeConfigView";
-import { EconomyReadView } from "../features/economy/EconomyReadView";
 import { LedgerReadView } from "../features/economy/LedgerReadView";
+import { WalletReadView } from "../features/economy/WalletReadView";
 import { UnitEconomicsDashboard } from "../features/economy/UnitEconomicsDashboard";
 import { RuntimeNavigation } from "../features/navigation/RuntimeNavigation";
 import { HttpAdminEconomyClient, type AdminEconomySummary } from "../runtime/AdminEconomyClient";
+import { HttpAdminLedgerClient, type AdminLedgerSummary } from "../runtime/AdminLedgerClient";
 import { HttpAdminRuntimeClient } from "../runtime/AdminRuntimeClient";
+import { HttpAdminWalletClient, type AdminWalletSummary } from "../runtime/AdminWalletClient";
 
 interface AdminAppProps {
   manifest?: WebRuntimeManifest;
@@ -18,11 +20,11 @@ interface AdminAppProps {
 }
 
 export function AdminApp({ manifest, economyAccessToken }: AdminAppProps): React.ReactElement {
-  const economy = useAdminEconomy(economyAccessToken);
+  const reads = useAdminReads(economyAccessToken);
   const publishRuntime = usePublishRuntime(economyAccessToken);
   return <AdminShell brand={<span aria-label="RouterGo Studio">RouterGo Studio</span>} navigation={manifest ? <RuntimeNavigation manifest={manifest} /> : undefined}>
     <h1>Studio</h1>
-    {manifest ? <div className="admin-stack"><RuntimeConfigView manifest={manifest} onPublish={publishRuntime} /><ModelCatalogView models={manifest.catalog} /><ProviderView models={manifest.catalog} /><UnitEconomicsDashboard authorized={Boolean(economy)} summary={economy?.unitEconomics} /><EconomyReadView authorized={false} /><LedgerReadView authorized={false} /></div> : <Panel title="Área de administración"><StatusMessage>La configuración runtime no está disponible.</StatusMessage></Panel>}
+    {manifest ? <div className="admin-stack"><RuntimeConfigView manifest={manifest} onPublish={publishRuntime} /><ModelCatalogView models={manifest.catalog} /><ProviderView models={manifest.catalog} /><WalletReadView authorized={Boolean(reads.wallet)} summary={reads.wallet} /><UnitEconomicsDashboard authorized={Boolean(reads.economy)} summary={reads.economy?.unitEconomics} /><LedgerReadView authorized={Boolean(reads.ledger)} rows={reads.ledger?.entries} /></div> : <Panel title="Área de administración"><StatusMessage>La configuración runtime no está disponible.</StatusMessage></Panel>}
   </AdminShell>;
 }
 
@@ -33,13 +35,22 @@ function usePublishRuntime(accessToken?: string): (() => void) | undefined {
   }, [accessToken]);
 }
 
-function useAdminEconomy(accessToken?: string): AdminEconomySummary | undefined {
-  const [economy, setEconomy] = React.useState<AdminEconomySummary>();
+interface AdminReadState {
+  economy?: AdminEconomySummary;
+  wallet?: AdminWalletSummary;
+  ledger?: AdminLedgerSummary;
+}
+
+function useAdminReads(accessToken?: string): AdminReadState {
+  const [reads, setReads] = React.useState<AdminReadState>({});
   React.useEffect(() => {
-    if (!accessToken?.trim()) { setEconomy(undefined); return; }
+    if (!accessToken?.trim()) { setReads({}); return; }
     let active = true;
-    void new HttpAdminEconomyClient().read(accessToken).then((value) => { if (active) setEconomy(value); }).catch(() => { if (active) setEconomy(undefined); });
+    const update = <K extends keyof AdminReadState>(key: K, value: AdminReadState[K]) => { if (active) setReads((current) => ({ ...current, [key]: value })); };
+    void new HttpAdminEconomyClient().read(accessToken).then((value) => update('economy', value)).catch(() => undefined);
+    void new HttpAdminWalletClient().read(accessToken).then((value) => update('wallet', value)).catch(() => undefined);
+    void new HttpAdminLedgerClient().read(accessToken).then((value) => update('ledger', value)).catch(() => undefined);
     return () => { active = false; };
   }, [accessToken]);
-  return economy;
+  return reads;
 }

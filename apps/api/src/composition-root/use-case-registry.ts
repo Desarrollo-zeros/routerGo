@@ -12,6 +12,8 @@ import type { ApiKeyIdentityResolver } from '../application/ports/outbound/ApiKe
 import type { AuthorizePermissionUseCase } from '../application/use-cases/AuthorizePermission.js';
 import type { PublishRuntimeManifest } from '../application/use-cases/PublishRuntimeManifest.js';
 import type { RollbackRuntimeManifest } from '../application/use-cases/RollbackRuntimeManifest.js';
+import type { GetLedgerPort } from '../application/ports/inbound/GetLedgerPort.js';
+import { AuthorizationDeniedError } from '../application/errors/AuthorizationDeniedError.js';
 
 interface RegistryDeps {
   manifest: RuntimeManifest;
@@ -26,6 +28,7 @@ interface RegistryDeps {
   authorizePermission: AuthorizePermissionUseCase;
   publishRuntime: PublishRuntimeManifest;
   rollbackRuntime: RollbackRuntimeManifest;
+  ledger: GetLedgerPort;
 }
 
 export function createUseCaseRegistry(deps: RegistryDeps): UseCaseRegistry {
@@ -41,7 +44,9 @@ export function createUseCaseRegistry(deps: RegistryDeps): UseCaseRegistry {
     createQuote: notReady,
     createRun: notReady,
     streamRun: notReady,
-    getEconomy: async (req) => { await authenticate(req, deps.authenticateApiKey, 'economy.read'); return deps.economy.execute(); },
+    getEconomy: async (req) => executeEconomy(req, deps),
+    getLedger: async (req) => executeLedger(req, deps),
+    getAdminWallet: async (req) => executeAdminWallet(req, deps),
     publishRuntime: async (req) => executePublish(req, deps),
     rollbackRuntime: async (req) => executeRollback(req, deps),
     chatCompletions: async (req, reply) => deps.chatCompletions.execute(await readChatInput(req, deps.authenticateApiKey, reply)),
@@ -54,6 +59,30 @@ async function executePublish(req: unknown, deps: RegistryDeps): Promise<unknown
   const identity = await requireIdentity(context, deps.resolveApiKeyIdentity);
   const decision = await deps.authorizePermission.execute({ identity, permission: 'runtime.publish' });
   return deps.publishRuntime.execute({ identity, decision, operationId: requiredHeader(req, 'idempotency-key'), correlationId: correlationId(req) });
+}
+
+async function executeEconomy(req: unknown, deps: RegistryDeps): Promise<unknown> {
+  const context = await authenticate(req, deps.authenticateApiKey, 'economy.read');
+  const identity = await requireIdentity(context, deps.resolveApiKeyIdentity);
+  const decision = await deps.authorizePermission.execute({ identity, permission: 'economy.read' });
+  requireAllowed(decision);
+  return deps.economy.execute();
+}
+
+async function executeLedger(req: unknown, deps: RegistryDeps): Promise<unknown> {
+  const context = await authenticate(req, deps.authenticateApiKey, 'audit.read');
+  const identity = await requireIdentity(context, deps.resolveApiKeyIdentity);
+  const decision = await deps.authorizePermission.execute({ identity, permission: 'audit.read' });
+  requireAllowed(decision);
+  return deps.ledger.execute({ identity, limit: queryLimit(req) });
+}
+
+async function executeAdminWallet(req: unknown, deps: RegistryDeps): Promise<unknown> {
+  const context = await authenticate(req, deps.authenticateApiKey, 'economy.read');
+  const identity = await requireIdentity(context, deps.resolveApiKeyIdentity);
+  const decision = await deps.authorizePermission.execute({ identity, permission: 'wallet.read' });
+  requireAllowed(decision);
+  return deps.wallet.execute({ userId: context.userId, walletId: context.walletId });
 }
 
 async function executeRollback(req: unknown, deps: RegistryDeps): Promise<unknown> {
@@ -88,6 +117,16 @@ function correlationId(req: unknown): string {
   const headers = (req as { headers?: Record<string, unknown> }).headers;
   const value = headers?.['x-correlation-id'];
   return typeof value === 'string' && value.trim() ? value.trim() : requiredHeader(req, 'idempotency-key');
+}
+
+function requireAllowed(decision: { allowed: boolean; reason: 'ALLOWED' | 'MISSING_PERMISSION' | 'NO_ACTIVE_MEMBERSHIP' | 'WRONG_ORGANIZATION' | 'INACTIVE_ROLE' }): void {
+  if (!decision.allowed) throw new AuthorizationDeniedError(decision.reason);
+}
+
+function queryLimit(req: unknown): number | undefined {
+  const query = (req as { query?: Record<string, unknown> }).query;
+  const value = query?.limit;
+  return typeof value === 'string' ? Number(value) : typeof value === 'number' ? value : undefined;
 }
 
 const notReady: UseCaseHandler = async () => {

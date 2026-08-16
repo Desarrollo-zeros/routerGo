@@ -17,6 +17,8 @@ const ROUTES: Route[] = [
   { route_key: 'run-create', method: 'POST', path: '/runs', use_case: 'createRun', auth: 'session', req: 'createRunRequest', res: 'runResponse' },
   { route_key: 'run-events', method: 'GET', path: '/runs/:id/events', use_case: 'streamRun', auth: 'session', req: null, res: 'streamResponse' },
   { route_key: 'admin-economy', method: 'GET', path: '/admin/economy', use_case: 'getEconomy', auth: 'api_key', req: null, res: 'economyResponse' },
+  { route_key: 'admin-wallet', method: 'GET', path: '/admin/wallet', use_case: 'getAdminWallet', auth: 'api_key', req: null, res: 'walletResponse' },
+  { route_key: 'admin-ledger', method: 'GET', path: '/admin/ledger', use_case: 'getLedger', auth: 'api_key', req: null, res: 'ledgerResponse' },
   { route_key: 'admin-runtime-publish', method: 'POST', path: '/admin/runtime/publish', use_case: 'publishRuntime', auth: 'api_key', req: null, res: 'runtimeManifestResponse' },
   { route_key: 'admin-runtime-rollback', method: 'POST', path: '/admin/runtime/rollback', use_case: 'rollbackRuntime', auth: 'api_key', req: 'runtimeRollbackRequest', res: 'runtimeManifestResponse' },
 ];
