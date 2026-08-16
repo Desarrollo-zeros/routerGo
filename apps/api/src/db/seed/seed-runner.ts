@@ -13,7 +13,7 @@ import { seedIdentity } from './seed-identity.js';
 import { seedUiRoutes } from './seed-ui-routes.js';
 import { seedRuntimeManifest } from './seed-runtime-manifest.js';
 
-export const SEED_VERSION = '2026-08-16-r10';
+export const SEED_VERSION = '2026-08-16-r11';
 export const MANIFEST_VERSION = 8;
 
 function checksumFor(version: string): string {

@@ -9,6 +9,7 @@ const NAVS: Nav[] = [
   { route_key: 'quote-create', screen_key: 'chat', label_key: 'nav.chat', icon_key: 'message', order_index: 3, flag: 'chat_enabled' },
   { route_key: 'admin-economy', screen_key: 'admin-economy', label_key: 'nav.economy', icon_key: 'chart', order_index: 99, flag: 'admin_enabled' },
   { route_key: 'battle-matchmaking', screen_key: 'battle', label_key: 'nav.battles', icon_key: 'bolt', order_index: 4, flag: 'battles_enabled' },
+  { route_key: 'treasure-list', screen_key: 'treasure', label_key: 'nav.treasure', icon_key: 'map', order_index: 5, flag: 'treasure_enabled' },
 ];
 
 export async function seedNavigation(client: pg.PoolClient): Promise<void> {

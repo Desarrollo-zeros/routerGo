@@ -2,6 +2,7 @@ const LABELS: Record<string, string> = {
   "nav.activity": "Actividad",
   "nav.chat": "Chat",
   "nav.wallet": "Billetera",
+  "nav.treasure": "Tesoro",
   "nav.economy": "Economía",
   "nav.catalog": "Catálogo",
   "nav.battles": "Batallas",
