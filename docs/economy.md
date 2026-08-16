@@ -36,4 +36,23 @@ history as a substitute for a correction event.
 The intended application sequence is `QUOTE -> RESERVE -> EXECUTE -> SETTLE ->
 RELEASE/REFUND`. T021 and T022 define the domain policy and budget circuit
 breaker; T023 coordinates the state changes with a unit of work. T020 only
-provides their persistence contract.
+provides the persistence contract consumed by these policies.
+
+## Domain policy boundaries
+
+`CreditReservation` is the stateful domain aggregate for one reservation. A
+new reservation starts as `RESERVED`; partial settlement or release keeps it
+reserved, full settlement becomes `SETTLED`, and releasing all unused credits
+becomes `RELEASED`. `EXPIRED` blocks settlement but permits an explicit release
+of remaining credits; `CANCELLED` is terminal when no credits were consumed.
+The aggregate never mutates a wallet or ledger and keeps `operationId` for the
+future transactional idempotency boundary.
+
+`EconomyBudgetPolicy` is a pure deny-by-default policy. It evaluates a single
+already-selected budget against scope, period, actual spend, committed spend,
+requested amount, and an economic circuit input. `OPEN` or disabled spending
+denies immediately. This economic circuit is separate from the technical
+reliability circuit in T005: the latter protects external calls, while this one
+protects platform spending and subsidy limits. Pending or reversed revenue is
+never treated as funding; only finalized USD micro-units can fund an
+`AD_FUNDED_COMPUTE` scope.
