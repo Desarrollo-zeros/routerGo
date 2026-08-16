@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 test("screenshots 320/360/430 + fps", async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("routergo.local.session", "screenshot@example.com"));
   await page.route("**/runtime-manifest", (r) => r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({
     version: 1,
     contentHash: "a".repeat(64),

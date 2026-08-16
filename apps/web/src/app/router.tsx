@@ -5,6 +5,7 @@ import { CreditBalance } from "../design-system/CreditBalance";
 import type { RuntimeBundle } from "../runtime/bootstrap";
 import { useRuntime } from "../runtime/RuntimeProvider";
 import type { NavigationItem } from "../runtime/NavigationRegistry";
+import { clearLocalSession } from "../features/auth/AuthView";
 
 function Layout({ bundle }: { bundle: RuntimeBundle }): React.ReactElement {
   const [balance, setBalance] = React.useState(0);
@@ -13,14 +14,18 @@ function Layout({ bundle }: { bundle: RuntimeBundle }): React.ReactElement {
     void bundle.api.request<{ balance: number }>({ routeKey: "wallet-get" }).then((wallet) => setBalance(wallet.balance)).catch(() => undefined);
   }, [bundle]);
   const nav = <RuntimeNavigation items={items} />;
-  return <AppShell header={<CreditBalance balance={balance} />} nav={nav}><Outlet /></AppShell>;
+  return <AppShell header={<RuntimeHeader balance={balance} />} nav={nav}><Outlet /></AppShell>;
+}
+
+function RuntimeHeader({ balance }: { balance: number }): React.ReactElement {
+  return <div className="rg-topbar"><Link to="/" className="rg-topbar-brand"><span className="rg-mark">R</span><span>RouterGo</span></Link><div className="rg-topbar-actions"><CreditBalance balance={balance} label="GoCredits" /><button className="rg-logout" onClick={() => { clearLocalSession(); window.location.reload(); }}>Salir</button></div></div>;
 }
 
 function RuntimeNavigation({ items }: { items: NavigationItem[] }): React.ReactElement {
   const location = useLocation();
   return (
     <div className="rg-nav-list">
-      <Link className="rg-brand" to="/">RouterGo</Link>
+      <p className="rg-nav-title">Tu espacio</p>
       {items.map((item) => {
         const current = location.pathname === item.path;
         return <Link key={item.route_key} className="rg-nav-link" to={item.path} aria-current={current ? "page" : undefined} data-route-key={item.route_key}>{item.label}</Link>;
