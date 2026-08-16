@@ -1,7 +1,7 @@
 phase: 3
-current_objective: T054
+current_objective: T061
 status: executing
-last_green_commit: f625ac4
+last_green_commit: 7404b4b
 last_completed_tasks:
   - T020
   - T021
@@ -23,9 +23,12 @@ last_completed_tasks:
   - T051
   - T052
   - T053
+  - T060
 next_candidates:
   - T042
   - T043
   - T054
+  - T055
+  - T061
 blocked_tasks: []
-last_validation: T055 policy tests pass (5); typecheck, lint, lines, and architecture pass. T054 remains open pending authenticated workflows; T055 remains open pending durable anti-fraud telemetry and policy administration.
+last_validation: T060 migration and PostgreSQL persistence test pass; full validation passes 49 API suites/243 tests, web 6 tests, advertiser/admin builds, typecheck, lint, lines, architecture, secrets, repeated seed checksum a97a1259b6596eb4, and healthy local services. T042/T043/T054/T055 remain open; T061 is next.

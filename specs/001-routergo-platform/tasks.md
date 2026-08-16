@@ -54,7 +54,7 @@ Format: `[ID] [P?] [Story] task`. `[P]` means safe parallel ownership in differe
 - [ ] T055 [US4] Add frequency caps, consent/region policy hooks, anti-click-fraud telemetry.
 
 ## Phase 6 — Generic challenges and exercise
-- [ ] T060 [US5] Add versioned challenge schema with typed verification strategies.
+- [x] T060 [US5] Add versioned challenge schema with typed verification strategies.
 - [ ] T061 [P] [US5] Implement ChallengeVerification Strategy registry.
 - [ ] T062 [P] [US5] Implement reward eligibility/specification and budget integration.
 - [ ] T063 [US5] Migrate existing exercise flow into approved challenge template strategy.

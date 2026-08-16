@@ -39,6 +39,12 @@
 - `challenge_definitions(type,verification_strategy,status,sponsor_id,safety_profile)`
 - `challenge_versions`, `challenge_completions`, `challenge_reward_rules`
 
+Migration `010_challenges.sql` makes challenge definitions and versions
+immutable by identity, keeps published content separate from drafts, and
+requires every reward rule to carry a positive maximum credit amount. The
+schema does not execute verification or issue rewards; T061-T064 own those
+typed application policies.
+
 ### Ads
 - `advertisers(organization_id,status)`
 - `advertiser_accounts(balance_micro,currency,status)`
