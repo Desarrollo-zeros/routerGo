@@ -14,6 +14,7 @@ export interface ExecuteQuotedRunOutput {
   actualUserCredits: bigint;
   providerRequestId: string | null;
   reused: boolean;
+  usage?: { inputTokens: number; outputTokens: number };
 }
 
 export interface ExecuteQuotedRunPort {

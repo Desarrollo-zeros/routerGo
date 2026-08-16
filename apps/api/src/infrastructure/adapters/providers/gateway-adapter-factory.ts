@@ -40,7 +40,12 @@ export class GatewayAdapterFactory {
   }
 
   getStrategy(key: RequestMapperKey): ProtocolStrategy {
-    const s = this.strategies.get(key);
+    const aliases: Record<string, string> = {
+      'openai-chat': 'chat_completions',
+      'openai-responses': 'responses',
+      'anthropic-messages': 'messages',
+    };
+    const s = this.strategies.get(aliases[key] ?? key);
     if (!s) throw new UnknownMapperError(key);
     return s;
   }

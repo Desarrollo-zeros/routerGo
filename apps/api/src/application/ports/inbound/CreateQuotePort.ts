@@ -3,6 +3,7 @@ export interface CreateQuoteInput {
   walletId: string;
   modelId: string;
   idempotencyKey: string;
+  maxOutputTokens?: number;
 }
 
 export interface CreateQuoteOutput {

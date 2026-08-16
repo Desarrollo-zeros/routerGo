@@ -16,7 +16,7 @@ export class CreateQuoteUseCase implements CreateQuotePort {
   ) {}
 
   async execute(input: CreateQuoteInput): Promise<CreateQuoteOutput> {
-    if (!input.userId || !input.walletId || !input.modelId || !input.idempotencyKey) throw new Error('InvalidInput');
+    if (!input.userId || !input.walletId || !input.modelId || !input.idempotencyKey || !validMaxOutputTokens(input.maxOutputTokens)) throw new Error('InvalidInput');
     const model = await this.catalog.getModel(input.modelId);
     if (!model) throw new Error('ModelNotFound');
     if (!model.enabled) throw new Error('ModelDisabled');
@@ -35,7 +35,7 @@ export class CreateQuoteUseCase implements CreateQuotePort {
         creditPrice: price,
         estimatedPlatformCostMicrousd: 0n,
         pricingVersion: 'catalog-v1',
-        maxOutputTokens: 4096,
+        maxOutputTokens: input.maxOutputTokens ?? 4096,
         idempotencyKey: input.idempotencyKey,
         createdAt: now,
         expiresAt: new Date(now.getTime() + QUOTE_TTL_MS),
@@ -48,4 +48,8 @@ export class CreateQuoteUseCase implements CreateQuotePort {
   private reused(q: ChatQuote): CreateQuoteOutput {
     return { quoteId: q.id, creditPrice: q.creditPrice.toString(), expiresAt: q.expiresAt.toISOString(), reused: true };
   }
+}
+
+function validMaxOutputTokens(value: number | undefined): boolean {
+  return value === undefined || (Number.isInteger(value) && value > 0);
 }

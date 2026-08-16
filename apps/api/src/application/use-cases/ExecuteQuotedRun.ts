@@ -58,7 +58,7 @@ export class ExecuteQuotedRunUseCase implements ExecuteQuotedRunPort {
     await this.markReserved(claimed.run.id, reservation.reservationId);
     let response: ProviderResponse;
     try {
-      response = await this.provider.call({ model: model.providerModelId, messages: input.messages, maxTokens: quote.maxOutputTokens, stream: input.stream, userId: input.userId }, model.endpoint);
+      response = await this.provider.call({ model: model.providerModelId, messages: input.messages, maxTokens: quote.maxOutputTokens, stream: input.stream, userId: input.userId, idempotencyKey: input.idempotencyKey }, model.endpoint);
     } catch (error) {
       return this.failProvider(claimed.run.id, quote, reservation.reservationId, error);
     }
@@ -113,7 +113,7 @@ export class ExecuteQuotedRunUseCase implements ExecuteQuotedRunPort {
       throw new ExecuteQuotedRunError(compensationCode(error), 'Economic finalization requires reconciliation', { cause: error });
     }
     await this.updateRun(runId, (run) => { run.recordProviderOutcome(outcome(response, usage)); if (actual > 0n) run.markEconomySettled(); else run.markEconomyReleased(); run.markCompleted(); });
-    return { runId, status: 'COMPLETED', economyStatus: actual === quote.creditPrice.value ? 'SETTLED' : 'RELEASED', content: response.content, actualUserCredits: actual, providerRequestId: (response.requestId ?? response.id) || null, reused: false };
+    return { runId, status: 'COMPLETED', economyStatus: actual === quote.creditPrice.value ? 'SETTLED' : 'RELEASED', content: response.content, actualUserCredits: actual, providerRequestId: (response.requestId ?? response.id) || null, usage, reused: false };
   }
 
   private async failProvider(runId: string, quote: Awaited<ReturnType<ExecuteQuotedRunUseCase['loadQuote']>>, reservationId: string, error: unknown): Promise<never> {

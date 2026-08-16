@@ -41,6 +41,18 @@ describe('composition root contracts', () => {
     expect(response.json()).toMatchObject({ object: 'list', data: expect.arrayContaining([expect.objectContaining({ object: 'model', owned_by: 'routergo' })]) });
   });
 
+  it('exposes chat completions without allowing unauthenticated execution', async () => {
+    const app = await appPromise;
+    const response = await app.inject({
+      method: 'POST',
+      url: '/v1/chat/completions',
+      headers: { 'idempotency-key': 'test-key' },
+      payload: { model: 'deepseek-v4-flash-free', messages: [{ role: 'user', content: 'hello' }] },
+    });
+    expect(response.statusCode).toBe(401);
+    expect(response.json()).toEqual({ error: 'authentication_required' });
+  });
+
   it('does not report synthetic success for an unimplemented quote route', async () => {
     const composition = await compositionPromise;
 

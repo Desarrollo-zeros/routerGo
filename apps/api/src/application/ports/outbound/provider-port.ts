@@ -5,6 +5,7 @@ export interface ProviderRequest {
   temperature?: number;
   stream?: boolean;
   userId?: string;
+  idempotencyKey?: string;
 }
 
 export interface ProviderResponse {

@@ -17,6 +17,21 @@ import { ReserveCreditsUseCase } from '../application/use-cases/ReserveCredits.j
 import { SettleCreditsUseCase } from '../application/use-cases/SettleCredits.js';
 import { ReleaseCreditsUseCase } from '../application/use-cases/ReleaseCredits.js';
 import { z } from 'zod';
+import { PgUnitOfWorkFactory } from '../infrastructure/adapters/postgres/PgUnitOfWork.js';
+import { PostgresExecutionTargetAdapter } from '../infrastructure/adapters/postgres/PostgresExecutionTargetAdapter.js';
+import { PostgresBudgetEvaluator } from '../infrastructure/adapters/postgres/PostgresBudgetEvaluator.js';
+import { HttpProviderAdapter } from '../infrastructure/adapters/providers/HttpProviderAdapter.js';
+import { GatewayAdapterFactory } from '../infrastructure/adapters/providers/gateway-adapter-factory.js';
+import { CreateQuoteUseCase } from '../application/use-cases/CreateQuote.js';
+import { ExecuteQuotedRunUseCase } from '../application/use-cases/ExecuteQuotedRun.js';
+import { ChatCompletionsUseCase } from '../application/use-cases/ChatCompletions.js';
+import { QuoteUsagePricing } from '../application/ports/outbound/UsagePricingPort.js';
+import { ExponentialBackoff } from '../infrastructure/reliability/exponential-backoff.js';
+import { DefaultErrorClassifier } from '../infrastructure/reliability/error-classifier.js';
+import { RetryPolicy } from '../infrastructure/reliability/retry-policy.js';
+import { SystemSleeper } from '../infrastructure/reliability/system-sleeper.js';
+import { ReliabilityExecutor } from '../infrastructure/reliability/reliability-executor.js';
+import { CircuitBreaker } from '../infrastructure/reliability/circuit-breaker.js';
 
 const { Pool } = pg;
 
@@ -28,6 +43,7 @@ export async function createComposition() {
   const catalog = new CatalogPostgresAdapter(pool);
   const wallet = new WalletPostgresRepository(pool);
   const economyUnitOfWork = new PgEconomyUnitOfWorkFactory(pool);
+  const unitOfWork = new PgUnitOfWorkFactory(pool);
   const economyClock = new SystemClock();
   const creditOperations = {
     reserve: new ReserveCreditsUseCase(economyUnitOfWork, economyClock),
@@ -36,9 +52,30 @@ export async function createComposition() {
   };
   const economy = createEconomy(pool);
   const catalogUseCase = new GetCatalogUseCase(catalog);
-  const useCases = createUseCaseRegistry({ manifest, catalog: catalogUseCase, models: new ListModelsUseCase(catalogUseCase), wallet: new GetWalletUseCase(wallet), economy });
+  const target = new PostgresExecutionTargetAdapter(pool);
+  const provider = createProvider(economyClock);
+  const createQuote = new CreateQuoteUseCase(catalog, economyClock, unitOfWork);
+  const executeRun = new ExecuteQuotedRunUseCase({
+    uowFactory: unitOfWork, creditOperations, budget: new PostgresBudgetEvaluator(pool),
+    provider, target, pricing: new QuoteUsagePricing(), clock: economyClock,
+  });
+  const useCases = createUseCaseRegistry({
+    manifest, catalog: catalogUseCase, models: new ListModelsUseCase(catalogUseCase),
+    wallet: new GetWalletUseCase(wallet), economy,
+    chatCompletions: new ChatCompletionsUseCase({ createQuote, executeRun, clock: economyClock }),
+  });
   const streams = new RedisStreamAdapter(redis as never);
   return { pool, redis, manifest, schemas, useCases, creditOperations, sseDeps: { streams } };
+}
+
+function createProvider(clock: SystemClock): HttpProviderAdapter {
+  const reliability = new ReliabilityExecutor({
+    classifier: new DefaultErrorClassifier(),
+    retry: new RetryPolicy({ maxAttempts: 2 }, new ExponentialBackoff({ baseDelayMs: 100, maxDelayMs: 1000, jitterRatio: 0.2 })),
+    sleeper: new SystemSleeper(), clock,
+  });
+  const breaker = new CircuitBreaker({ failureThreshold: 3, openDurationMs: 10_000, clock });
+  return new HttpProviderAdapter({ reliability, breaker, factory: new GatewayAdapterFactory() });
 }
 
 function databaseUrl(): string {
@@ -76,6 +113,8 @@ function createSchemas(): SchemaRegistry {
   schemas.register('manifestResponse', { type: 'object' });
   schemas.register('catalogResponse', { type: 'object', properties: { models: { type: 'array', items: { type: 'object', properties: { logicalId: { type: 'string' }, tier: { type: 'string' }, creditPrice: { type: 'string' }, enabled: { type: 'boolean' } } } } } });
   schemas.register('modelsResponse', { type: 'object', required: ['object', 'data'], properties: { object: { const: 'list' }, data: { type: 'array', items: { type: 'object', required: ['id', 'object', 'created', 'owned_by'], properties: { id: { type: 'string' }, object: { const: 'model' }, created: { type: 'number' }, owned_by: { type: 'string' } } } } } });
+  schemas.register('chatCompletionsRequest', { type: 'object', required: ['model', 'messages'], properties: { model: { type: 'string' }, messages: { type: 'array', minItems: 1, items: { type: 'object', required: ['role', 'content'], properties: { role: { enum: ['system', 'user', 'assistant'] }, content: { type: 'string' } }, additionalProperties: false } }, max_tokens: { type: 'integer', minimum: 1 }, temperature: { type: 'number' }, stream: { type: 'boolean' } }, additionalProperties: false });
+  schemas.register('chatCompletionsResponse', { type: 'object', required: ['id', 'object', 'created', 'model', 'choices', 'usage'], properties: { id: { type: 'string' }, object: { const: 'chat.completion' }, created: { type: 'number' }, model: { type: 'string' }, choices: { type: 'array' }, usage: { type: 'object' } } });
   schemas.register('walletResponse', { type: 'object', properties: { walletId: { type: 'string' }, balance: { type: 'string' }, version: { type: 'number' } } });
   schemas.register('ledgerResponse', { type: 'object', properties: { entries: { type: 'array', items: { type: 'object' } } } });
   schemas.register('verifyActivityResponse', { type: 'object', properties: { verified: { type: 'boolean' } } });

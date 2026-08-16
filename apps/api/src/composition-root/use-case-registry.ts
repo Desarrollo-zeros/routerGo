@@ -5,6 +5,7 @@ import type { GetWalletPort } from '../application/ports/inbound/GetWalletPort.j
 import type { ListModelsPort } from '../application/ports/inbound/ListModelsPort.js';
 import type { UseCaseHandler, UseCaseRegistry } from '../infrastructure/http/dynamic-route-registry.js';
 import { AuthenticationRequiredError, RouteNotReadyError } from '../infrastructure/http/http-errors.js';
+import type { ChatCompletionsPort, ChatCompletionMessage } from '../application/ports/inbound/ChatCompletionsPort.js';
 
 interface RegistryDeps {
   manifest: RuntimeManifest;
@@ -12,6 +13,7 @@ interface RegistryDeps {
   models: ListModelsPort;
   wallet: GetWalletPort;
   economy: GetEconomyPort;
+  chatCompletions: ChatCompletionsPort;
 }
 
 export function createUseCaseRegistry(deps: RegistryDeps): UseCaseRegistry {
@@ -28,6 +30,7 @@ export function createUseCaseRegistry(deps: RegistryDeps): UseCaseRegistry {
     createRun: notReady,
     streamRun: notReady,
     getEconomy: async () => deps.economy.execute(),
+    chatCompletions: async (req) => deps.chatCompletions.execute(readChatInput(req)),
   };
 }
 
@@ -41,4 +44,14 @@ function readWalletInput(req: unknown): { userId: string; walletId: string } {
     throw new AuthenticationRequiredError();
   }
   return { userId: user.userId, walletId: user.walletId };
+}
+
+function readChatInput(req: unknown) {
+  const request = req as { body?: Record<string, unknown>; headers?: Record<string, unknown>; user?: { userId?: unknown; walletId?: unknown } };
+  const userId = request.user?.userId;
+  const walletId = request.user?.walletId;
+  const key = request.headers?.['idempotency-key'];
+  if (typeof userId !== 'string' || typeof walletId !== 'string' || typeof key !== 'string') throw new AuthenticationRequiredError();
+  const body = request.body ?? {};
+  return { userId, walletId, idempotencyKey: key, model: String(body.model ?? ''), messages: body.messages as ChatCompletionMessage[], maxTokens: body.max_tokens as number | undefined, temperature: body.temperature as number | undefined, stream: body.stream as boolean | undefined };
 }
