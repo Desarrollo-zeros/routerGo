@@ -1,7 +1,7 @@
 phase: 3
 current_objective: T054
 status: executing
-last_green_commit: 1ec4b79
+last_green_commit: f625ac4
 last_completed_tasks:
   - T020
   - T021
@@ -28,4 +28,4 @@ next_candidates:
   - T043
   - T054
 blocked_tasks: []
-last_validation: T053 event unit/persistence tests pass; full validation passes 47 API suites/237 tests, web 6 tests, build, typecheck, lint, lines, architecture, secrets, repeated seed checksum a97a1259b6596eb4, E2E 7/7, and healthy PostgreSQL/Redis/LiteLLM. T054 has a compilable advertiser shell but remains open pending authenticated workflows.
+last_validation: T055 policy tests pass (5); typecheck, lint, lines, and architecture pass. T054 remains open pending authenticated workflows; T055 remains open pending durable anti-fraud telemetry and policy administration.

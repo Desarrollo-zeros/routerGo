@@ -25,3 +25,9 @@ makes retries return `DUPLICATE` without charging spend twice; priced events
 increment active campaign spend atomically and are rejected when the budget is
 insufficient. Impressions remain zero-cost. Finalized USD revenue continues to
 use the existing idempotent `ad:<event>:revenue` reconciliation path.
+
+T055 adds a pure eligibility policy hook. Consent, allowed region, frequency
+cap, and click-rate fraud signals are evaluated from caller-supplied policy
+values and return explicit denial reasons. The policy has no hidden defaults,
+does not persist telemetry, and does not grant rewards; policy configuration
+and anti-fraud telemetry storage remain application concerns.
