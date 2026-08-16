@@ -7,9 +7,10 @@ import { ProviderView } from "../features/providers/ProviderView";
 import { RuntimeConfigView } from "../features/runtime/RuntimeConfigView";
 import { EconomyReadView } from "../features/economy/EconomyReadView";
 import { LedgerReadView } from "../features/economy/LedgerReadView";
+import { RuntimeNavigation } from "../features/navigation/RuntimeNavigation";
 
 export function AdminApp({ manifest }: { manifest?: WebRuntimeManifest }): React.ReactElement {
-  return <AdminShell brand={<span aria-label="RouterGo Studio">RouterGo Studio</span>}>
+  return <AdminShell brand={<span aria-label="RouterGo Studio">RouterGo Studio</span>} navigation={manifest ? <RuntimeNavigation manifest={manifest} /> : undefined}>
     <h1>Studio</h1>
     {manifest ? <div className="admin-stack"><RuntimeConfigView manifest={manifest} /><ModelCatalogView models={manifest.catalog} /><ProviderView models={manifest.catalog} /><EconomyReadView authorized={false} /><LedgerReadView authorized={false} /></div> : <Panel title="Área de administración"><StatusMessage>La configuración runtime no está disponible.</StatusMessage></Panel>}
   </AdminShell>;

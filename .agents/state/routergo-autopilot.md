@@ -1,7 +1,7 @@
-phase: 3
-current_objective: T076
-status: executing
-last_green_commit: 71eed94
+phase: 4
+current_objective: T042
+status: ready_to_commit
+last_green_commit: 3bab732
 last_completed_tasks:
   - T020
   - T021
@@ -28,8 +28,12 @@ last_completed_tasks:
   - T062
   - T063
   - T064
+  - T070
   - T071
   - T072
+  - T073
+  - T074
+  - T075
 next_candidates:
   - T042
   - T043
@@ -38,4 +42,4 @@ next_candidates:
   - T065
   - T074
 blocked_tasks: []
-last_validation: T074 integration tests pass (2); typecheck pass. T042/T043/T054/T055/T065 remain open.
+last_validation: T042 UI slice build, lint, lines, and architecture pass; authenticated transport and audited publish remain open. T043/T054/T055/T065 also remain open.
