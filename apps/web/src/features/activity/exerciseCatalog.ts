@@ -9,6 +9,7 @@ export type ExerciseDefinition = {
   instruction: string;
   source: string;
   imageUrl?: string;
+  animationUrl?: string;
 };
 
 type DatasetExercise = {
@@ -21,9 +22,35 @@ type DatasetExercise = {
   secondary_muscles?: string[];
   instructions?: { es?: string; en?: string };
   image?: string;
+  gif_url?: string;
+};
+
+type GymGifExercise = {
+  id?: string;
+  name?: string;
+  bodyPart?: string;
+  equipment?: string;
+  category?: string;
+  secondaryMuscles?: string[];
+  instructions?: string[];
+  gifUrl?: string;
+};
+
+type FreeExercise = {
+  id?: string;
+  name?: string;
+  equipment?: string;
+  category?: string;
+  level?: string;
+  primaryMuscles?: string[];
+  secondaryMuscles?: string[];
+  instructions?: string[];
+  images?: string[];
 };
 
 export const EXERCISE_DATASET_URL = "https://raw.githubusercontent.com/hasaneyldrm/exercises-dataset/main/data/exercises.json";
+export const GYM_GIFS_URL = "https://cdn.jsdelivr.net/gh/JahelCuadrado/ExerciseGymGifsDB@v1.1.0/api/es/equipment/bodyweight.json";
+export const FREE_EXERCISE_DB_URL = "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json";
 
 export const EXERCISES: ExerciseDefinition[] = [
   {
@@ -95,14 +122,66 @@ function mapDatasetExercise(item: DatasetExercise): ExerciseDefinition | undefin
     instruction: item.instructions?.es ?? item.instructions?.en ?? "Sigue una ejecución controlada y detén la actividad si sientes molestias.",
     source: "exercises-dataset · Gym visual",
     imageUrl: item.image ? `https://raw.githubusercontent.com/hasaneyldrm/exercises-dataset/main/${item.image}` : undefined,
+    animationUrl: item.gif_url ? `https://raw.githubusercontent.com/hasaneyldrm/exercises-dataset/main/${item.gif_url}` : undefined,
   };
 }
 
+function mapGymGifExercise(item: GymGifExercise): ExerciseDefinition | undefined {
+  if (!item.id || !item.name || item.equipment !== "bodyweight") return undefined;
+  return {
+    id: `gym-gifs-${item.id}`,
+    name: item.name,
+    category: label(item.category ?? "Movimiento"),
+    equipment: "Peso corporal",
+    target: label(item.bodyPart ?? "Cuerpo completo"),
+    muscles: (item.secondaryMuscles ?? []).map(label).join(" · "),
+    level: "Catálogo",
+    instruction: item.instructions?.join(" ") ?? "Realiza el movimiento de forma controlada.",
+    source: "ExerciseGymGifsDB · jsDelivr",
+    animationUrl: item.gifUrl,
+  };
+}
+
+function mapFreeExercise(item: FreeExercise): ExerciseDefinition | undefined {
+  if (!item.id || !item.name || item.equipment !== "body only") return undefined;
+  const image = item.images?.[0];
+  return {
+    id: `free-db-${item.id}`,
+    name: item.name,
+    category: label(item.category ?? "Movimiento"),
+    equipment: "Peso corporal",
+    target: label(item.primaryMuscles?.[0] ?? "Cuerpo completo"),
+    muscles: (item.secondaryMuscles ?? []).map(label).join(" · "),
+    level: label(item.level ?? "beginner"),
+    instruction: item.instructions?.join(" ") ?? "Realiza el movimiento de forma controlada.",
+    source: "free-exercise-db · Public Domain",
+    imageUrl: image ? `https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/${image}` : undefined,
+  };
+}
+
+async function fetchJson(url: string, signal?: AbortSignal): Promise<unknown> {
+  const response = await fetch(url, { signal });
+  if (!response.ok) throw new Error(`Catálogo no disponible (${response.status}).`);
+  return response.json() as Promise<unknown>;
+}
+
+function uniqueExercises(items: ExerciseDefinition[]): ExerciseDefinition[] {
+  return [...new Map(items.map((item) => [item.id, item])).values()];
+}
+
 export async function loadExerciseDataset(signal?: AbortSignal): Promise<ExerciseDefinition[]> {
-  const response = await fetch(EXERCISE_DATASET_URL, { signal });
-  if (!response.ok) throw new Error(`No se pudo cargar el catálogo (${response.status}).`);
-  const payload = await response.json() as unknown;
-  if (!Array.isArray(payload)) throw new Error("El catálogo de ejercicios tiene un formato inválido.");
-  const mapped = payload.map((item) => mapDatasetExercise(item as DatasetExercise)).filter((item): item is ExerciseDefinition => Boolean(item));
+  const payloads = await Promise.allSettled([
+    fetchJson(EXERCISE_DATASET_URL, signal),
+    fetchJson(GYM_GIFS_URL, signal),
+    fetchJson(FREE_EXERCISE_DB_URL, signal),
+  ]);
+  const first = payloads[0].status === "fulfilled" && Array.isArray(payloads[0].value) ? payloads[0].value : [];
+  const second = payloads[1].status === "fulfilled" && !Array.isArray(payloads[1].value) ? (payloads[1].value as { exercises?: unknown[] }).exercises ?? [] : [];
+  const third = payloads[2].status === "fulfilled" && Array.isArray(payloads[2].value) ? payloads[2].value : [];
+  const mapped = uniqueExercises([
+    ...first.map((item) => mapDatasetExercise(item as DatasetExercise)).filter((item): item is ExerciseDefinition => Boolean(item)),
+    ...second.map((item) => mapGymGifExercise(item as GymGifExercise)).filter((item): item is ExerciseDefinition => Boolean(item)),
+    ...third.map((item) => mapFreeExercise(item as FreeExercise)).filter((item): item is ExerciseDefinition => Boolean(item)),
+  ]);
   return mapped.length > 0 ? mapped : EXERCISES;
 }

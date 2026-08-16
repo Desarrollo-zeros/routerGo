@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ActivityState } from "../../design-system/ActivityCard";
 import { requestCamera, stopStream } from "../../adapters/camera";
-import { createPoseWorker } from "./poseWorker";
+import { createPoseDetector, type PoseDetector } from "./poseWorker";
 import { angleAt, classifyRep, smoothAngle } from "./hysteresis";
 import { calibrate } from "./calibration";
 
@@ -21,28 +21,6 @@ function presentActivityError(msg: string): string {
   }
   if (low.includes("camera") || low.includes("getusermedia")) return "No se pudo activar la cámara. Revisa el permiso del navegador.";
   return msg;
-}
-
-function waitForWorkerReady(worker: Worker): Promise<void> {
-  return new Promise<void>((res, rej) => {
-    const t = setTimeout(() => rej(new Error("timeout modelo")), 15000);
-    worker.onmessage = (e) => {
-      if (e.data.type === "ready") { clearTimeout(t); res(); }
-      if (e.data.type === "error") { clearTimeout(t); rej(new Error(e.data.payload)); }
-    };
-    worker.postMessage({ type: "init" });
-  });
-}
-
-async function requestFrame(worker: Worker, bitmap: ImageBitmap, ts: number): Promise<{ landmarks: Landmark[] | null }> {
-  return new Promise<{ landmarks: Landmark[] | null }>((resolve) => {
-    const handler = (e: MessageEvent) => {
-      if (e.data.type === "result") { worker.removeEventListener("message", handler); resolve(e.data.payload); }
-    };
-    worker.addEventListener("message", handler);
-    worker.postMessage({ type: "frame", payload: { bitmap, ts } }, [bitmap as unknown as Transferable]);
-    setTimeout(() => { worker.removeEventListener("message", handler); resolve({ landmarks: null }); }, 400);
-  });
 }
 
 function extractJoints(lm: Landmark[]): { shoulder: Landmark; elbow: Landmark; wrist: Landmark; hip: Landmark | undefined } | null {
@@ -78,7 +56,7 @@ export function useActivityMachine() {
   const [error, setError] = useState<string | undefined>();
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const workerRef = useRef<Worker | null>(null);
+  const detectorRef = useRef<PoseDetector | null>(null);
   const rafRef = useRef<number | null>(null);
   const repState = useRef<RepState>("up");
   const smoothRef = useRef(160);
@@ -88,8 +66,8 @@ export function useActivityMachine() {
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
     stopStream(streamRef.current);
     streamRef.current = null;
-    workerRef.current?.terminate();
-    workerRef.current = null;
+    detectorRef.current?.close();
+    detectorRef.current = null;
   }, []);
 
   useEffect(() => () => cleanup(), [cleanup]);
@@ -100,8 +78,7 @@ export function useActivityMachine() {
     try {
       if (!videoRef.current) throw new Error("video ref missing");
       setState("loading_model");
-      workerRef.current = createPoseWorker();
-      await waitForWorkerReady(workerRef.current);
+      detectorRef.current = await createPoseDetector();
       setState("calibration");
       const stream = await requestCamera(videoRef.current);
       streamRef.current = stream;
@@ -118,7 +95,7 @@ export function useActivityMachine() {
     setCount(0);
     repState.current = "up";
     calibYs.current = { sy: [], hy: [] };
-    const ctx: LoopContext = { videoRef, workerRef, calibYs, smoothRef, repState, rafRef };
+    const ctx: LoopContext = { videoRef, detectorRef, calibYs, smoothRef, repState, rafRef };
     const loop = async () => { await runLoopFrame(ctx, setCount, loop); };
     rafRef.current = requestAnimationFrame(loop);
   }, []);
@@ -138,7 +115,7 @@ export function useActivityMachine() {
 
 type LoopContext = {
   videoRef: React.MutableRefObject<HTMLVideoElement | null>;
-  workerRef: React.MutableRefObject<Worker | null>;
+  detectorRef: React.MutableRefObject<PoseDetector | null>;
   calibYs: React.MutableRefObject<{ sy: number[]; hy: number[] }>;
   smoothRef: React.MutableRefObject<number>;
   repState: React.MutableRefObject<RepState>;
@@ -147,25 +124,23 @@ type LoopContext = {
 
 async function runLoopFrame(ctx: LoopContext, setCount: React.Dispatch<React.SetStateAction<number>>, loop: () => Promise<void>): Promise<void> {
   const video = ctx.videoRef.current;
-  const worker = ctx.workerRef.current;
-  if (!isVideoReady(video, worker)) { ctx.rafRef.current = requestAnimationFrame(loop); return; }
+  const detector = ctx.detectorRef.current;
+  if (!isVideoReady(video, detector)) { ctx.rafRef.current = requestAnimationFrame(loop); return; }
   try {
-    await handleVideoFrame({ video: video as HTMLVideoElement, worker: worker as Worker, ctx, setCount });
+    await handleVideoFrame({ video: video as HTMLVideoElement, detector: detector as PoseDetector, ctx, setCount });
   } catch { /* frame drop */ }
   ctx.rafRef.current = requestAnimationFrame(loop);
 }
 
-function isVideoReady(video: HTMLVideoElement | null, worker: Worker | null): boolean {
-  return Boolean(video && worker && video.readyState >= 2);
+function isVideoReady(video: HTMLVideoElement | null, detector: PoseDetector | null): boolean {
+  return Boolean(video && detector && video.readyState >= 2);
 }
 
-type FrameParams = { video: HTMLVideoElement; worker: Worker; ctx: LoopContext; setCount: React.Dispatch<React.SetStateAction<number>> };
+type FrameParams = { video: HTMLVideoElement; detector: PoseDetector; ctx: LoopContext; setCount: React.Dispatch<React.SetStateAction<number>> };
 
-async function handleVideoFrame({ video, worker, ctx, setCount }: FrameParams): Promise<void> {
-  const bitmap = await createImageBitmap(video);
+async function handleVideoFrame({ video, detector, ctx, setCount }: FrameParams): Promise<void> {
   const ts = performance.now();
-  const res = await requestFrame(worker, bitmap, ts);
-  const lm = res.landmarks;
+  const lm = detector.detect(video, ts);
   if (!lm || lm.length <= 16) return;
   const joints = extractJoints(lm);
   if (!joints) return;

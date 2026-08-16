@@ -40,11 +40,12 @@ export function ActivityView({ api }: { api: HttpApiPort }): React.ReactElement 
   }, [api]);
   React.useEffect(() => {
     const controller = new AbortController();
-    const timeout = window.setTimeout(() => controller.abort(), 8000);
+    const timeout = window.setTimeout(() => controller.abort(), 20000);
     void loadExerciseDataset(controller.signal).then((items) => {
-      setExercises(items);
-      setExerciseId((current) => items.some((item) => item.id === current) ? current : items[0].id);
-      setCatalogStatus(`${items.length} ejercicios de peso corporal disponibles`);
+      const merged = [...EXERCISES, ...items.filter((item) => !EXERCISES.some((local) => local.name.toLowerCase() === item.name.toLowerCase()))];
+      setExercises(merged);
+      setExerciseId((current) => merged.some((item) => item.id === current) ? current : merged[0].id);
+      setCatalogStatus(`${merged.length} ejercicios de peso corporal disponibles`);
     }).catch(() => setCatalogStatus("Catálogo local disponible · sin conexión")).finally(() => window.clearTimeout(timeout));
     return () => { window.clearTimeout(timeout); controller.abort(); };
   }, []);
@@ -68,7 +69,7 @@ export function ActivityView({ api }: { api: HttpApiPort }): React.ReactElement 
     <section className="rg-activity-hero"><p>Una forma distinta de acceder</p><h1>Recupera GoCredits<br /><span>con tu esfuerzo 💪</span></h1><p>Entrena, verifica tu esfuerzo y usa tus créditos al instante.</p><div className="rg-exercise-picker"><label htmlFor="exercise-select">Actividad actual</label><select id="exercise-select" value={exercise.id} onChange={(event) => setExerciseId(event.target.value)} disabled={machine.state !== "idle"}><option value="" disabled>Elige un ejercicio</option>{exercises.map((item) => <option key={item.id} value={item.id}>{item.name} · {item.target}</option>)}</select><small>{catalogStatus}</small></div></section>
     <section className="rg-exercise-card" aria-live="polite">
       <div className="rg-exercise-meta"><div><span className="rg-exercise-tag">♟ {exercise.category} · {exercise.level}</span><h2>{exercise.name}</h2><p>{exercise.target} · {exercise.equipment}</p></div><div className="rg-rep-ring">{shownReps}<small>reps</small></div></div>
-      <div className="rg-exercise-visual"><img src={exercise.imageUrl ?? "/exercise-pushup.png"} onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = "/exercise-pushup.png"; }} alt={`Demostración de ${exercise.name.toLowerCase()}`} /></div>
+      <div className="rg-exercise-visual"><img src={exercise.animationUrl ?? exercise.imageUrl ?? "/exercise-pushup.png"} onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = exercise.imageUrl ?? "/exercise-pushup.png"; }} alt={`Demostración de ${exercise.name.toLowerCase()}`} /></div>
       <div className="rg-exercise-details"><p>{exercise.instruction}</p><small>{exercise.muscles} · Catálogo: {exercise.source}</small></div>
       <div className="rg-credit-strip"><div className="rg-credit-token"><span>G</span></div><p>Cada repetición equivale a<strong>1 GoCredit</strong></p><span className="rg-credit-arrow">→</span><p>Úsalos al instante<br />sin esperar.</p></div>
       {machine.error ? <p className="rg-error-copy" role="alert">{machine.error}</p> : null}
