@@ -14,6 +14,15 @@ function resolvePermissionError(msg: string): ActivityState {
   return "unavailable";
 }
 
+function presentActivityError(msg: string): string {
+  const low = msg.toLowerCase();
+  if (low.includes("dynamically imported module") || low.includes("mediapipe") || low.includes("timeout modelo")) {
+    return "El detector de movimiento no está disponible en este entorno. Prueba de nuevo o usa otro navegador.";
+  }
+  if (low.includes("camera") || low.includes("getusermedia")) return "No se pudo activar la cámara. Revisa el permiso del navegador.";
+  return msg;
+}
+
 function waitForWorkerReady(worker: Worker): Promise<void> {
   return new Promise<void>((res, rej) => {
     const t = setTimeout(() => rej(new Error("timeout modelo")), 15000);
@@ -99,7 +108,7 @@ export function useActivityMachine() {
       setState("ready");
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
-      setError(msg);
+      setError(presentActivityError(msg));
       setState(resolvePermissionError(msg));
     }
   }, []);

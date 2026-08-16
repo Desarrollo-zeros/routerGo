@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { PrimaryCTA } from "../../design-system/PrimaryCTA";
 import { SponsorPlacement } from "../../design-system/SponsorPlacement";
 import { useChat } from "./useChat";
 import type { CatalogEntry } from "../../runtime/types";
@@ -14,21 +13,12 @@ export function ChatView({ catalog, balance, api }: Props): React.ReactElement {
   const entry = catalog.find((c) => c.logical_id === model);
 
   return (
-    <div className="rg-feature-stack">
-      <label htmlFor="modelSel" className="rg-secondary-label">Modelo · créditos: {entry?.credit_price ?? "-"} · saldo {balance}</label>
-      <select id="modelSel" value={model} onChange={(e) => setModel(e.target.value)} className="rg-control">
-        {catalog.map((c) => <option key={c.logical_id} value={c.logical_id}>{c.logical_id} · {c.tier} · {c.credit_price} cr</option>)}
-      </select>
-      <div className="rg-chat-log">
-        {chat.messages.length === 0 ? <p className="rg-muted-copy">Inicia una conversación. El costo en créditos se muestra antes de gastar.</p> : null}
-        {chat.messages.map((m, i) => <div className={`rg-chat-message ${m.role}`} key={i}>{m.content}</div>)}
-        {chat.error ? <p role="alert" className="rg-error-copy">{chat.error}</p> : null}
-      </div>
-      <SponsorPlacement placement="chat-inline" />
-      <label htmlFor="prompt" className="sr-only">Prompt</label>
-      <textarea id="prompt" value={input} onChange={(e) => setInput(e.target.value)} placeholder="Escribe tu mensaje…" rows={3} className="rg-control rg-prompt" />
-      <PrimaryCTA loading={chat.streaming} disabled={!input.trim()} onClick={() => { const v = input; setInput(""); void chat.send(v); }}>{chat.streaming ? "Transmitiendo…" : "Enviar · costo visible arriba"}</PrimaryCTA>
+    <div className="rg-chat-page">
+      <section className="rg-chat-hero"><p className="rg-wallet-kicker">Tu espacio de inteligencia</p><h1>Piensa en voz alta.</h1><p>Elige un modelo, escribe lo que necesitas y conoce el costo antes de enviar.</p></section>
+      <section className="rg-chat-model-card"><div><span className="rg-chat-model-icon">✦</span><div><p>Modelo activo</p><strong>{entry?.logical_id ?? "Sin modelo"}</strong></div></div><label htmlFor="modelSel">Cambiar modelo<select id="modelSel" value={model} onChange={(e) => setModel(e.target.value)}>{catalog.map((c) => <option key={c.logical_id} value={c.logical_id}>{c.logical_id} · {c.tier} · {c.credit_price} cr</option>)}</select></label><span className="rg-chat-cost">{entry?.credit_price ?? "-"} cr / solicitud</span></section>
+      <section className="rg-chat-stage"><div className="rg-chat-stage-head"><span>Conversación nueva</span><span>{balance} GoCredits</span></div><div className="rg-chat-log">{chat.messages.length === 0 ? <div className="rg-chat-empty"><span className="rg-empty-icon">✦</span><h2>¿Qué quieres resolver hoy?</h2><p>Escribe una pregunta, una idea o un problema. Tu saldo y el costo estarán siempre visibles.</p></div> : null}{chat.messages.map((m, i) => <div className={`rg-chat-message ${m.role}`} key={i}>{m.content}</div>)}{chat.error ? <p role="alert" className="rg-error-copy">No se pudo completar la solicitud: {chat.error}</p> : null}</div><div className="rg-chat-composer"><label htmlFor="prompt" className="sr-only">Prompt</label><textarea id="prompt" value={input} onChange={(e) => setInput(e.target.value)} placeholder="Escribe tu mensaje…" rows={3} /><button disabled={chat.streaming || !input.trim()} onClick={() => { const v = input; setInput(""); void chat.send(v); }}>{chat.streaming ? "Transmitiendo…" : "Enviar"}<span>↗</span></button></div></section>
       {chat.streaming ? <button onClick={chat.stop} className="rg-secondary-button">Detener</button> : null}
+      <SponsorPlacement placement="chat-inline"><div className="rg-sponsor-content"><span>Patrocinado</span><strong>Una pausa también impulsa tus ideas.</strong><small>Descubre una marca que acompaña tu momento.</small></div></SponsorPlacement>
     </div>
   );
 }

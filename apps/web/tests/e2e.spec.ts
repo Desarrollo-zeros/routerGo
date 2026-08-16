@@ -111,9 +111,10 @@ test.describe("RouterGo E2E",()=>{
   test("saldo cero badge y CTA bloqueado",async({page})=>{
     await mockApi(page,0);
     await page.goto("/chat");
-    await expect(page.getByText(/saldo 0/i)).toBeVisible();
+    await expect(page.getByText("0 GoCredits")).toBeVisible();
     await page.goto("/wallet");
-    await expect(page.getByText(/Total ganado: 0/)).toBeVisible();
+    await expect(page.getByText("Ganados hasta hoy")).toBeVisible();
+    await expect(page.getByText("GoCredits disponibles")).toBeVisible();
     await expect(page.getByLabel("créditos").first()).toBeVisible();
   });
   test("cámara denegada muestra permiso",async({page})=>{
