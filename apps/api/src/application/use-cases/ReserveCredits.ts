@@ -81,9 +81,11 @@ export class ReserveCreditsUseCase implements ReserveCreditsPort {
 function assertReserveMatch(input: ReserveCreditsInput, reservation: CreditReservation): void {
   if (reservation.walletId !== input.walletId || reservation.reservedCredits.value !== input.credits
     || (input.reservationId !== undefined && reservation.reservationId !== input.reservationId)) {
-    throw new EconomyOperationError('DUPLICATE_OPERATION', 'Operation key belongs to another reservation');
+    throw new EconomyOperationError('IDEMPOTENCY_CONFLICT', 'Operation key belongs to another reservation');
   }
-  if (input.expiresAt && reservation.expiresAt?.getTime() !== input.expiresAt.getTime()) {
-    throw new EconomyOperationError('DUPLICATE_OPERATION', 'Operation key belongs to another reservation');
+  const existingExpiry = reservation.expiresAt?.getTime() ?? null;
+  const requestedExpiry = input.expiresAt?.getTime() ?? null;
+  if (existingExpiry !== requestedExpiry) {
+    throw new EconomyOperationError('IDEMPOTENCY_CONFLICT', 'Operation key belongs to another reservation');
   }
 }

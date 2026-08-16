@@ -77,3 +77,55 @@ export async function countOperations(pool: Pool, reservationId: string): Promis
   const result = await pool.query<{ count: string }>('SELECT count(*)::text AS count FROM credit_reservation_operations WHERE reservation_id=$1', [reservationId]);
   return Number(result.rows[0].count);
 }
+
+export interface EconomySnapshot {
+  walletBalance: bigint;
+  ledgerBalance: bigint;
+  spend: bigint;
+  refunds: bigint;
+  reserved: bigint;
+  settled: bigint;
+  released: bigint;
+  remaining: bigint;
+  reservationCount: bigint;
+}
+
+export async function snapshot(pool: Pool, walletId: string): Promise<EconomySnapshot> {
+  const wallet = await pool.query<{ balance: string }>('SELECT balance FROM wallets WHERE id=$1', [walletId]);
+  const ledger = await pool.query<{ balance: string; spend: string; refunds: string }>(
+    `SELECT COALESCE(SUM(amount_signed),0)::text AS balance,
+            COALESCE(SUM(CASE WHEN type='SPEND' THEN -amount_signed ELSE 0 END),0)::text AS spend,
+            COALESCE(SUM(CASE WHEN type='REFUND' THEN amount_signed ELSE 0 END),0)::text AS refunds
+     FROM ledger_entries WHERE wallet_id=$1`,
+    [walletId],
+  );
+  const reservations = await pool.query<{ count: string; reserved: string; settled: string; released: string; remaining: string }>(
+    `SELECT count(*)::text AS count, COALESCE(SUM(reserved_credits),0)::text AS reserved,
+            COALESCE(SUM(settled_credits),0)::text AS settled,
+            COALESCE(SUM(released_credits),0)::text AS released,
+            COALESCE(SUM(reserved_credits-settled_credits-released_credits),0)::text AS remaining
+     FROM credit_reservations WHERE wallet_id=$1`,
+    [walletId],
+  );
+  const row = ledger.rows[0];
+  const reservation = reservations.rows[0];
+  return {
+    walletBalance: BigInt(wallet.rows[0].balance), ledgerBalance: BigInt(row.balance),
+    spend: BigInt(row.spend), refunds: BigInt(row.refunds), reserved: BigInt(reservation.reserved),
+    settled: BigInt(reservation.settled), released: BigInt(reservation.released),
+    remaining: BigInt(reservation.remaining), reservationCount: BigInt(reservation.count),
+  };
+}
+
+export async function insertReservationBlocker(pool: Pool, walletId: string, reservationId: string): Promise<void> {
+  await pool.query(
+    `INSERT INTO credit_reservations
+       (id,wallet_id,operation_id,reserved_credits,status)
+     VALUES ($1,$2,$3,1,'RESERVED')`,
+    [reservationId, walletId, `blocker-${reservationId}`],
+  );
+}
+
+export async function deleteReservation(pool: Pool, reservationId: string): Promise<void> {
+  await pool.query('DELETE FROM credit_reservations WHERE id=$1', [reservationId]);
+}

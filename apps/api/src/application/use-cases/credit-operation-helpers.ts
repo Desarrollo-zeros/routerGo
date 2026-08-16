@@ -46,16 +46,27 @@ export async function insertOperation(
   operation: ReservationOperationRecord,
 ): Promise<void> {
   if (await scope.operations.insert(operation)) return;
-  throw new EconomyOperationError('DUPLICATE_OPERATION', 'Operation was already completed');
+  throw new EconomyOperationError('IDEMPOTENCY_CONFLICT', 'Operation key conflicts with another command');
 }
 
 export function mapEconomyError(error: unknown): EconomyOperationError {
   if (error instanceof EconomyOperationError) return error;
   if (error instanceof CreditReservationError) return mapReservationError(error);
+  if (isOperationUniqueViolation(error)) {
+    return new EconomyOperationError('IDEMPOTENCY_CONFLICT', 'Operation key conflicts with another command', error);
+  }
   if (error instanceof Error && error.message === 'InsufficientBalance') {
     return new EconomyOperationError('INSUFFICIENT_CREDITS', 'Wallet has insufficient credits');
   }
   return new EconomyOperationError('TRANSACTION_FAILED', 'Economic transaction failed', error);
+}
+
+function isOperationUniqueViolation(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false;
+  const databaseError = error as { code?: unknown; constraint?: unknown };
+  return databaseError.code === '23505'
+    && (databaseError.constraint === 'credit_reservations_operation_id_key'
+      || databaseError.constraint === 'credit_reservation_operations_pkey');
 }
 
 function assertOperationMatch(
@@ -65,7 +76,7 @@ function assertOperationMatch(
   credits: bigint,
 ): void {
   if (operation.reservationId !== reservationId || operation.kind !== kind || operation.requestedCredits !== credits) {
-    throw new EconomyOperationError('DUPLICATE_OPERATION', 'Operation key belongs to another command');
+    throw new EconomyOperationError('IDEMPOTENCY_CONFLICT', 'Operation key belongs to another command');
   }
 }
 

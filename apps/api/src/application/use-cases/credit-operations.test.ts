@@ -40,7 +40,7 @@ describe('credit reservation application operations', () => {
     await context.reserve.execute({ operationId: 'reserve-1', walletId: 'wallet-1', credits: 80n });
 
     await expect(context.reserve.execute({ operationId: 'reserve-1', walletId: 'wallet-1', credits: 70n }))
-      .rejects.toMatchObject({ code: 'DUPLICATE_OPERATION' });
+      .rejects.toMatchObject({ code: 'IDEMPOTENCY_CONFLICT' });
   });
 
   it('settles partially without charging the wallet again', async () => {

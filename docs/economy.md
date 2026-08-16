@@ -68,8 +68,8 @@ denies immediately. This economic circuit is separate from the technical
 reliability circuit in T005: the latter protects external calls, while this one
 protects platform spending and subsidy limits. Pending or reversed revenue is
 never treated as funding; only finalized USD micro-units can fund an
-`AD_FUNDED_COMPUTE` scope. The policy is correct for the supplied snapshot; it
-does not claim to solve concurrent readers, which belongs to T023/T024.
+`AD_FUNDED_COMPUTE` scope. T024's concurrency hardening is specific to user
+GoCredit reservations; platform budget readers remain a later boundary.
 
 ## T023 accounting boundary
 
@@ -101,5 +101,23 @@ stored result without another economic effect.
 T023 intentionally does not evaluate `EconomyBudgetPolicy`: it moves user
 GoCredits, while platform cost is a separate `USD_MICRO` concern and no
 conversion exists. Quote/run integration and any durable platform-budget
-commitment belong to T025/T024 according to their later acceptance criteria.
+commitment belong to T025/T026 according to their later acceptance criteria.
 Caller authentication and wallet ownership remain API-boundary concerns.
+
+## Concurrency & Idempotency Guarantees
+
+PostgreSQL is the authority for economic correctness. Reserve locks the wallet;
+settle and release lock the reservation before locking the wallet when a
+refund is required. Every mutation remains inside one transaction, so a failed
+wallet, reservation, ledger, or idempotency write rolls back all earlier writes.
+
+The same operation ID with the same economic payload replays the committed
+result and cannot create another debit, settlement, refund, or ledger row. The
+same ID with a different wallet, reservation, operation kind, expiry, or amount
+returns `IDEMPOTENCY_CONFLICT`. A retry after rollback can use the same ID
+because the idempotency record is committed atomically with the mutation.
+
+Reservation state is reconciled as `reserved = settled + released + remaining`
+and `settled + released <= reserved`. Wallet balances reconcile exactly with
+the signed ledger movements; no Redis lock or in-memory mutex participates in
+this correctness boundary.
