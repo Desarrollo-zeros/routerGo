@@ -35,6 +35,7 @@
 - T013 is implemented: `PrivilegedChangeService` requires an allowed `AccessDecision`, runs the typed mutation/audit/outbox scope through one PostgreSQL transaction, sanitizes metadata and event payloads, and uses deterministic operation IDs for idempotency. Unit tests plus PostgreSQL commit, rollback, and duplicate-operation tests cover the boundary.
 - T015 is implemented: published runtime snapshots are validated, hashed, immutable, selected through an explicit active pointer, and exposed with separate API/UI projections. Publish and rollback reuse T013, enforce expected-version/idempotency/concurrency boundaries, and synchronize a versioned Redis cache after commit.
 - T014 is implemented: the PWA consumes the canonical `version`/`contentHash`, `apiRoutes`, nested UI routes/navigation, feature flags, catalog, and design-token projection. Labels resolve through a local registry, screen paths come from `ui.routes`, unknown screens/labels/capabilities fail closed, and the shared contract parser is covered by web tests.
+- T031/T032 are implemented: developer keys are issued once and persisted only as hashes; scoped authentication supports revocation and rotation; durable client/key/model quota policies are evaluated through an atomic Redis RPM/TPM/credit counter. HTTP route enforcement and OpenAI-compatible endpoints remain later tasks.
 
 ### P0 — Foundation blockers
 

@@ -1,5 +1,5 @@
 phase: 3
-current_objective: T032
+current_objective: T033
 status: selecting_next_objective
 last_green_commit: 950dd20
 last_completed_tasks:
@@ -12,7 +12,8 @@ last_completed_tasks:
   - T026
   - T030
   - T031
+  - T032
 blocked_tasks: []
 next_candidates:
-  - T032
-last_validation: T031 lifecycle and PostgreSQL repository tests pass; full quality gates pending before commit closure.
+  - T033
+last_validation: T032 quota unit and PostgreSQL/Redis integration tests pass; full quality gates pending before commit closure.
