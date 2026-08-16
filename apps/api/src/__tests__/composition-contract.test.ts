@@ -53,6 +53,13 @@ describe('composition root contracts', () => {
     expect(response.json()).toEqual({ error: 'authentication_required' });
   });
 
+  it('protects the unit-economics dashboard with its capability boundary', async () => {
+    const app = await appPromise;
+    const response = await app.inject({ method: 'GET', url: '/admin/economy' });
+    expect(response.statusCode).toBe(401);
+    expect(response.json()).toEqual({ error: 'authentication_required' });
+  });
+
   it('does not report synthetic success for an unimplemented quote route', async () => {
     const composition = await compositionPromise;
 

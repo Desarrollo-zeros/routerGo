@@ -16,7 +16,7 @@ const ROUTES: Route[] = [
   { route_key: 'quote-create', method: 'POST', path: '/quotes', use_case: 'createQuote', auth: 'session', req: 'createQuoteRequest', res: 'quoteResponse' },
   { route_key: 'run-create', method: 'POST', path: '/runs', use_case: 'createRun', auth: 'session', req: 'createRunRequest', res: 'runResponse' },
   { route_key: 'run-events', method: 'GET', path: '/runs/:id/events', use_case: 'streamRun', auth: 'session', req: null, res: 'streamResponse' },
-  { route_key: 'admin-economy', method: 'GET', path: '/admin/economy', use_case: 'getEconomy', auth: 'admin', req: null, res: 'economyResponse' },
+  { route_key: 'admin-economy', method: 'GET', path: '/admin/economy', use_case: 'getEconomy', auth: 'api_key', req: null, res: 'economyResponse' },
 ];
 
 export async function seedRoutes(client: pg.PoolClient): Promise<void> {

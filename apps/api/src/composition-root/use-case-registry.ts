@@ -33,7 +33,7 @@ export function createUseCaseRegistry(deps: RegistryDeps): UseCaseRegistry {
     createQuote: notReady,
     createRun: notReady,
     streamRun: notReady,
-    getEconomy: async () => deps.economy.execute(),
+    getEconomy: async (req) => { await authenticate(req, deps.authenticateApiKey, 'economy.read'); return deps.economy.execute(); },
     chatCompletions: async (req, reply) => deps.chatCompletions.execute(await readChatInput(req, deps.authenticateApiKey, reply)),
     responses: async (req, reply) => deps.responses.execute(await readResponsesInput(req, deps.authenticateApiKey, reply)),
   };
