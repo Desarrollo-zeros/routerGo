@@ -58,7 +58,7 @@ export class ExecuteQuotedRunUseCase implements ExecuteQuotedRunPort {
     await this.markReserved(claimed.run.id, reservation.reservationId);
     let response: ProviderResponse;
     try {
-      response = await this.provider.call({ model: model.providerModelId, messages: input.messages, maxTokens: quote.maxOutputTokens, stream: input.stream, userId: input.userId, idempotencyKey: input.idempotencyKey }, model.endpoint);
+      const request = { model: model.providerModelId, messages: input.messages, maxTokens: quote.maxOutputTokens, stream: input.stream, userId: input.userId, idempotencyKey: input.idempotencyKey }; response = input.stream ? await this.provider.stream(request, model.endpoint, (chunk) => input.onChunk?.({ delta: chunk.delta, done: chunk.done })) : await this.provider.call(request, model.endpoint);
     } catch (error) {
       return this.failProvider(claimed.run.id, quote, reservation.reservationId, error);
     }

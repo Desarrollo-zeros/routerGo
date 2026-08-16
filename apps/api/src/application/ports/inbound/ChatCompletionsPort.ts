@@ -12,6 +12,7 @@ export interface ChatCompletionsInput {
   maxTokens?: number;
   temperature?: number;
   stream?: boolean;
+  onChunk?: (chunk: { delta: string; done: boolean }) => void;
 }
 
 export interface ChatCompletionsOutput {

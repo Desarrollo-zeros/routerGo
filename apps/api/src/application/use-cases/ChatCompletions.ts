@@ -13,16 +13,16 @@ export class ChatCompletionsUseCase implements ChatCompletionsPort {
 
   async execute(input: ChatCompletionsInput): Promise<ChatCompletionsOutput> {
     validateInput(input);
-    assertNonStreaming(input);
+    assertStreamingBoundary(input);
     const quote = await this.dependencies.createQuote.execute(toQuoteInput(input));
-    const run = await this.dependencies.executeRun.execute({ userId: input.userId, quoteId: quote.quoteId, idempotencyKey: input.idempotencyKey, messages: input.messages, stream: false });
+    const run = await this.dependencies.executeRun.execute({ userId: input.userId, quoteId: quote.quoteId, idempotencyKey: input.idempotencyKey, messages: input.messages, stream: input.stream, onChunk: input.onChunk });
     const usage = { prompt_tokens: run.usage?.inputTokens ?? 0, completion_tokens: run.usage?.outputTokens ?? 0, total_tokens: (run.usage?.inputTokens ?? 0) + (run.usage?.outputTokens ?? 0) };
     return { id: run.providerRequestId ?? run.runId, object: 'chat.completion', created: Math.floor(this.dependencies.clock.now().getTime() / 1000), model: input.model, choices: [{ index: 0, message: { role: 'assistant', content: run.content }, finish_reason: 'stop' }], usage };
   }
 }
 
-function assertNonStreaming(input: ChatCompletionsInput): void {
-  if (input.stream) throw new ChatCompletionsError('STREAMING_NOT_SUPPORTED');
+function assertStreamingBoundary(input: ChatCompletionsInput): void {
+  if (input.stream && !input.onChunk) throw new ChatCompletionsError('STREAMING_NOT_SUPPORTED');
 }
 
 function toQuoteInput(input: ChatCompletionsInput) {

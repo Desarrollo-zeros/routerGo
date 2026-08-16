@@ -33,7 +33,7 @@ export function createUseCaseRegistry(deps: RegistryDeps): UseCaseRegistry {
     streamRun: notReady,
     getEconomy: async () => deps.economy.execute(),
     chatCompletions: async (req) => deps.chatCompletions.execute(readChatInput(req)),
-    responses: async (req) => deps.responses.execute(readResponsesInput(req)),
+    responses: async (req, reply) => deps.responses.execute(readResponsesInput(req, reply)),
   };
 }
 
@@ -59,12 +59,23 @@ function readChatInput(req: unknown) {
   return { userId, walletId, idempotencyKey: key, model: String(body.model ?? ''), messages: body.messages as ChatCompletionMessage[], maxTokens: body.max_tokens as number | undefined, temperature: body.temperature as number | undefined, stream: body.stream as boolean | undefined };
 }
 
-function readResponsesInput(req: unknown) {
+function readResponsesInput(req: unknown, reply: unknown) {
   const request = req as { body?: Record<string, unknown>; headers?: Record<string, unknown>; user?: { userId?: unknown; walletId?: unknown } };
   const userId = request.user?.userId;
   const walletId = request.user?.walletId;
   const key = request.headers?.['idempotency-key'];
   if (typeof userId !== 'string' || typeof walletId !== 'string' || typeof key !== 'string') throw new AuthenticationRequiredError();
   const body = request.body ?? {};
-  return { userId, walletId, idempotencyKey: key, model: String(body.model ?? ''), input: body.input as string | ChatCompletionMessage[], maxOutputTokens: body.max_output_tokens as number | undefined, stream: body.stream as boolean | undefined };
+  const stream = body.stream as boolean | undefined;
+  const response = reply as { raw?: { writeHead?: (status: number, headers: Record<string, string>) => void; write?: (data: string) => void; end?: () => void } };
+  const onChunk = stream ? createSseWriter(response) : undefined;
+  return { userId, walletId, idempotencyKey: key, model: String(body.model ?? ''), input: body.input as string | ChatCompletionMessage[], maxOutputTokens: body.max_output_tokens as number | undefined, stream, onChunk };
+}
+
+function createSseWriter(reply: { raw?: { writeHead?: (status: number, headers: Record<string, string>) => void; write?: (data: string) => void; end?: () => void } }): (chunk: { delta: string; done: boolean }) => void {
+  reply.raw?.writeHead?.(200, { 'content-type': 'text/event-stream', 'cache-control': 'no-cache', connection: 'keep-alive' });
+  return (chunk) => {
+    reply.raw?.write?.(`data: ${JSON.stringify({ type: chunk.done ? 'response.completed' : 'response.output_text.delta', delta: chunk.delta })}\n\n`);
+    if (chunk.done) { reply.raw?.write?.('data: [DONE]\n\n'); reply.raw?.end?.(); }
+  };
 }

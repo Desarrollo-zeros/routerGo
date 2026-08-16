@@ -6,6 +6,7 @@ export interface ResponsesInput {
   idempotencyKey: string;
   maxOutputTokens?: number;
   stream?: boolean;
+  onChunk?: (chunk: { delta: string; done: boolean }) => void;
 }
 
 export interface ResponsesOutput {

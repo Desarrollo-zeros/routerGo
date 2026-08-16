@@ -11,6 +11,8 @@ The provider target is resolved from `model_catalog`, `provider_endpoints`, and
 and circuit-breaker infrastructure. Provider request IDs and usage are carried
 through the run result for accounting and the OpenAI-compatible response.
 
-Streaming is intentionally rejected by this subset and belongs to T035. A
-request without an authenticated API-key context returns `401`; transport key
-validation, revocation, quota errors, and richer error contracts remain T036.
+`POST /v1/responses` reuses the same accounting boundary and supports provider
+SSE delivery for `stream=true`; `/v1/chat/completions` remains non-streaming in
+this compatibility subset. A request without an authenticated API-key context
+returns `401`; transport key validation, revocation, quota errors, and richer
+error contracts remain T036.

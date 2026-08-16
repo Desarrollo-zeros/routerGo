@@ -4,6 +4,7 @@ export interface ExecuteQuotedRunInput {
   idempotencyKey: string;
   messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>;
   stream?: boolean;
+  onChunk?: (chunk: { delta: string; done: boolean }) => void;
 }
 
 export interface ExecuteQuotedRunOutput {

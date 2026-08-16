@@ -19,6 +19,7 @@ export interface ProviderResponse {
   content: string;
   usage?: { inputTokens: number; outputTokens: number };
   raw: unknown;
+  requestId?: string;
 }
 
 export interface ProviderStreamChunk {

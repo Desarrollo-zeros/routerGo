@@ -35,7 +35,7 @@ Format: `[ID] [P?] [Story] task`. `[P]` means safe parallel ownership in differe
 - [x] T032 [P] [US2] Implement layered RPM/TPM/credit/model quotas with Redis + durable policy.
 - [x] T033 [US2] Implement `/v1/models` contract.
 - [x] T034 [US2] Implement `/v1/chat/completions` supported compatibility subset.
-- [ ] T035 [US2] Implement `/v1/responses` supported compatibility subset + SSE.
+- [x] T035 [US2] Implement `/v1/responses` supported compatibility subset + SSE.
 - [ ] T036 [US2] Contract-test errors, revocation, rate limits, budget exhaustion, stream disconnect.
 
 ## Phase 4 — RouterGo Studio + CMS

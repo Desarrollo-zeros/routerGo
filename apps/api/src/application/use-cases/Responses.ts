@@ -13,6 +13,7 @@ export class ResponsesUseCase implements ResponsesPort {
       idempotencyKey: input.idempotencyKey,
       maxTokens: input.maxOutputTokens,
       stream: input.stream,
+      onChunk: input.onChunk,
     });
     return {
       id: result.id,

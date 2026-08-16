@@ -38,6 +38,7 @@
 - T031/T032 are implemented: developer keys are issued once and persisted only as hashes; scoped authentication supports revocation and rotation; durable client/key/model quota policies are evaluated through an atomic Redis RPM/TPM/credit counter. HTTP route enforcement and OpenAI-compatible endpoints remain later tasks.
 - T033 is implemented: the runtime manifest seeds `/v1/models`, and the API returns the OpenAI list/object contract from the persisted catalog.
 - T034 is implemented: the runtime manifest seeds `/v1/chat/completions`; the non-streaming application flow composes quote, reserve, configured provider execution, usage propagation, and settlement/release. Provider HTTP calls consume the shared reliability boundary, and unauthenticated requests fail with 401. API-key transport validation, revocation/quota error contracts, and SSE remain T036/T035.
+- T035 is implemented: the runtime manifest seeds `/v1/responses`; Responses input/output maps through the same economic execution boundary, provider SSE is parsed through protocol strategies, and stream chunks are delivered as SSE with a terminal event. Authentication, revocation, quota, and error contract coverage remain T036.
 
 ### P0 — Foundation blockers
 
