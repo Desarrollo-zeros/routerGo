@@ -1,7 +1,7 @@
 phase: 3
-current_objective: T063
+current_objective: T064
 status: executing
-last_green_commit: 416ea88
+last_green_commit: 7892cee
 last_completed_tasks:
   - T020
   - T021
@@ -26,11 +26,12 @@ last_completed_tasks:
   - T060
   - T061
   - T062
+  - T063
 next_candidates:
   - T042
   - T043
   - T054
   - T055
-  - T063
+  - T064
 blocked_tasks: []
-last_validation: T062 policy and budget-port tests pass (6); typecheck, lines and architecture pass. T042/T043/T054/T055 remain open; T063 is next.
+last_validation: T063 approved exercise strategy tests pass (2); typecheck, lines and architecture pass. T042/T043/T054/T055 remain open; T064 is next.

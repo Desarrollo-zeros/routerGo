@@ -51,6 +51,7 @@
 - T060 is implemented: migration `010_challenges.sql` adds versioned challenge definitions, immutable version identities, bounded reward rules, and completion records with sponsor/safety metadata. Verification strategies and reward execution remain T061-T064.
 - T061 is implemented: challenge verification resolves only explicitly registered typed strategies, rejects duplicate/unsafe keys, and fails closed for unknown strategy keys without dynamic imports or execution.
 - T062 is implemented: challenge reward eligibility uses bigint GoCredits, challenge and daily caps, and an explicit budget-port decision; it returns no issuance side effect and fails closed on budget/circuit denial.
+- T063 is implemented: the existing exercise boundary now has an approved-template verification strategy with configured repetition/duration limits, typed evidence rejection, and no direct reward side effect.
 
 ### P0 — Foundation blockers
 
