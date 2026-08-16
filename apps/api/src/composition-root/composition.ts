@@ -79,8 +79,7 @@ export async function createComposition() {
   });
   const quota = new CheckApiQuotaUseCase({ policies: new ApiQuotaPostgresRepository(pool), counter: new RedisApiQuotaCounter(redis) });
   const chatCompletions = new ChatCompletionsUseCase({ createQuote, executeRun, clock: economyClock, quota });
-  const providerAnalytics = createProviderAnalytics(pool);
-  const runtimeManifest = createRuntimeManifestUseCases(pool, redis); const authorizePermission = new AuthorizePermissionUseCase(new PostgresAuthorizationGrantReader(pool));
+  const providerAnalytics = createProviderAnalytics(pool); const runtimeManifest = createRuntimeManifestUseCases(pool, redis); const authorizePermission = new AuthorizePermissionUseCase(new PostgresAuthorizationGrantReader(pool));
   const identity = createIdentityDependencies(pool);
   const useCases = createUseCaseRegistry({
     manifest, catalog: catalogUseCase, models: new ListModelsUseCase(catalogUseCase),
@@ -91,6 +90,7 @@ export async function createComposition() {
     ledger: new GetLedgerUseCase(new PostgresAdminLedgerReader(pool)),
     advertiser: createAdvertiserHandlers(pool),
     challenges: createChallengeHandlers(pool),
+    providerAnalytics,
   });
   const streams = new RedisStreamAdapter(redis as never); return {
     pool, redis, manifest, schemas, useCases, creditOperations, providerAnalytics, sseDeps: { streams },

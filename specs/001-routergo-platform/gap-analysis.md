@@ -74,7 +74,7 @@
 - T100 is implemented: migration `017_risk_events.sql` adds idempotent cross-context abuse events, bounded user scores, and review cases; `RiskSignalPolicy` maps duplicate/replay/velocity/severity signals to normal/review/blocked actions without role-name or raw-payload decisions. Risk ingestion orchestration, dashboards, and analyst workflows remain T102-T106.
 - T101 is implemented: the protected Studio unit-economics dashboard reads revenue, provider cost, infrastructure cost, contribution, and GoCredits reward liability as separate fixed-precision measures, with fail-closed authorization and rendering tests.
 - T101 foundation connected: `/admin/economy` is an explicit `economy.read` API-key capability route, and Studio fetches typed unit-economics, wallet, and ledger responses when an authenticated session injects an access token. A browser session/token transport remains an integration concern; privilege separation is covered by T043.
-- T102 foundation connected: PostgreSQL aggregates provider quota windows and finalized costs, an HTTP HEAD probe supplies explicit health, and non-zero alerts are recorded idempotently in the outbox through the composition root. Operator analytics transport and configurable policy storage remain open.
+- T102 is implemented: PostgreSQL aggregates provider quota windows and finalized costs, an HTTP HEAD probe supplies explicit health, non-zero alerts are recorded idempotently in the outbox, and `/admin/providers/analytics` exposes the typed result behind the `providers.read` API-key capability. Configurable policy storage remains open.
 - T103 foundation expanded: `pnpm test:performance` now exercises both health and catalog API read paths against p95/error budgets with a pure evaluator. Authenticated critical-route load, realtime soak, and production-scale budgets remain open.
 - T104 is implemented: provider-contract tests (11), secrets scan, responsive/offline/camera/screenshot E2E (7) and performance smoke pass. Production security review and staged beta operations remain T105-T106.
 - T105 local gate is implemented: `BetaReleaseGate` requires runtime flags, a closed economy circuit, verified rollback, and a passing regression suite. The actual staged beta deployment and rollback drill remain blocked until a staging controller/environment is available; no production readiness is claimed.
@@ -82,7 +82,7 @@
 ### T106 convergence record — 2026-08-16
 
 - Local foundation gates are reproducible through clean PostgreSQL migration/seed runs, Docker health checks, typecheck, lint, line and architecture checks, secrets scan, API/web tests, build, performance smoke, provider contracts, and E2E.
-- Completed phase-10 work is limited to risk foundations (T100) and regression evidence (T104). T101-T103 have tested foundations but remain open until their integration requirements are met; T105 is intentionally not marked complete because staging and rollback evidence are external.
+- Completed phase-10 work includes risk foundations (T100), unit economics (T101), provider analytics (T102), and regression evidence (T104). T103 remains open for load/performance evidence; T105 is intentionally not marked complete because staging and rollback evidence are external.
 - Remaining product and operational gaps are explicit in `tasks.md`: battle completion (T081, T083-T084), and staged beta operations (T105). Rev.7 is not declared complete.
 
 ### P0 — Foundation blockers

@@ -1,12 +1,12 @@
 import type { RuntimeManifest } from '../config/RuntimeManifest.js';
 import type { GetCatalogPort } from '../application/ports/inbound/GetCatalogPort.js';
 import type { GetEconomyPort } from '../application/ports/inbound/GetEconomyPort.js';
+import type { GetProviderAnalyticsPort } from '../application/ports/inbound/GetProviderAnalyticsPort.js';
 import type { GetWalletPort } from '../application/ports/inbound/GetWalletPort.js';
 import type { ListModelsPort } from '../application/ports/inbound/ListModelsPort.js';
 import type { UseCaseHandler, UseCaseRegistry } from '../infrastructure/http/dynamic-route-registry.js';
 import { AuthenticationRequiredError, RouteNotReadyError } from '../infrastructure/http/http-errors.js';
-import type { ChatCompletionsPort, ChatCompletionMessage } from '../application/ports/inbound/ChatCompletionsPort.js';
-import type { ResponsesPort } from '../application/ports/inbound/ResponsesPort.js';
+import type { ChatCompletionsPort, ChatCompletionMessage } from '../application/ports/inbound/ChatCompletionsPort.js'; import type { ResponsesPort } from '../application/ports/inbound/ResponsesPort.js';
 import type { ApiKeyRequestContext } from '../application/ports/outbound/ApiKeyContextResolver.js';
 import type { ApiKeyIdentityResolver } from '../application/ports/outbound/ApiKeyIdentityResolver.js';
 import type { AuthorizePermissionUseCase } from '../application/use-cases/AuthorizePermission.js';
@@ -14,10 +14,9 @@ import type { PublishRuntimeManifest } from '../application/use-cases/PublishRun
 import type { RollbackRuntimeManifest } from '../application/use-cases/RollbackRuntimeManifest.js';
 import type { GetLedgerPort } from '../application/ports/inbound/GetLedgerPort.js';
 import { AuthorizationDeniedError } from '../application/errors/AuthorizationDeniedError.js';
-import type { AdvertiserHandlers } from './advertiser-handlers.js';
-import { advertiserRead, advertiserWrite } from './advertiser-handlers.js';
-import type { ChallengeHandlers } from './challenge-handlers.js';
-import { listChallenges, createChallenge, submitChallenge, approveChallenge } from './challenge-handlers.js';
+import type { AdvertiserHandlers } from './advertiser-handlers.js'; import { advertiserRead, advertiserWrite } from './advertiser-handlers.js';
+import type { ChallengeHandlers } from './challenge-handlers.js'; import { listChallenges, createChallenge, submitChallenge, approveChallenge } from './challenge-handlers.js';
+import { providerAnalyticsRead } from './provider-handlers.js';
 interface RegistryDeps {
   manifest: RuntimeManifest;
   catalog: GetCatalogPort;
@@ -34,6 +33,7 @@ interface RegistryDeps {
   ledger: GetLedgerPort;
   advertiser: AdvertiserHandlers;
   challenges: ChallengeHandlers;
+  providerAnalytics: GetProviderAnalyticsPort;
 }
 export function createUseCaseRegistry(deps: RegistryDeps): UseCaseRegistry {
   return {
@@ -49,6 +49,7 @@ export function createUseCaseRegistry(deps: RegistryDeps): UseCaseRegistry {
     createRun: notReady,
     streamRun: notReady,
     getEconomy: async (req) => executeEconomy(req, deps),
+    getProviderAnalytics: async (req) => providerAnalyticsRead(req, { analytics: deps.providerAnalytics, authenticateApiKey: deps.authenticateApiKey, identity: deps.resolveApiKeyIdentity, authorize: deps.authorizePermission }),
     getLedger: async (req) => executeLedger(req, deps),
     getAdminWallet: async (req) => executeAdminWallet(req, deps),
     publishRuntime: async (req) => executePublish(req, deps),
@@ -72,7 +73,6 @@ async function executePublish(req: unknown, deps: RegistryDeps): Promise<unknown
   const decision = await deps.authorizePermission.execute({ identity, permission: 'runtime.publish' });
   return deps.publishRuntime.execute({ identity, decision, operationId: requiredHeader(req, 'idempotency-key'), correlationId: correlationId(req) });
 }
-
 async function executeEconomy(req: unknown, deps: RegistryDeps): Promise<unknown> {
   const context = await authenticate(req, deps.authenticateApiKey, 'economy.read');
   const identity = await requireIdentity(context, deps.resolveApiKeyIdentity);
@@ -80,7 +80,6 @@ async function executeEconomy(req: unknown, deps: RegistryDeps): Promise<unknown
   requireAllowed(decision);
   return deps.economy.execute();
 }
-
 async function executeLedger(req: unknown, deps: RegistryDeps): Promise<unknown> {
   const context = await authenticate(req, deps.authenticateApiKey, 'audit.read');
   const identity = await requireIdentity(context, deps.resolveApiKeyIdentity);

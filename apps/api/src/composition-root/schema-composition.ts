@@ -7,6 +7,7 @@ export function createSchemas(): SchemaRegistry {
   schemas.registerZod('createQuoteRequest', z.object({ logicalModelId: z.string(), maxOutputTokens: z.number().optional() }));
   schemas.registerZod('createRunRequest', z.object({ quoteId: z.string() }));
   schemas.register('economyResponse', { type: 'object', properties: { go: { type: 'object' }, windows: { type: 'object' }, contribution: { type: 'object' }, unitEconomics: { type: 'object' }, dau: { type: 'number' } } });
+  schemas.register('providerAnalyticsResponse', { type: 'array', items: { type: 'object', required: ['gatewayId', 'health', 'quotaUsagePct', 'costMicro', 'alert'], properties: { gatewayId: { type: 'string' }, health: { type: 'string' }, quotaUsagePct: { type: 'number' }, costMicro: { type: 'number' }, alert: { type: 'string' } } } });
   schemas.register('healthResponse', { type: 'object', properties: { status: { type: 'string' } } });
   schemas.register('manifestResponse', { type: 'object' });
   schemas.register('runtimeManifestResponse', { type: 'object', required: ['version', 'contentHash', 'manifest'], properties: { version: { type: 'number' }, contentHash: { type: 'string' }, manifest: { type: 'object' } } });
